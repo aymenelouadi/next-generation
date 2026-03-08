@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://i.imgur.com/placeholder.png" alt="Bot Discord Dashboard Banner" width="800"/>
+<img src="media/login.png" alt="Bot Discord Dashboard Banner" width="800"/>
 
 # 🤖 Bot Discord Dashboard ALL-IN-ONE
 ### Next Generation — v5.0.0
