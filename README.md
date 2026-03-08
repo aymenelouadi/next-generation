@@ -35,6 +35,32 @@ Protection · Moderation · Tickets · Auto Roles · Levels · Dashboard · and 
 
 ---
 
+> [!IMPORTANT]
+> ## ⚠️ Required Setup Before Starting
+>
+> After cloning the project, open `settings.json` and find the `DASHBOARD` section.
+> You **must** fill in the following fields or the dashboard/bot will not work correctly:
+>
+> ```json
+> "DASHBOARD": {
+>     "OWNERS": ["YOUR_DISCORD_USER_ID"],
+>     "SHIPS": ["YOUR_DISCORD_USER_ID"],
+>     "CODE": "YOUR_SECRET_ACCESS_CODE",
+>     ...
+> }
+> ```
+>
+> | Field | Description |
+> |-------|-------------|
+> | `OWNERS` | Your Discord user ID(s). Owners have full access to the dashboard. Add multiple IDs as an array. |
+> | `SHIPS` | Discord user ID(s) that are considered "team/staff" members for the dashboard. |
+> | `CODE` | The access code required to log into the dashboard (default is `"ADMIN"` — **change it!**). |
+>
+> **How to get your Discord User ID:**
+> Enable Developer Mode in Discord → right-click your profile → **Copy User ID**.
+
+---
+
 ## ✨ Features
 
 | Category | Highlights |
