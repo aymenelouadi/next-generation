@@ -1,4 +1,4 @@
-﻿{
+{
     "system": {
         "PREFIX": "!",
         "COMMANDS": {
@@ -10,10 +10,10 @@
         }
     },
     "court": {
-        "name": "THE LA",
-        "logo": "https://i.imgur.com/abc123.png",
+        "name": "Server Name",
+        "logo": "",
         "color": "#FFD700",
-        "logChannel": "1471993445605179615"
+        "logChannel": ""
     },
     "actions": {
         "say": {
@@ -21,9 +21,7 @@
             "aliases": [],
             "emoji": "",
             "color": "#27ae60",
-            "rolesAllowed": [
-                "1427279664606482544"
-            ],
+            "rolesAllowed": [],
             "enabled": true,
             "admin": true
         },
@@ -32,10 +30,7 @@
             "aliases": [],
             "emoji": "",
             "color": "#27ae60",
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "enabled": true,
             "admin": true
         },
@@ -45,10 +40,7 @@
             "emoji": "",
             "color": "#f1c40f",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -58,10 +50,7 @@
             "emoji": "",
             "color": "#f1c40f",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -71,10 +60,7 @@
             "emoji": "",
             "color": "#f1c40f",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -84,10 +70,7 @@
             "emoji": "",
             "color": "#f1c40f",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -97,10 +80,7 @@
             "emoji": "",
             "color": "#f1c40f",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -110,10 +90,7 @@
             "emoji": "",
             "color": "#f1c40f",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -123,10 +100,7 @@
             "emoji": "",
             "color": "#f1c40f",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -136,10 +110,7 @@
             "emoji": "",
             "color": "#f1c40f",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -149,10 +120,7 @@
             "emoji": "",
             "color": "#f1c40f",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -162,10 +130,7 @@
             "emoji": "",
             "color": "#f1c40f",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -175,15 +140,7 @@
             "emoji": "",
             "color": "#f1c40f",
             "enabled": true,
-            "rolesAllowed": [
-                "1456720781563396199",
-                "1413253148864151703",
-                "1460597414791741470",
-                "1457503534777106636",
-                "1472910881099743353",
-                "1472647432604225627",
-                "1472647007717031998"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "saveRecord": true,
             "dm": true,
@@ -195,11 +152,7 @@
             "emoji": "",
             "color": "#f1c40f",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636",
-                "1472910881099743353"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "saveRecord": true,
             "dm": true,
@@ -211,11 +164,7 @@
             "emoji": "",
             "color": "#f1c40f",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636",
-                "1472910881099743353"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -225,15 +174,11 @@
             "emoji": "",
             "color": "#e74c3c",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636",
-                "1472910881099743353"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "saveRecord": true,
             "dm": true,
-            "muteRole": "1466554735149580420",
+            "muteRole": "",
             "durationOptions": {
                 "1h": 3600000,
                 "6h": 21600000,
@@ -252,11 +197,7 @@
             "emoji": "",
             "color": "#2ecc71",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636",
-                "1472910881099743353"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "saveRecord": true,
             "dm": true,
@@ -268,11 +209,7 @@
             "emoji": "",
             "color": "#e67e22",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636",
-                "1472647432604225627"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "saveRecord": true,
             "dm": true,
@@ -284,11 +221,7 @@
             "emoji": "",
             "color": "#c0392b",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636",
-                "1472647432604225627"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "saveRecord": true,
             "dm": true,
@@ -301,11 +234,7 @@
             "emoji": "",
             "color": "#27ae60",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636",
-                "1472647007717031998"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "saveRecord": true,
             "dm": false,
@@ -317,11 +246,7 @@
             "emoji": "",
             "color": "#27ae60",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636",
-                "1472647007717031998"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "saveRecord": true,
             "dm": false,
@@ -333,16 +258,9 @@
             "emoji": "",
             "color": "#27ae60",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636",
-                "1472647432604225627"
-            ],
-            "addRole": "1473728148486226134",
-            "showRoom": [
-                "1457327357663641720",
-                "1474340054158544906"
-            ],
+            "rolesAllowed": [],
+            "addRole": "",
+            "showRoom": [],
             "log": true,
             "saveRecord": true,
             "dm": true,
@@ -354,11 +272,7 @@
             "emoji": "",
             "color": "#27ae60",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636",
-                "1472647432604225627"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "saveRecord": true,
             "dm": true,
@@ -366,9 +280,7 @@
         },
         "afk": {
             "label": "afk",
-            "aliases": [
-                "jjjj"
-            ],
+            "aliases": [],
             "emoji": "",
             "color": "#27ae60",
             "enabled": false,
@@ -386,12 +298,7 @@
             "emoji": "",
             "color": "#27ae60",
             "enabled": true,
-            "rolesAllowed": [
-                "1457328798101016598",
-                "1460597414791741470",
-                "1457503534777106636",
-                "1472647432604225627"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -401,11 +308,7 @@
             "emoji": "",
             "color": "#27ae60",
             "enabled": true,
-            "rolesAllowed": [
-                "1457328798101016598",
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -415,12 +318,7 @@
             "emoji": "",
             "color": "#27ae60",
             "enabled": true,
-            "rolesAllowed": [
-                "1457328798101016598",
-                "1460597414791741470",
-                "1457503534777106636",
-                "1472647007717031998"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -430,11 +328,7 @@
             "emoji": "",
             "color": "#27ae60",
             "enabled": true,
-            "rolesAllowed": [
-                "1457328798101016598",
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -444,10 +338,7 @@
             "emoji": "",
             "color": "#27ae60",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -457,10 +348,7 @@
             "emoji": "",
             "color": "#27ae60",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -470,10 +358,7 @@
             "emoji": "",
             "color": "#27ae60",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -483,10 +368,7 @@
             "emoji": "",
             "color": "#27ae60",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -496,10 +378,7 @@
             "emoji": "",
             "color": "#27ae60",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -509,10 +388,7 @@
             "emoji": "",
             "color": "#27ae60",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -647,10 +523,7 @@
             "aliases": [],
             "emoji": "",
             "color": "#27ae60",
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "enabled": true,
             "admin": true
         },
@@ -659,10 +532,7 @@
             "aliases": [],
             "emoji": "",
             "color": "#27ae60",
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "enabled": true,
             "admin": true
         },
@@ -671,10 +541,7 @@
             "aliases": [],
             "emoji": "",
             "color": "#27ae60",
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "enabled": true,
             "admin": true
         },
@@ -683,10 +550,7 @@
             "aliases": [],
             "emoji": "",
             "color": "#27ae60",
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "enabled": true,
             "admin": true
         },
@@ -696,10 +560,7 @@
             "emoji": "",
             "color": "#f1c40f",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -709,10 +570,7 @@
             "emoji": "",
             "color": "#e74c3c",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -722,10 +580,7 @@
             "emoji": "",
             "color": "#e74c3c",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -735,10 +590,7 @@
             "emoji": "",
             "color": "#e74c3c",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -748,10 +600,7 @@
             "emoji": "",
             "color": "#e74c3c",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -761,10 +610,7 @@
             "emoji": "",
             "color": "#e74c3c",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -774,10 +620,7 @@
             "emoji": "",
             "color": "#e74c3c",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -787,10 +630,7 @@
             "emoji": "",
             "color": "#e74c3c",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         },
@@ -800,10 +640,7 @@
             "emoji": "",
             "color": "#e74c3c",
             "enabled": true,
-            "rolesAllowed": [
-                "1460597414791741470",
-                "1457503534777106636"
-            ],
+            "rolesAllowed": [],
             "log": true,
             "admin": true
         }
@@ -858,29 +695,15 @@
     },
     "DASHBOARD": {
         "ENABLED": true,
-        "INTRO": false,
-        "SHIPS": [
-            "756947441592303707",
-            "510649116590604300",
-            "33333333333333333333"
-        ],
-        "OWNERS": [
-            "756947441592303707",
-            "1462837631464509553",
-            "744968184045502494",
-            "1102036117437562990",
-            "876497524733648896",
-            "622372198572883988",
-            "1300736905813430324",
-            "1149281132861476875",
-            "299994785555546113"
-        ],
+        "INTRO": true,
+        "SHIPS": [],
+        "OWNERS": [],
         "SERVERS": {
             "ADD_BOT_ON_MANY_SERVER": false,
             "SERVER_ALLOWED": [],
             "LEAVE_AUTO": false
         },
-        "CODE_ACCESS": false,
+        "CODE_ACCESS": true,
         "CODE": "ADMIN",
         "WEBHOOK_LOG": {
             "URL": "",
