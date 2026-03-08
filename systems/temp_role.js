@@ -28,7 +28,7 @@ module.exports = {
                 fs.writeFileSync(this.dbPath, JSON.stringify({}, null, 2));
                 return {};
             } else {
-                const data = fs.readFileSync(this.dbPath, 'utf8');
+                const data = fs.readFileSync(this.dbPath, 'utf8').replace(/^\uFEFF/, '');
                 return JSON.parse(data);
             }
         } catch (error) {

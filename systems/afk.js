@@ -26,7 +26,7 @@ module.exports = {
         }
 
         try {
-            const fileContent = fs.readFileSync(dbPath, 'utf8');
+            const fileContent = fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '');
             const database = JSON.parse(fileContent);
 
             const now = Date.now();

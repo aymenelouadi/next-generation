@@ -280,7 +280,7 @@ const getAFKUser = (userId) => {
     }
     
     try {
-        const fileContent = fs.readFileSync(dbPath, 'utf8');
+        const fileContent = fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '');
         const database = JSON.parse(fileContent);
         return database[userId] || null;
     } catch (error) {
@@ -297,7 +297,7 @@ const removeAFKFromDatabase = (userId) => {
     }
     
     try {
-        const fileContent = fs.readFileSync(dbPath, 'utf8');
+        const fileContent = fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '');
         const database = JSON.parse(fileContent);
         
         if (!database[userId]) {
