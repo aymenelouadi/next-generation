@@ -29,7 +29,7 @@ const saveToDatabase = (userId, userData, caseData) => {
     let database = {};
     if (fs.existsSync(dbPath)) {
         try {
-            const fileContent = fs.readFileSync(dbPath, 'utf8');
+            const fileContent = fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '');
             if (fileContent.trim()) {
                 database = JSON.parse(fileContent);
             }

@@ -76,7 +76,7 @@ module.exports = {
                 fs.writeFileSync(this.dbPath, JSON.stringify({}, null, 2));
                 this.db = {};
             } else {
-                const data = fs.readFileSync(this.dbPath, 'utf8');
+                const data = fs.readFileSync(this.dbPath, 'utf8').replace(/^\uFEFF/, '');
                 this.db = JSON.parse(data);
 
                 console.log(`Database loaded: ${Object.keys(this.db).length} guilds`);

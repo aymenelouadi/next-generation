@@ -104,7 +104,7 @@ module.exports = {
             
             if (fs.existsSync(dbPath)) {
                 try {
-                    const data = fs.readFileSync(dbPath, 'utf8');
+                    const data = fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '');
                     db = JSON.parse(data);
                 } catch (error) {
                     console.error('Error reading database:', error);

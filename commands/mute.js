@@ -42,7 +42,7 @@ function saveRecord(userId, userData, caseData) {
     const dbPath = path.join(__dirname, '../database/records.json');
     fs.mkdirSync(path.dirname(dbPath), { recursive: true });
     let db = {};
-    try { db = JSON.parse(fs.readFileSync(dbPath, 'utf8') || '{}'); } catch {}
+    try { db = JSON.parse(fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '') || '{}'); } catch {}
     if (!db[userId]) db[userId] = { username: userData.username, tag: userData.tag, cases: [] };
     else { db[userId].username = userData.username; db[userId].tag = userData.tag; }
     db[userId].cases.push(caseData);

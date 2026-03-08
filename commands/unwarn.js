@@ -33,7 +33,7 @@ function removeWarning(caseId, moderator) {
     if (!fs.existsSync(dbPath)) return { ok: false, reason: 'no_db' };
 
     let db = {};
-    try { db = JSON.parse(fs.readFileSync(dbPath, 'utf8') || '{}'); } catch { return { ok: false, reason: 'parse_error' }; }
+    try { db = JSON.parse(fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '') || '{}'); } catch { return { ok: false, reason: 'parse_error' }; }
 
     let userId = null;
     let removedCase = null;

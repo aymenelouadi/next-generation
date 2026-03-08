@@ -27,7 +27,7 @@ function saveWarning(userId, userData, caseData) {
     const dbPath = path.join(__dirname, '../database/warning.json');
     fs.mkdirSync(path.dirname(dbPath), { recursive: true });
     let db = {};
-    try { db = JSON.parse(fs.readFileSync(dbPath, 'utf8') || '{}'); } catch {}
+    try { db = JSON.parse(fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '') || '{}'); } catch {}
     if (!db[userId]) db[userId] = { username: userData.username, tag: userData.tag, cases: [] };
     else { db[userId].username = userData.username; db[userId].tag = userData.tag; }
     db[userId].cases.push(caseData);
@@ -38,7 +38,7 @@ function saveWarning(userId, userData, caseData) {
 function warnCount(userId) {
     const dbPath = path.join(__dirname, '../database/warning.json');
     try {
-        const db = JSON.parse(fs.readFileSync(dbPath, 'utf8') || '{}');
+        const db = JSON.parse(fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '') || '{}');
         return db[userId]?.cases?.length ?? 0;
     } catch { return 0; }
 }

@@ -20,7 +20,7 @@ function getWarnings(userId) {
     const dbPath = path.join(__dirname, '../database/warning.json');
     if (!fs.existsSync(dbPath)) return null;
     try {
-        const db = JSON.parse(fs.readFileSync(dbPath, 'utf8') || '{}');
+        const db = JSON.parse(fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '') || '{}');
         return db[userId] || null;
     } catch { return null; }
 }

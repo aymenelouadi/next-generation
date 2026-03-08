@@ -52,7 +52,7 @@ function saveJail(userId, data) {
     const dbPath = path.join(__dirname, '../database/jailed.json');
     fs.mkdirSync(path.dirname(dbPath), { recursive: true });
     let db = {};
-    try { db = JSON.parse(fs.readFileSync(dbPath, 'utf8')); } catch {}
+    try { db = JSON.parse(fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '')); } catch {}
     db[userId] = data;
     try { fs.writeFileSync(dbPath, JSON.stringify(db, null, 2)); return true; } catch { return false; }
 }
