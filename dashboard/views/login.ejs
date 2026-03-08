@@ -1,0 +1,813 @@
+<%#
+  This project was programmed by the Code Nexus team.
+  If you encounter any problems, open an Issue or log into the Discord server:
+  https://discord.gg/UvEYbFd2rj
+%>
+<!DOCTYPE html>
+<html lang="<%= t.lang %>" dir="<%= t.dir %>">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    <%= t.login.pageTitle %>
+  </title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Tajawal:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    /* ══ Reset & Variables ══════════════════════════════ */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #040010;
+      --surface: rgba(255, 255, 255, 0.035);
+      --surface-2: rgba(255, 255, 255, 0.06);
+      --card: rgba(10, 3, 30, 0.78);
+      --purple: #7c3aed;
+      --purple-l: #a78bfa;
+      --cyan: #06b6d4;
+      --cyan-l: #67e8f9;
+      --gold: #d97706;
+      --gold-l: #fcd34d;
+      --border: rgba(124, 58, 237, 0.22);
+      --border-h: rgba(124, 58, 237, 0.55);
+      --muted: rgba(203, 194, 255, 0.5);
+      --white: #f8fafc;
+      --discord: #5865f2;
+      --error-bg: rgba(220, 38, 38, 0.08);
+      --error-bd: rgba(220, 38, 38, 0.3);
+      --error-tx: #fca5a5;
+    }
+
+    /* ══ Base ═══════════════════════════════════════════ */
+    html {
+      height: 100%;
+    }
+
+    body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--white);
+      font-family: '<%= t.fontBody %>', 'Tajawal', 'Inter', system-ui, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ══ Canvas ═════════════════════════════════════════ */
+    #c {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ══ Ambient gradients ══════════════════════════════ */
+    .glow {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+      filter: blur(110px);
+      animation: glow-drift 22s ease-in-out infinite alternate;
+    }
+
+    .glow-a {
+      width: min(640px, 90vw);
+      height: min(640px, 90vw);
+      top: -25%;
+      right: -18%;
+      background: radial-gradient(circle, rgba(124, 58, 237, .32) 0%, transparent 65%);
+    }
+
+    .glow-b {
+      width: min(540px, 80vw);
+      height: min(540px, 80vw);
+      bottom: -20%;
+      left: -14%;
+      background: radial-gradient(circle, rgba(6, 182, 212, .2) 0%, transparent 65%);
+      animation-delay: -11s;
+    }
+
+    .glow-c {
+      width: min(300px, 50vw);
+      height: min(300px, 50vw);
+      top: 35%;
+      left: 30%;
+      background: radial-gradient(circle, rgba(217, 119, 6, .1) 0%, transparent 65%);
+      animation-delay: -5s;
+    }
+
+    @keyframes glow-drift {
+      from {
+        transform: translate(0, 0) scale(1);
+      }
+
+      to {
+        transform: translate(22px, 16px) scale(1.06);
+      }
+    }
+
+    /* ══ Lang switcher (floating top) ══════════════════ */
+    .lang-bar {
+      position: fixed;
+      top: 18px;
+      right: 20px;
+      z-index: 100;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    [dir="rtl"] .lang-bar {
+      right: auto;
+      left: 20px;
+    }
+
+    .lang-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 13px;
+      border-radius: 99px;
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-decoration: none;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all .2s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .lang-btn.active {
+      background: rgba(124, 58, 237, .2);
+      border-color: rgba(124, 58, 237, .5);
+      color: var(--purple-l);
+    }
+
+    .lang-btn.inactive {
+      background: var(--surface);
+      border-color: rgba(255, 255, 255, .08);
+      color: var(--muted);
+    }
+
+    .lang-btn.inactive:hover {
+      border-color: rgba(124, 58, 237, .35);
+      color: var(--purple-l);
+    }
+
+    /* ══ Page layout ════════════════════════════════════ */
+    .page {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px 32px;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 900px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* ══ Left Panel ═════════════════════════════════════ */
+    .left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+      padding: 24px 40px;
+    }
+
+    /* Logo */
+    .logo-img {
+      width: 110px;
+      height: 110px;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Brand text */
+    .brand-name {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.5rem, 3.2vw, 2.1rem);
+      font-weight: 900;
+      letter-spacing: .07em;
+      text-align: center;
+      background: linear-gradient(135deg, var(--white) 0%, var(--purple-l) 45%, var(--cyan-l) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .brand-sub {
+      font-size: clamp(.85rem, 1.8vw, 1rem);
+      font-weight: 500;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* Stats */
+    .stats {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 10px 18px;
+      background: var(--surface);
+      border: 1px solid rgba(255, 255, 255, .06);
+      border-radius: 12px;
+      min-width: 72px;
+      transition: border-color .2s;
+    }
+
+    .stat-item:hover {
+      border-color: var(--border-h);
+    }
+
+    .stat-num {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--cyan-l);
+      line-height: 1;
+    }
+
+    .stat-lbl {
+      font-size: .65rem;
+      color: var(--muted);
+      letter-spacing: .06em;
+      white-space: nowrap;
+    }
+
+    /* ══ Divider ════════════════════════════════════════ */
+    .sep {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      align-self: stretch;
+      height: 300px;
+      width: 1px;
+      position: relative;
+      margin: 0 8px;
+    }
+
+    .sep::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom,
+          transparent 0%,
+          var(--border) 25%,
+          var(--border) 75%,
+          transparent 100%);
+    }
+
+    .sep-dot {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--purple-l);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, .15), 0 0 16px var(--purple);
+      animation: sep-pulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes sep-pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, .15), 0 0 16px var(--purple);
+      }
+
+      50% {
+        box-shadow: 0 0 0 6px rgba(124, 58, 237, .2), 0 0 30px var(--purple);
+      }
+    }
+
+    /* ══ Right Panel / Card ═════════════════════════════ */
+    .right {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 40px;
+    }
+
+    .card {
+      text-align: center;
+      width: 100%;
+      max-width: 380px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 40px 34px 36px;
+      backdrop-filter: blur(32px) saturate(180%);
+      -webkit-backdrop-filter: blur(32px) saturate(180%);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, .04) inset,
+        0 1px 0 rgba(255, 255, 255, .06) inset,
+        0 32px 80px rgba(0, 0, 0, .7),
+        0 0 60px -8px rgba(124, 58, 237, .22);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Gradient top line */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 15%;
+      right: 15%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--purple-l), var(--cyan-l), transparent);
+      opacity: .55;
+    }
+
+    /* Subtle inner highlight */
+    .card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .025) 0%, transparent 100%);
+      border-radius: 22px 22px 0 0;
+      pointer-events: none;
+    }
+
+    /* Card tag */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 14px;
+      border-radius: 99px;
+      border: 1px solid rgba(6, 182, 212, .25);
+      background: rgba(6, 182, 212, .06);
+      font-size: .65rem;
+      letter-spacing: .14em;
+      color: var(--cyan-l);
+      font-family: 'Orbitron', monospace;
+      margin-bottom: 20px;
+    }
+
+    .tag-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 6px var(--cyan);
+      animation: sep-pulse 2s ease-in-out infinite;
+    }
+
+    /* Card title */
+    .card-title {
+      font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+      font-weight: 700;
+      margin-bottom: 7px;
+      letter-spacing: -.01em;
+    }
+
+    .card-desc {
+      font-size: .875rem;
+      color: var(--muted);
+      line-height: 1.75;
+      font-weight: 300;
+      margin-bottom: 28px;
+    }
+
+    /* Error */
+    .err {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      padding: 11px 14px;
+      border-radius: 11px;
+      border: 1px solid var(--error-bd);
+      background: var(--error-bg);
+      color: var(--error-tx);
+      font-size: .82rem;
+      margin-bottom: 20px;
+      line-height: 1.55;
+    }
+
+    .err-icon {
+      flex-shrink: 0;
+      margin-top: 1px;
+      width: 16px;
+      height: 16px;
+      stroke: var(--error-tx);
+    }
+
+    /* Discord button */
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 14px 22px;
+      border-radius: 13px;
+      text-decoration: none;
+      font-family: inherit;
+      font-size: .95rem;
+      font-weight: 600;
+      color: var(--white);
+      background: linear-gradient(135deg,
+          rgba(88, 101, 242, .22) 0%,
+          rgba(88, 101, 242, .08) 100%);
+      border: 1px solid rgba(88, 101, 242, .38);
+      cursor: pointer;
+      transition: border-color .22s, box-shadow .22s, transform .15s, background .22s;
+      margin-bottom: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(88, 101, 242, .3), rgba(88, 101, 242, .05));
+      opacity: 0;
+      transition: opacity .2s;
+    }
+
+    .btn:hover {
+      border-color: rgba(88, 101, 242, .75);
+      box-shadow: 0 0 28px rgba(88, 101, 242, .3), 0 8px 20px rgba(0, 0, 0, .4);
+      transform: translateY(-2px);
+    }
+
+    .btn:hover::before {
+      opacity: 1;
+    }
+
+    .btn:active {
+      transform: translateY(0) scale(.98);
+    }
+
+    .btn svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn-label {
+      flex: 1;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Badges */
+    .badges {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .67rem;
+      color: var(--muted);
+      padding: 5px 12px;
+      border-radius: 99px;
+      border: 1px solid rgba(255, 255, 255, .07);
+      background: var(--surface);
+      transition: border-color .2s;
+    }
+
+    .badge:hover {
+      border-color: var(--border-h);
+    }
+
+    .bdot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .bd-g {
+      background: #4ade80;
+      box-shadow: 0 0 5px #4ade80;
+      animation: sep-pulse 2s infinite;
+    }
+
+    .bd-c {
+      background: var(--cyan);
+      box-shadow: 0 0 5px var(--cyan);
+      animation: sep-pulse 2s infinite .7s;
+    }
+
+    /* Card footer */
+    .cfoot {
+      margin-top: 26px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, .06);
+      text-align: center;
+      font-size: .62rem;
+      color: rgba(255, 255, 255, .2);
+      letter-spacing: .08em;
+      font-family: 'Orbitron', monospace;
+    }
+
+    /* ══ Responsive ═════════════════════════════════════ */
+    @media (max-width: 700px) {
+      .wrapper {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        gap: 24px;
+        max-width: 400px;
+      }
+
+      .sep {
+        display: none;
+      }
+
+      .left {
+        padding: 0 16px;
+        gap: 14px;
+      }
+
+      .right {
+        padding: 0 0 8px;
+      }
+
+      .logo-img {
+        width: 88px;
+        height: 88px;
+      }
+
+      .card {
+        padding: 32px 22px 28px;
+      }
+
+      .stats {
+        gap: 6px;
+      }
+
+      .stat-item {
+        padding: 8px 12px;
+        min-width: 60px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .card {
+        padding: 26px 16px 22px;
+      }
+
+      .brand-name {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="c"></canvas>
+  <div class="glow glow-a"></div>
+  <div class="glow glow-b"></div>
+  <div class="glow glow-c"></div>
+
+  <!-- Lang Switcher -->
+  <div class="lang-bar">
+    <a class="lang-btn <%= lang === 'ar' ? 'active' : 'inactive' %>" href="/?lang=ar">ع</a>
+    <a class="lang-btn <%= lang === 'en' ? 'active' : 'inactive' %>" href="/?lang=en">EN</a>
+  </div>
+
+  <div class="page">
+    <div class="wrapper">
+
+      <!-- Left: Branding -->
+      <div class="left">
+        <img class="logo-img"
+          src="https://res.cloudinary.com/difucqa9h/image/upload/v1770643265/discord_images/yaix1pbnbdv3srvf12gl.png"
+          alt="Code Nexus" />
+
+        <div class="brand-name">CODE NEXUS</div>
+
+        <div class="stats">
+          <div class="stat-item">
+            <span class="stat-num">+100</span>
+            <span class="stat-lbl">
+              <%= t.login.statCommands %>
+            </span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num">7</span>
+            <span class="stat-lbl">
+              <%= t.login.statSystems %>
+            </span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num">v5</span>
+            <span class="stat-lbl">
+              <%= t.login.statVersion %>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Separator -->
+      <div class="sep">
+        <div class="sep-dot"></div>
+      </div>
+
+      <!-- Right: Login Card -->
+      <div class="right">
+        <div class="card">
+
+          <div class="tag">
+            <span class="tag-dot"></span>
+            <%= t.login.tag %>
+          </div>
+
+          <div class="card-title">
+            <%= t.login.welcome %>
+          </div>
+          <div class="card-desc">
+            <%= t.login.desc %>
+          </div>
+
+          <% if (error) { %>
+            <div class="err">
+              <i data-lucide="alert-triangle" class="err-icon"></i>
+              <span>
+                <% if (error==='access_denied' ) { %>
+                  <%= t.login.errorDenied %>
+                    <% } %>
+                      <% if (error==='oauth_failed' ) { %>
+                        <%= t.login.errorOauth %>
+                          <% } %>
+                            <% if (error==='unauthorized' ) { %>
+                              <%= t.login.errorUnauth %>
+                                <% } %>
+                                  <% if (!['access_denied','oauth_failed','unauthorized'].includes(error)) { %>
+                                    <%= t.login.errorGeneric %>
+                                      <% } %>
+              </span>
+            </div>
+            <% } %>
+
+              <a href="/auth/discord" class="btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 71 55" fill="none">
+                  <path
+                    d="M60.1 4.98A58.55 58.55 0 0 0 45.57.38a40.37 40.37 0 0 0-1.82 3.72 54.35 54.35 0 0 0-16.5 0A40.21 40.21 0 0 0 25.43.38 58.37 58.37 0 0 0 10.9 4.99C1.57 18.9-1.04 32.44.33 45.79a58.96 58.96 0 0 0 17.98 9.1 43.1 43.1 0 0 0 3.75-6.13 38.52 38.52 0 0 1-5.9-2.85c.5-.36.98-.74 1.45-1.12A41.97 41.97 0 0 0 53.4 45.79c.47.38.96.76 1.46 1.12a38.43 38.43 0 0 1-5.92 2.86 43.22 43.22 0 0 0 3.75 6.12A58.79 58.79 0 0 0 70.67 45.8C72.3 30.11 67.99 16.71 60.1 4.98ZM23.74 37.7c-3.56 0-6.5-3.27-6.5-7.28s2.87-7.29 6.5-7.29c3.62 0 6.58 3.27 6.49 7.29-.02 4-.87 7.28-6.49 7.28Zm23.51 0c-3.56 0-6.5-3.27-6.5-7.28s2.88-7.29 6.5-7.29 6.58 3.27 6.5 7.29c0 4-2.95 7.28-6.5 7.28Z"
+                    fill="#5865F2" />
+                </svg>
+                <span class="btn-label">
+                  <%= t.login.btnDiscord %>
+                </span>
+              </a>
+
+              <div class="badges">
+                <div class="badge"><span class="bdot bd-g"></span>
+                  <%= t.login.badgeApi %>
+                </div>
+                <div class="badge"><span class="bdot bd-c"></span>
+                  <%= t.login.badgeSsl %>
+                </div>
+              </div>
+
+              <div class="cfoot">
+                <%= t.login.footer %> &nbsp;•&nbsp; 2026
+              </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Minimal Three.js starfield -->
+  <script src="/js/lucide.min.js"></script>
+  <script>lucide.createIcons();</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script>
+    (function () {
+      const canvas = document.getElementById('c');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+      renderer.setPixelRatio(1);
+      renderer.setSize(innerWidth, innerHeight);
+      renderer.setClearColor(0x040010, 1);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 500);
+      camera.position.z = 1;
+
+      // Stars
+      const N = 3200, pos = new Float32Array(N * 3);
+      for (let i = 0; i < N * 3; i++) pos[i] = (Math.random() - .5) * 240;
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const mat = new THREE.PointsMaterial({
+        color: 0xb8b0ff, size: 0.26,
+        transparent: true, opacity: 0.65, depthWrite: false
+      });
+      scene.add(new THREE.Points(geo, mat));
+
+      let mx = 0, my = 0, t = 0;
+      document.addEventListener('mousemove', e => {
+        mx = (e.clientX / innerWidth - .5) * .3;
+        my = (e.clientY / innerHeight - .5) * .15;
+      });
+      window.addEventListener('resize', () => {
+        camera.aspect = innerWidth / innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(innerWidth, innerHeight);
+      });
+
+      const stars = scene.children[0];
+      (function render() {
+        requestAnimationFrame(render);
+        t += 0.00028;
+        stars.rotation.y = t + mx * .2;
+        stars.rotation.x = my * .1;
+        renderer.render(scene, camera);
+      })();
+    })();
+  </script>
+
+  <!-- Page transition overlay -->
+  <div id="page-overlay" style="
+    position:fixed;inset:0;z-index:9999;
+    background:#040010;
+    animation:page-in .45s cubic-bezier(.4,0,.2,1) forwards;
+    pointer-events:none;
+  "></div>
+  <style>
+    @keyframes page-in {
+      from {
+        opacity: 1
+      }
+
+      to {
+        opacity: 0
+      }
+    }
+
+    @keyframes page-out {
+      from {
+        opacity: 0
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    #page-overlay.leaving {
+      animation: page-out .38s cubic-bezier(.4, 0, .2, 1) forwards;
+      pointer-events: all;
+    }
+  </style>
+  <script>
+    document.querySelector('a.btn').addEventListener('click', function (e) {
+      e.preventDefault();
+      const href = this.href;
+      const ov = document.getElementById('page-overlay');
+      ov.classList.add('leaving');
+      setTimeout(() => { window.location.href = href; }, 400);
+    });
+  </script>
+</body>
+
+</html>
+<%#
+  This project was programmed by the Code Nexus team.
+  If you encounter any problems, open an Issue or log into the Discord server:
+  https://discord.gg/UvEYbFd2rj
+%>

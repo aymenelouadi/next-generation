@@ -1,0 +1,2015 @@
+<%#
+  This project was programmed by the Code Nexus team.
+  If you encounter any problems, open an Issue or log into the Discord server:
+  https://discord.gg/UvEYbFd2rj
+%>
+<!DOCTYPE html>
+<html lang="<%= t.lang %>" dir="<%= t.dir %>">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    <%= guildInfo.name %> — <%= t.guild.pageTitle %>
+  </title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Tajawal:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #040010;
+      --surface: rgba(255, 255, 255, .04);
+      --surface-2: rgba(255, 255, 255, .07);
+      --card: rgba(10, 3, 30, .78);
+      --purple: #7c3aed;
+      --purple-l: #a78bfa;
+      --cyan: #06b6d4;
+      --cyan-l: #67e8f9;
+      --gold: #d97706;
+      --gold-l: #fcd34d;
+      --green: #22c55e;
+      --border: rgba(124, 58, 237, .2);
+      --border-h: rgba(124, 58, 237, .5);
+      --muted: rgba(203, 194, 255, .5);
+      --white: #f8fafc;
+      --nav-w: 64px;
+      --mgmt-w: 220px;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: '<%= t.fontBody %>', 'Tajawal', 'Inter', system-ui, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    #c {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .glow {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+      filter: blur(120px);
+      animation: glow-drift 22s ease-in-out infinite alternate;
+    }
+
+    .glow-a {
+      width: min(600px, 80vw);
+      height: min(600px, 80vw);
+      top: -20%;
+      right: -16%;
+      background: radial-gradient(circle, rgba(124, 58, 237, .28) 0%, transparent 65%);
+    }
+
+    .glow-b {
+      width: min(500px, 70vw);
+      height: min(500px, 70vw);
+      bottom: -18%;
+      left: -12%;
+      background: radial-gradient(circle, rgba(6, 182, 212, .18) 0%, transparent 65%);
+      animation-delay: -11s;
+    }
+
+    @keyframes glow-drift {
+      from {
+        transform: translate(0, 0) scale(1);
+      }
+
+      to {
+        transform: translate(20px, 15px) scale(1.06);
+      }
+    }
+
+    /* ── Topbar ─────────────────────────────────────── */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      background: rgba(4, 0, 16, .8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, .06);
+      gap: 12px;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .guild-icon-top {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+      filter: drop-shadow(0 4px 18px rgba(124, 58, 237, 0.35));
+    }
+
+    .guild-icon-top-fallback {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(124, 58, 237, .35), rgba(6, 182, 212, .2));
+      border: 1px solid rgba(124, 58, 237, .35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', monospace;
+      font-size: .85rem;
+      font-weight: 800;
+      color: var(--purple-l);
+      flex-shrink: 0;
+    }
+
+    .guild-meta {
+      min-width: 0;
+    }
+
+    .guild-meta-name {
+      font-size: .88rem;
+      font-weight: 700;
+      letter-spacing: -.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+    }
+
+    .guild-meta-id {
+      font-size: .6rem;
+      color: var(--muted);
+      font-family: 'Orbitron', monospace;
+      letter-spacing: .05em;
+      white-space: nowrap;
+    }
+
+    .topbar-sep {
+      width: 1px;
+      height: 28px;
+      background: rgba(255, 255, 255, .08);
+      flex-shrink: 0;
+    }
+
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .topbar-brand img {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      filter: drop-shadow(0 4px 18px rgba(124, 58, 237, 0.35));
+    }
+
+    .topbar-brand span {
+      font-family: 'Orbitron', monospace;
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .1em;
+      background: linear-gradient(135deg, var(--white), var(--purple-l));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    /* User chip */
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 4px 10px 4px 5px;
+      border-radius: 99px;
+      background: var(--surface);
+      border: 1px solid rgba(255, 255, 255, .08);
+      cursor: pointer;
+    }
+
+    .user-chip-av {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      flex-shrink: 0;
+    }
+
+    .user-chip-av-fallback {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(124, 58, 237, .25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .user-chip span {
+      font-size: .78rem;
+      font-weight: 500;
+    }
+
+    /* Lang select */
+    .lang-select {
+      background: var(--surface);
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 10px;
+      color: var(--white);
+      font-size: .8rem;
+      font-weight: 600;
+      padding: 6px 30px 6px 10px;
+      cursor: pointer;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      font-family: inherit;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a78bfa' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 9px center;
+      background-size: 12px;
+      transition: border-color .18s, background-color .18s;
+      min-width: 100px;
+    }
+
+    .lang-select:hover {
+      border-color: rgba(124, 58, 237, .5);
+      background-color: rgba(124, 58, 237, .08);
+    }
+
+    .lang-select:focus {
+      border-color: rgba(124, 58, 237, .6);
+    }
+
+    .lang-select option {
+      background: #0a0022;
+      color: var(--white);
+    }
+
+    /* Menu toggle (mobile) */
+    .menu-toggle {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--surface);
+      border: 1px solid rgba(255, 255, 255, .08);
+      color: var(--white);
+      cursor: pointer;
+      transition: background .18s;
+      flex-shrink: 0;
+    }
+
+    .menu-toggle:hover {
+      background: rgba(124, 58, 237, .15);
+      border-color: rgba(124, 58, 237, .4);
+    }
+
+    /* Nav overlay (mobile) */
+    .nav-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .55);
+      z-index: 88;
+      backdrop-filter: blur(2px);
+    }
+
+    .nav-overlay.open {
+      display: block;
+    }
+
+    /* ── Nav Sidebar ────────────────────────────────── */
+    .nav-sidebar {
+      position: fixed;
+      top: 60px;
+      bottom: 0;
+      left: 0;
+      width: var(--nav-w);
+      z-index: 90;
+      background: rgba(4, 0, 16, .92);
+      border-right: 1px solid rgba(255, 255, 255, .06);
+      backdrop-filter: blur(20px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 0 16px;
+      gap: 4px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+      transition: width .28s cubic-bezier(.22, 1, .36, 1);
+    }
+
+    .nav-sidebar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .nav-sidebar:hover {
+      width: 220px;
+      align-items: stretch;
+      overflow-x: unset;
+    }
+
+    [dir="rtl"] .nav-sidebar {
+      left: auto;
+      right: 0;
+      border-right: none;
+      border-left: 1px solid rgba(255, 255, 255, .06);
+    }
+
+    /* Back to home button */
+    .nav-back {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      width: 40px;
+      min-height: 40px;
+      color: var(--purple-l);
+      text-decoration: none;
+      transition: width 350ms cubic-bezier(0.4, 0, 0.2, 1), gap 350ms cubic-bezier(0.4, 0, 0.2, 1), padding 350ms cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 0;
+      overflow: visible;
+      padding: 0;
+      justify-content: flex-start;
+      border-radius: 0;
+      background: none;
+      border: none;
+    }
+
+    .nav-back .nav-icon {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: var(--purple);
+      border-radius: 0.6rem;
+      padding: 7px;
+      box-sizing: border-box;
+      transition: background 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nav-back:hover .nav-icon {
+      background: #8b5cf6;
+    }
+
+    .nav-back .nav-label {
+      font-size: .78rem;
+      font-weight: 600;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 350ms cubic-bezier(0.4, 0, 0.2, 1), visibility 350ms cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+      color: var(--white);
+    }
+
+    .nav-sidebar:hover .nav-back {
+      width: 100%;
+      gap: 10px;
+      padding: 0 12px 0 8px;
+    }
+
+    .nav-sidebar:hover .nav-back .nav-label {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    [dir="rtl"] .nav-sidebar:hover .nav-back {
+      padding: 0 8px 0 12px;
+    }
+
+    .nav-divider {
+      width: 32px;
+      height: 1px;
+      background: rgba(255, 255, 255, .08);
+      margin: 4px 0;
+      flex-shrink: 0;
+      transition: width .28s;
+    }
+
+    .nav-sidebar:hover .nav-divider {
+      width: calc(100% - 24px);
+    }
+
+    /* Server icon item */
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      width: 40px;
+      min-height: 40px;
+      border-radius: 0;
+      background: none;
+      text-decoration: none;
+      flex-shrink: 0;
+      position: relative;
+      overflow: visible;
+      transition: gap 350ms cubic-bezier(0.4, 0, 0.2, 1),
+        width 350ms cubic-bezier(0.4, 0, 0.2, 1),
+        padding 350ms cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 0;
+      justify-content: flex-start;
+    }
+
+    .nav-item-icon {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .nav-item-icon img {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      display: block;
+      border-radius: 50%;
+    }
+
+    .nav-item-fallback {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, rgba(124, 58, 237, .5), rgba(6, 182, 212, .3));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', monospace;
+      font-size: .8rem;
+      font-weight: 800;
+      color: var(--white);
+      border-radius: 50%;
+    }
+
+    /* Status dot on icon */
+    .nav-status {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid rgba(4, 0, 16, .92);
+      flex-shrink: 0;
+      transition: opacity .2s;
+    }
+
+    .nav-status.on {
+      background: #23a55a;
+      box-shadow: 0 0 5px rgba(35, 165, 90, .7);
+    }
+
+    .nav-status.off {
+      background: #ef4444;
+      box-shadow: 0 0 5px rgba(239, 68, 68, .6);
+    }
+
+    /* Expanded label */
+    .nav-item-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      flex: 1;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 350ms cubic-bezier(0.4, 0, 0.2, 1), visibility 350ms cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+    }
+
+    .nav-item-name {
+      font-size: .78rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--white);
+    }
+
+    .nav-item-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-left: auto;
+      /* push to far right of label row */
+    }
+
+    .nav-item-dot.on {
+      background: #23a55a;
+      box-shadow: 0 0 4px rgba(35, 165, 90, .7);
+    }
+
+    .nav-item-dot.off {
+      background: #ef4444;
+      box-shadow: 0 0 4px rgba(239, 68, 68, .6);
+    }
+
+    .nav-sidebar:hover .nav-item {
+      width: 100%;
+      gap: 10px;
+      padding: 0 12px 0 8px;
+      justify-content: flex-start;
+      border-radius: 10px;
+    }
+
+    [dir="rtl"] .nav-sidebar:hover .nav-item {
+      padding: 0 8px 0 12px;
+    }
+
+    .nav-sidebar:hover .nav-item-label {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .nav-sidebar:hover .nav-status {
+      opacity: 0;
+    }
+
+    /* hide icon dot when label visible */
+
+    .nav-item:hover .nav-item-icon {
+      box-shadow: 0 0 0 2px rgba(124, 58, 237, .4);
+    }
+
+    .nav-item.active .nav-item-icon {
+      box-shadow: 0 0 0 2.5px var(--purple-l), 0 0 16px rgba(124, 58, 237, .35);
+    }
+
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 22px;
+      border-radius: 0 3px 3px 0;
+      background: var(--purple-l);
+      flex-shrink: 0;
+    }
+
+    [dir="rtl"] .nav-item.active::before {
+      left: auto;
+      right: -8px;
+      border-radius: 3px 0 0 3px;
+    }
+
+    /* ── Management Sidebar ────────────────────────── */
+    .mgmt-sidebar {
+      position: fixed;
+      top: 60px; bottom: 0;
+      left: var(--nav-w);
+      width: var(--mgmt-w);
+      z-index: 85;
+      background: rgba(6, 2, 20, .97);
+      border-right: 1px solid rgba(255,255,255,.06);
+      backdrop-filter: blur(20px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    [dir="rtl"] .mgmt-sidebar {
+      left: auto; right: var(--nav-w);
+      border-right: none;
+      border-left: 1px solid rgba(255,255,255,.06);
+    }
+    .mgmt-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 12px 10px;
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    .mgmt-header-inner { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .mgmt-header-icon {
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(136,144,161,.12);
+      border-radius: 11px;
+      width: 35px; height: 35px; flex-shrink: 0;
+      color: var(--muted);
+    }
+    .mgmt-header-title {
+      font-size: .78rem; font-weight: 700;
+      color: var(--white);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .mgmt-sort-btn {
+      background: none; border: none; color: var(--muted); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: 7px; padding: 0; flex-shrink: 0;
+      transition: background .15s, color .15s;
+    }
+    .mgmt-sort-btn:hover { background: rgba(255,255,255,.06); color: var(--white); }
+    .mgmt-body {
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+      scrollbar-width: thin; scrollbar-color: rgba(124,58,237,.25) transparent;
+      padding-bottom: 8px;
+    }
+    .mgmt-body::-webkit-scrollbar { width: 3px; }
+    .mgmt-body::-webkit-scrollbar-track { background: transparent; }
+    .mgmt-body::-webkit-scrollbar-thumb { background: rgba(124,58,237,.3); border-radius: 3px; }
+    .mgmt-nav { padding: 8px 10px 0; }
+    .mgmt-section { margin-bottom: 2px; }
+    .mgmt-section-btn {
+      width: 100%;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 10px;
+      background: none; border: none; border-radius: 10px;
+      cursor: pointer; color: var(--white);
+      font-family: inherit; font-size: .76rem; font-weight: 700; letter-spacing: .02em;
+      transition: background .15s;
+    }
+    .mgmt-section-btn:hover { background: rgba(255,255,255,.04); }
+    .mgmt-sec-chevron {
+      color: var(--muted); flex-shrink: 0;
+      transform: rotate(180deg);
+      transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .mgmt-section-btn.open .mgmt-sec-chevron { transform: rotate(0deg); }
+    .mgmt-sec-body {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .mgmt-sec-body.open { max-height: 800px; }
+    .mgmt-item {
+      display: flex; align-items: center;
+      gap: 0;
+      padding: 5px 8px 5px 0;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: .78rem; font-weight: 600;
+      position: relative; cursor: pointer;
+      transition: background .15s, color .15s;
+      width: 100%; border: none; background: none;
+      font-family: inherit;
+    }
+    .mgmt-item:hover:not(.disabled) { background: rgba(255,255,255,.04); color: var(--white); }
+    .mgmt-item.active { color: var(--white); }
+    .mgmt-item.disabled { cursor: default; opacity: .6; }
+    .mgmt-item-indicator {
+      width: 3px; height: 0;
+      border-radius: 0 3px 3px 0;
+      background: var(--purple);
+      box-shadow: 0 0 10px rgba(104,31,209,.6);
+      margin-right: 8px; flex-shrink: 0;
+      transition: height 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .mgmt-item.active .mgmt-item-indicator { height: 1.6rem; }
+    [dir="rtl"] .mgmt-item-indicator { border-radius: 3px 0 0 3px; margin-right: 0; margin-left: 8px; }
+    .mgmt-item-icon {
+      display: flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; flex-shrink: 0;
+      border-radius: 8px; margin-right: 8px;
+      color: inherit;
+    }
+    [dir="rtl"] .mgmt-item-icon { margin-right: 0; margin-left: 8px; }
+    .mgmt-item-label {
+      flex: 1; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    .mgmt-badge {
+      font-size: .6rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.1);
+      color: var(--muted); background: rgba(255,255,255,.05);
+      flex-shrink: 0; letter-spacing: .03em; margin-left: 4px;
+    }
+    [dir="rtl"] .mgmt-badge { margin-left: 0; margin-right: 4px; }
+    .mgmt-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--purple);
+      border-radius: 16px 16px 0 0;
+      flex-shrink: 0; position: sticky; bottom: 0;
+    }
+    .mgmt-footer-user { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .mgmt-footer-av {
+      width: 32px; height: 32px; border-radius: 50%;
+      object-fit: cover; flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,.25);
+    }
+    .mgmt-footer-av-fallback {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .82rem; font-weight: 700; color: var(--white); flex-shrink: 0;
+    }
+    .mgmt-footer-name {
+      font-size: .78rem; font-weight: 700; color: var(--white);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+    }
+    .mgmt-footer-dots {
+      background: none; border: none; color: var(--white);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      padding: 4px; border-radius: 6px; flex-shrink: 0;
+      transition: background .15s;
+    }
+    .mgmt-footer-dots:hover { background: rgba(255,255,255,.18); }
+
+    /* ── Main layout ───────────────────────────────── */
+    .main {
+      position: relative;
+      z-index: 10;
+      min-height: calc(100vh - 60px);
+      margin-top: 60px;
+      margin-left: calc(var(--nav-w) + var(--mgmt-w));
+      padding: 36px 32px 60px;
+      max-width: calc(1100px + var(--nav-w) + var(--mgmt-w));
+    }
+
+    [dir="rtl"] .main {
+      margin-left: 0;
+      margin-right: calc(var(--nav-w) + var(--mgmt-w));
+    }
+
+    /* ── Section heading ───────────────────────────── */
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .section-heading-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      background: rgba(124, 58, 237, .12);
+      border: 1px solid rgba(124, 58, 237, .25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .section-heading h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -.01em;
+    }
+
+    /* ── Stat cards grid ────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 20px 18px;
+      backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .22s, box-shadow .22s, transform .18s;
+      animation: card-enter .4s cubic-bezier(.22, 1, .36, 1) both;
+    }
+
+    .stat-card:nth-child(1) {
+      animation-delay: .05s;
+    }
+
+    .stat-card:nth-child(2) {
+      animation-delay: .1s;
+    }
+
+    @keyframes card-enter {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-h), transparent);
+      opacity: 0;
+      transition: opacity .22s;
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-h);
+      box-shadow: 0 0 36px -6px rgba(124, 58, 237, .2);
+      transform: translateY(-2px);
+    }
+
+    .stat-card:hover::before {
+      opacity: 1;
+    }
+
+    .stat-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .stat-label {
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-family: 'Orbitron', monospace;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+      font-family: 'Orbitron', monospace;
+      letter-spacing: -.02em;
+      background: linear-gradient(135deg, var(--white) 30%, var(--purple-l));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-value.no-data {
+      font-size: 1.4rem;
+      background: none;
+      -webkit-background-clip: unset;
+      background-clip: unset;
+      -webkit-text-fill-color: var(--muted);
+      color: var(--muted);
+    }
+
+    .stat-icon-wrap {
+      width: 48px;
+      height: 48px;
+      border-radius: 13px;
+      background: rgba(124, 58, 237, .1);
+      border: 1px solid rgba(124, 58, 237, .2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background .2s;
+    }
+
+    .stat-card:hover .stat-icon-wrap {
+      background: rgba(124, 58, 237, .17);
+    }
+
+    .stat-icon-wrap.cyan {
+      background: rgba(6, 182, 212, .1);
+      border-color: rgba(6, 182, 212, .2);
+    }
+
+    .stat-card:hover .stat-icon-wrap.cyan {
+      background: rgba(6, 182, 212, .17);
+    }
+
+    /* ── Profile Sidebar ─────────────────────────────── */
+    .profile-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(0, 0, 0, 0);
+      pointer-events: none;
+      transition: background .28s;
+    }
+
+    .profile-backdrop.open {
+      background: rgba(0, 0, 0, .55);
+      pointer-events: all;
+    }
+
+    .profile-sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 201;
+      width: 300px;
+      max-width: 92vw;
+      background: rgba(8, 2, 22, .97);
+      border-left: 1px solid rgba(124, 58, 237, .18);
+      box-shadow: -12px 0 60px rgba(0, 0, 0, .7);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(110%);
+      transition: transform .32s cubic-bezier(.22, 1, .36, 1);
+      overflow: hidden;
+    }
+
+    [dir="rtl"] .profile-sidebar {
+      right: auto;
+      left: 0;
+      border-left: none;
+      border-right: 1px solid rgba(124, 58, 237, .18);
+      box-shadow: 12px 0 60px rgba(0, 0, 0, .7);
+      transform: translateX(-110%);
+    }
+
+    .profile-sidebar.open {
+      transform: translateX(0);
+    }
+
+    .prof-banner {
+      width: 100%;
+      height: 100px;
+      flex-shrink: 0;
+      position: relative;
+      background: linear-gradient(135deg, #2d0b6b 0%, #0a0020 60%, #06b6d4 100%);
+    }
+
+    .prof-banner-solid {
+      width: 100%;
+      height: 100%;
+    }
+
+    .prof-banner-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, rgba(8, 2, 22, .95) 100%);
+    }
+
+    .prof-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, .5);
+      border: 1px solid rgba(255, 255, 255, .1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--muted);
+      transition: background .18s, color .18s;
+      z-index: 5;
+    }
+
+    [dir="rtl"] .prof-close {
+      right: auto;
+      left: 10px;
+    }
+
+    .prof-close:hover {
+      background: rgba(220, 38, 38, .25);
+      color: #fca5a5;
+    }
+
+    .prof-avatar-wrap {
+      position: relative;
+      margin: -38px 0 0 20px;
+      width: 80px;
+      height: 80px;
+      flex-shrink: 0;
+    }
+
+    [dir="rtl"] .prof-avatar-wrap {
+      margin: -38px 20px 0 0;
+    }
+
+    .prof-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      border: 3px solid rgba(8, 2, 22, .97);
+      box-shadow: 0 0 0 2px rgba(124, 58, 237, .5);
+    }
+
+    .prof-avatar-fallback {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(124, 58, 237, .4), rgba(6, 182, 212, .2));
+      border: 3px solid rgba(8, 2, 22, .97);
+      box-shadow: 0 0 0 2px rgba(124, 58, 237, .5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', monospace;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--purple-l);
+    }
+
+    .prof-online-dot {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #23a55a;
+      border: 3px solid rgba(8, 2, 22, .97);
+      box-shadow: 0 0 6px rgba(35, 165, 90, .7);
+      z-index: 4;
+    }
+
+    .prof-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 20px 24px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(124, 58, 237, .3) transparent;
+    }
+
+    .prof-names {
+      margin-bottom: 14px;
+    }
+
+    .prof-display-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: -.01em;
+      line-height: 1.2;
+    }
+
+    .prof-username {
+      font-size: .75rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .prof-block {
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .06);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+
+    .prof-block-label {
+      font-size: .6rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      color: rgba(203, 194, 255, .5);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      font-family: 'Orbitron', monospace;
+    }
+
+    .prof-id-text {
+      font-size: .75rem;
+      font-family: 'Orbitron', monospace;
+      color: var(--muted);
+      letter-spacing: .06em;
+      cursor: pointer;
+      transition: color .15s;
+    }
+
+    .prof-id-text:hover {
+      color: var(--purple-l);
+    }
+
+    .prof-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .prof-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid rgba(255, 255, 255, .08);
+      position: relative;
+      cursor: default;
+      transition: transform .15s, background .15s, box-shadow .15s;
+    }
+
+    .prof-badge:hover {
+      transform: translateY(-2px) scale(1.08);
+      background: rgba(255, 255, 255, .09);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, .4);
+    }
+
+    .prof-badge img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+
+    .prof-badge-tip {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 3, 30, .97);
+      border: 1px solid rgba(124, 58, 237, .3);
+      border-radius: 7px;
+      padding: 5px 10px;
+      font-size: .65rem;
+      white-space: nowrap;
+      color: var(--white);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .15s;
+      z-index: 10;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, .5);
+    }
+
+    .prof-badge:hover .prof-badge-tip {
+      opacity: 1;
+    }
+
+    .prof-footer {
+      padding: 14px 20px;
+      border-top: 1px solid rgba(255, 255, 255, .06);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .prof-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: .82rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background .18s, border-color .18s, transform .12s;
+      font-family: inherit;
+    }
+
+    .prof-btn:active {
+      transform: scale(.97);
+    }
+
+    .prof-btn.help {
+      background: rgba(6, 182, 212, .08);
+      border-color: rgba(6, 182, 212, .3);
+      color: var(--cyan-l);
+    }
+
+    .prof-btn.help:hover {
+      background: rgba(6, 182, 212, .14);
+      border-color: rgba(6, 182, 212, .5);
+    }
+
+    .prof-btn.logout {
+      background: rgba(220, 38, 38, .07);
+      border-color: rgba(220, 38, 38, .25);
+      color: #fca5a5;
+    }
+
+    .prof-btn.logout:hover {
+      background: rgba(220, 38, 38, .12);
+      border-color: rgba(220, 38, 38, .45);
+    }
+
+    /* ── Footer ─────────────────────────────────────── */
+    .site-footer {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 20px 20px 32px;
+      border-top: 1px solid rgba(255, 255, 255, .05);
+      margin-left: calc(var(--nav-w) + var(--mgmt-w));
+    }
+
+    [dir="rtl"] .site-footer {
+      margin-left: 0;
+      margin-right: calc(var(--nav-w) + var(--mgmt-w));
+    }
+
+    .site-footer .footer-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      text-decoration: none;
+    }
+
+    .site-footer .footer-logo img {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      filter: drop-shadow(0 4px 18px rgba(124, 58, 237, 0.35));
+    }
+
+    .site-footer .footer-logo span {
+      font-family: 'Orbitron', monospace;
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      background: linear-gradient(135deg, var(--white), var(--purple-l));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .site-footer p {
+      font-size: .68rem;
+      color: rgba(203, 194, 255, .3);
+    }
+
+    /* ── Responsive ─────────────────────────────────── */
+    @media (max-width: 1024px) {
+      /* On smaller desktops, shrink mgmt sidebar */
+      :root { --mgmt-w: 200px; }
+    }
+    @media (max-width: 768px) {
+      /* Hamburger visible */
+      .menu-toggle { display: flex !important; }
+
+      /* Server-icon sidebar: off-screen by default, toggled by sort button */
+      .nav-sidebar {
+        transform: translateX(-100%);
+        width: 220px !important;
+        align-items: stretch;
+        overflow-x: unset;
+        z-index: 95;
+        transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      [dir="rtl"] .nav-sidebar { transform: translateX(100%); }
+      .nav-sidebar.open {
+        transform: translateX(0) !important;
+      }
+      /* Expand items when nav panel is open */
+      .nav-sidebar.open .nav-back { width: 100%; gap: 10px; padding: 0 12px 0 8px; }
+      .nav-sidebar.open .nav-back .nav-label { opacity: 1; visibility: visible; pointer-events: auto; }
+      .nav-sidebar.open .nav-item { width: 100%; gap: 10px; padding: 0 12px 0 8px; justify-content: flex-start; border-radius: 10px; }
+      .nav-sidebar.open .nav-item-label { opacity: 1; visibility: visible; pointer-events: auto; }
+      .nav-sidebar.open .nav-status { opacity: 0; }
+      .nav-sidebar.open .nav-divider { width: calc(100% - 24px); }
+
+      /* Management sidebar: slides in from left */
+      .mgmt-sidebar {
+        left: 0 !important; right: auto !important;
+        transform: translateX(-100%);
+        width: 260px !important;
+        z-index: 92;
+      }
+      [dir="rtl"] .mgmt-sidebar {
+        left: auto !important; right: 0 !important;
+        transform: translateX(100%);
+      }
+      .mgmt-sidebar.open { transform: translateX(0) !important; }
+
+      /* Main & footer: full width */
+      .main {
+        margin-left: 0 !important; margin-right: 0 !important;
+        padding: 24px 16px 48px; max-width: 100%;
+      }
+      .site-footer {
+        margin-left: 0 !important; margin-right: 0 !important;
+      }
+
+      /* Topbar */
+      .topbar { padding: 0 12px; gap: 8px; }
+      .topbar-brand span { display: none; }
+      .guild-meta-id { display: none; }
+      .guild-meta-name { max-width: 120px; }
+      .user-chip span { display: none; }
+      .user-chip { padding: 4px 7px; }
+      .topbar-sep { display: none; }
+      .lang-select { min-width: 80px; font-size: .75rem; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .topbar-brand { display: none; }
+      .main { padding: 18px 12px 40px; }
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: .6;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="c"></canvas>
+  <div class="glow glow-a"></div>
+  <div class="glow glow-b"></div>
+
+  <!-- Nav overlay (mobile) -->
+  <div class="nav-overlay" id="nav-overlay"></div>
+
+  <!-- Profile Sidebar backdrop -->
+  <div class="profile-backdrop" id="prof-backdrop"></div>
+
+  <!-- Profile Sidebar -->
+  <aside class="profile-sidebar" id="prof-sidebar" aria-hidden="true">
+    <div class="prof-banner">
+      <% if (user.banner) { %>
+        <img src="https://cdn.discordapp.com/banners/<%= user.id %>/<%= user.banner %>.png?size=480" alt=""
+          style="width:100%;height:100%;object-fit:cover;" />
+        <% } else if (user.bannerColor) { %>
+          <div class="prof-banner-solid" data-bg="<%= user.bannerColor %>"></div>
+          <% } %>
+            <div class="prof-banner-overlay"></div>
+            <button class="prof-close" id="close-profile" aria-label="Close">
+              <i data-lucide="x" style="width:14px;height:14px;stroke:currentColor;"></i>
+            </button>
+    </div>
+    <div class="prof-avatar-wrap">
+      <% if (user.avatar) { %>
+        <img class="prof-avatar" src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=160"
+          alt="<%= user.displayName || user.username %>" />
+        <% } else { %>
+          <div class="prof-avatar-fallback">
+            <%= (user.displayName || user.username).charAt(0).toUpperCase() %>
+          </div>
+          <% } %>
+            <div class="prof-online-dot"></div>
+    </div>
+    <div class="prof-body">
+      <div class="prof-names">
+        <div class="prof-display-name">
+          <%= user.displayName || user.username %>
+        </div>
+        <div class="prof-username">@<%= user.username %>
+        </div>
+      </div>
+      <div class="prof-block">
+        <div class="prof-block-label">
+          <%= t.home.profileId %>
+        </div>
+        <div class="prof-id-text" id="prof-copy-id">
+          <%= user.id %>
+        </div>
+      </div>
+      <% const flags2=Number(user.publicFlags || 0); const BADGE_CDN='https://cdn.discordapp.com/badge-icons/' ; const
+        badges2=[]; if (flags2 & 1) badges2.push({ label: t.home.badgeStaff, img: 'staff.png' }); if (flags2 & 2)
+        badges2.push({ label: t.home.badgePartner, img: 'partner.png' }); if (flags2 & 4) badges2.push({ label:
+        t.home.badgeHsEvents, img: 'hypesquad.png' }); if (flags2 & 8) badges2.push({ label: t.home.badgeBug1,
+        img: 'bug_hunter_level_1.png' }); if (flags2 & 64) badges2.push({ label: t.home.badgeBravery,
+        img: 'hypesquad_house_1.png' }); if (flags2 & 128) badges2.push({ label: t.home.badgeBrilliance,
+        img: 'hypesquad_house_2.png' }); if (flags2 & 256) badges2.push({ label: t.home.badgeBalance,
+        img: 'hypesquad_house_3.png' }); if (flags2 & 512) badges2.push({ label: t.home.badgeEarlySupp,
+        img: 'early_supporter.png' }); if (flags2 & 16384) badges2.push({ label: t.home.badgeBug2,
+        img: 'bug_hunter_level_2.png' }); if (flags2 & 131072) badges2.push({ label: t.home.badgeVerifDev,
+        img: 'verified_bot_developer.png' }); if (flags2 & 262144) badges2.push({ label: t.home.badgeModAlumni,
+        img: 'certified_moderator.png' }); if (flags2 & 4194304) badges2.push({ label: t.home.badgeActiveDev,
+        img: 'active_developer.png' }); %>
+        <% if (badges2.length> 0) { %>
+          <div class="prof-block">
+            <div class="prof-block-label">
+              <%= t.home.profileBadges %>
+            </div>
+            <div class="prof-badges">
+              <% badges2.forEach(b=> { %>
+                <div class="prof-badge">
+                  <img src="<%= BADGE_CDN %><%= b.img %>" alt="<%= b.label %>"
+                    onerror="this.closest('.prof-badge').style.display='none'" />
+                  <span class="prof-badge-tip">
+                    <%= b.label %>
+                  </span>
+                </div>
+                <% }) %>
+            </div>
+          </div>
+          <% } %>
+    </div>
+    <div class="prof-footer">
+      <% if (isShip) { %>
+      <a href="/settings" class="prof-btn" style="background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);color:var(--purple-l);">
+        <i data-lucide="settings-2" style="width:16px;height:16px;stroke:currentColor;"></i>
+        <%= lang === 'ar' ? 'إعدادات النظام' : 'System Settings' %>
+      </a>
+      <% } %>
+      <a href="https://discord.gg/jfFSmVM5kK" target="_blank" class="prof-btn help">
+        <i data-lucide="help-circle" style="width:16px;height:16px;stroke:currentColor;"></i>
+        <%= t.home.profileHelp %>
+      </a>
+      <a href="/auth/logout" class="prof-btn logout" id="logout-link">
+        <i data-lucide="log-out" style="width:16px;height:16px;stroke:currentColor;"></i>
+        <%= t.home.profileLogout %>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <!-- Current guild info -->
+      <% if (guildInfo.icon) { %>
+        <img class="guild-icon-top"
+          src="https://cdn.discordapp.com/icons/<%= guildInfo.id %>/<%= guildInfo.icon %>.png?size=64"
+          alt="<%= guildInfo.name %>" />
+        <% } else { %>
+          <div class="guild-icon-top-fallback">
+            <%= guildInfo.name.charAt(0).toUpperCase() %>
+          </div>
+          <% } %>
+            <div class="guild-meta">
+              <div class="guild-meta-name" title="<%= guildInfo.name %>">
+                <%= guildInfo.name %>
+              </div>
+              <div class="guild-meta-id">
+                <%= guildInfo.id %>
+              </div>
+            </div>
+            <div class="topbar-sep"></div>
+            <!-- Brand -->
+            <a href="/dashboard" class="topbar-brand nav-link">
+              <img
+                src="https://res.cloudinary.com/difucqa9h/image/upload/v1770643265/discord_images/yaix1pbnbdv3srvf12gl.png"
+                alt="CODE NEXUS" />
+              <span>CODE NEXUS</span>
+            </a>
+    </div>
+
+    <div class="topbar-right">
+      <!-- User chip -->
+      <button class="user-chip" id="open-profile" aria-label="Profile">
+        <% if (user.avatar) { %>
+          <img class="user-chip-av"
+            src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=64"
+            alt="<%= user.displayName || user.username %>" />
+          <% } else { %>
+            <div class="user-chip-av-fallback">
+              <i data-lucide="user" style="width:13px;height:13px;stroke:var(--purple-l);"></i>
+            </div>
+            <% } %>
+              <span>
+                <%= user.displayName || user.username %>
+              </span>
+              <i data-lucide="chevron-down" style="width:12px;height:12px;stroke:var(--muted);"></i>
+      </button>
+
+      <!-- Language select -->
+      <select class="lang-select" id="lang-select" aria-label="Language">
+        <% supported.forEach(code=> { %>
+          <option value="<%= code %>" <%=lang===code ? 'selected' : '' %>><%= langFlags[code] %>
+              <%= langLabels[code] %>
+          </option>
+          <% }) %>
+      </select>
+
+      <!-- Mobile hamburger -->
+      <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation">
+        <i data-lucide="menu" style="width:18px;height:18px;stroke:currentColor;"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Nav sidebar (server icons) -->
+  <aside class="nav-sidebar" aria-label="Server navigation">
+    <!-- Back to home -->
+    <a href="/dashboard" class="nav-back nav-link" aria-label="<%= t.guild.backBtn %>">
+      <span class="nav-icon">
+        <i data-lucide="home" style="width:17px;height:17px;stroke:currentColor;"></i>
+      </span>
+      <span class="nav-label">
+        <%= t.guild.backBtn %>
+      </span>
+    </a>
+
+    <div class="nav-divider"></div>
+
+    <!-- All admin guilds -->
+    <% guilds.forEach(g=> { %>
+      <a href="/dashboard/<%= g.id %>" class="nav-item <%= g.id === guildId ? 'active' : '' %> nav-link"
+        aria-label="<%= g.name %>">
+        <!-- Icon -->
+        <div class="nav-item-icon">
+          <% if (g.icon) { %>
+            <img src="https://cdn.discordapp.com/icons/<%= g.id %>/<%= g.icon %>.png?size=64" alt="<%= g.name %>" />
+            <% } else { %>
+              <div class="nav-item-fallback">
+                <%= g.name.charAt(0).toUpperCase() %>
+              </div>
+              <% } %>
+                <!-- Status dot (visible when sidebar is collapsed) -->
+                <span class="nav-status <%= g.inBot ? 'on' : 'off' %>"></span>
+        </div>
+        <!-- Expanded label (visible on hover) -->
+        <div class="nav-item-label">
+          <span class="nav-item-name">
+            <%= g.name %>
+          </span>
+          <span class="nav-item-dot <%= g.inBot ? 'on' : 'off' %>"></span>
+        </div>
+      </a>
+      <% }) %>
+  </aside>
+
+  <!-- Management Sidebar -->
+  <aside class="mgmt-sidebar" id="mgmt-sidebar">
+    <!-- Header -->
+    <div class="mgmt-header">
+      <div class="mgmt-header-inner">
+        <div class="mgmt-header-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 2C2.00779 2 1 3.00779 1 4.25V5.75C1 6.99221 2.00779 8 3.25 8H14.75C15.9922 8 17 6.99221 17 5.75V4.25C17 3.00779 15.9922 2 14.75 2H3.25ZM3 5C3 5.5522 3.4477 6 4 6C4.5522 6 5 5.5522 5 5C5 4.4478 4.5523 4 4 4C3.4477 4 3 4.4478 3 5ZM6 5C6 5.5522 6.4477 6 7 6C7.5522 6 8 5.5522 8 5C8 4.4478 7.5523 4 7 4C6.4477 4 6 4.4478 6 5Z" fill="currentColor"/>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 10C2.00779 10 1 11.0078 1 12.25V13.75C1 14.9922 2.00779 16 3.25 16H14.75C15.9922 16 17 14.9922 17 13.75V12.25C17 11.0078 15.9922 10 14.75 10H3.25ZM3 13C3 13.5522 3.4477 14 4 14C4.5522 14 5 13.5522 5 13C5 12.4478 4.5523 12 4 12C3.4477 12 3 12.4478 3 13ZM6 13C6 13.5522 6.4477 14 7 14C7.5522 14 8 13.5522 8 13C8 12.4478 7.5523 12 7 12C6.4477 12 6 12.4478 6 13Z" fill="currentColor" fill-opacity="0.4"/>
+          </svg>
+        </div>
+        <span class="mgmt-header-title"><%= lang === 'ar' ? 'إدارة السيرفر' : 'Manage Server' %></span>
+      </div>
+      <button class="mgmt-sort-btn" aria-label="sort">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
+          <path d="M9.53,2.22c-.293-.293-.768-.293-1.061,0l-3.5,3.5c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l2.97-2.97,2.97,2.97c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-3.5-3.5Z" fill="currentColor"/>
+          <path d="M11.97,11.22l-2.97,2.97-2.97-2.97c-.293-.293-.768-.293-1.061,0s-.293,.768,0,1.061l3.5,3.5c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22l3.5-3.5c.293-.293,.293-.768,0-1.061s-.768-.293-1.061,0Z" fill="currentColor" fill-opacity="0.4"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="mgmt-body">
+      <div class="mgmt-nav">
+
+        <!-- ── Section: General ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'عام' : 'General' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18">
+              <path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/>
+            </svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <!-- Overview -->
+            <a href="/dashboard/<%= guildId %>" class="mgmt-item active nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18">
+                  <path opacity="0.4" d="M14.25 2H12.75C11.784 2 11 2.784 11 3.75V6.25C11 7.216 11.784 8 12.75 8H14.25C15.216 8 16 7.216 16 6.25V3.75C16 2.784 15.216 2 14.25 2Z" fill="currentColor"/>
+                  <path opacity="0.4" d="M5.25 10H3.75C2.784 10 2 10.784 2 11.75V14.25C2 15.216 2.784 16 3.75 16H5.25C6.216 16 7 15.216 7 14.25V11.75C7 10.784 6.216 10 5.25 10Z" fill="currentColor"/>
+                  <path d="M7.75 2H3.75C2.784 2 2 2.784 2 3.75V6.25C2 7.216 2.784 8 3.75 8H7.75C8.716 8 9.5 7.216 9.5 6.25V3.75C9.5 2.784 8.716 2 7.75 2Z" fill="currentColor"/>
+                  <path d="M14.25 10H10.25C9.284 10 8.5 10.784 8.5 11.75V14.25C8.5 15.216 9.284 16 10.25 16H14.25C15.216 16 16 15.216 16 14.25V11.75C16 10.784 15.216 10 14.25 10Z" fill="currentColor"/>
+                </svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'نظرة عامة' : 'Overview' %></span>
+            </a>
+            <!-- Manage Subscriptions (disabled) -->
+            <div class="mgmt-item disabled">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M4.75 9.5C5.094 9.5 5.394 9.734 5.478 10.068L5.968 12.032L7.932 12.522C8.266 12.606 8.5 12.906 8.5 13.25C8.5 13.594 8.266 13.894 7.932 13.978L5.968 14.468L5.478 16.432C5.394 16.766 5.094 17 4.75 17C4.406 17 4.106 16.766 4.022 16.432L3.532 14.468L1.568 13.978C1.234 13.894 1 13.594 1 13.25C1 12.906 1.234 12.606 1.568 12.522L3.532 12.032L4.022 10.068C4.106 9.734 4.406 9.5 4.75 9.5Z" fill="currentColor"/>
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M11.25 1C11.558 1 11.834 1.188 11.947 1.474L13.245 4.755L16.526 6.053C16.812 6.166 17 6.442 17 6.75C17 7.058 16.812 7.334 16.526 7.447L13.245 8.745L11.947 12.026C11.834 12.312 11.558 12.5 11.25 12.5C10.942 12.5 10.666 12.312 10.553 12.026L9.255 8.745L5.974 7.447C5.688 7.334 5.5 7.058 5.5 6.75C5.5 6.442 5.688 6.166 5.974 6.053L9.255 4.755L10.553 1.474C10.666 1.188 10.942 1 11.25 1Z" fill="currentColor" fill-opacity="0.4"/>
+                </svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'إدارة الاشتراكات' : 'Manage Subscriptions' %></span>
+              <span class="mgmt-badge"><%= lang === 'ar' ? 'مجاني' : 'Free' %></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Section: Levels ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'المستويات' : 'Levels' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18">
+              <path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/>
+            </svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/levels" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18">
+                  <path d="M9 6C5.962 6 3.5 8.463 3.5 11.5C3.5 14.537 5.962 17 9 17C12.038 17 14.5 14.537 14.5 11.5C14.5 8.463 12.038 6 9 6Z" fill="currentColor" fill-opacity="0.4"/>
+                  <path d="M11.476 10.693C11.417 10.512 11.26 10.381 11.073 10.353L9.951 10.19L9.449 9.173C9.281 8.831 8.72 8.831 8.553 9.173L8.051 10.19L6.929 10.353C6.741 10.38 6.584 10.512 6.526 10.693C6.467 10.874 6.516 11.073 6.653 11.206L7.465 11.998L7.273 13.116C7.241 13.304 7.318 13.493 7.472 13.605C7.626 13.717 7.83 13.731 7.998 13.643L9.002 13.116L10.006 13.643C10.079 13.682 10.158 13.701 10.238 13.701C10.342 13.701 10.445 13.669 10.532 13.605C10.686 13.493 10.763 13.304 10.731 13.116L10.539 11.998L11.351 11.206C11.488 11.073 11.537 10.874 11.478 10.693H11.476Z" fill="currentColor"/>
+                  <path d="M14.283 1C13.842 1 13.437 1.231 13.212 1.606L10.463 6.197C11.932 6.601 13.155 7.6 13.858 8.918L17.44 2.891C17.939 2.058 17.338 1 16.367 1H14.283Z" fill="currentColor"/>
+                  <path d="M1.633 1C0.662 1 0.061 2.059 0.561 2.892L4.151 8.903C4.854 7.592 6.074 6.599 7.537 6.197L4.789 1.608C4.565 1.234 4.153 1 3.717 1H1.633Z" fill="currentColor"/>
+                </svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'إعدادات المستوى' : 'Level Settings' %></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Section: Tickets ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'التذاكر' : 'Tickets' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/tickets" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path opacity="0.4" d="M14.25 2H12.75C11.784 2 11 2.784 11 3.75V6.25C11 7.216 11.784 8 12.75 8H14.25C15.216 8 16 7.216 16 6.25V3.75C16 2.784 15.216 2 14.25 2Z" fill="currentColor"/><path opacity="0.4" d="M5.25 10H3.75C2.784 10 2 10.784 2 11.75V14.25C2 15.216 2.784 16 3.75 16H5.25C6.216 16 7 15.216 7 14.25V11.75C7 10.784 6.216 10 5.25 10Z" fill="currentColor"/><path d="M7.75 2H3.75C2.784 2 2 2.784 2 3.75V6.25C2 7.216 2.784 8 3.75 8H7.75C8.716 8 9.5 7.216 9.5 6.25V3.75C9.5 2.784 8.716 2 7.75 2Z" fill="currentColor"/><path d="M14.25 10H10.25C9.284 10 8.5 10.784 8.5 11.75V14.25C8.5 15.216 9.284 16 10.25 16H14.25C15.216 16 16 15.216 16 14.25V11.75C16 10.784 15.216 10 14.25 10Z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'نظرة عامة' : 'Overview' %></span>
+            </a>
+            <a href="/dashboard/<%= guildId %>/tickets/general" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 11.5C10.3807 11.5 11.5 10.3807 11.5 9C11.5 7.6193 10.3807 6.5 9 6.5C7.6193 6.5 6.5 7.6193 6.5 9C6.5 10.3807 7.6193 11.5 9 11.5Z" fill="currentColor"/><path opacity="0.4" fill-rule="evenodd" clip-rule="evenodd" d="M7.6853 1.5H10.3147C10.7234 1.5 11.0941 1.7443 11.2629 2.1191L11.8071 3.3564C12.3536 3.5819 12.8668 3.8791 13.3352 4.237L14.6429 3.9095C15.0369 3.8108 15.4509 3.9764 15.6553 4.3295L16.9699 6.6705C17.1743 7.0235 17.1014 7.4708 16.7954 7.7392L15.7702 8.636C15.7899 8.757 15.8 8.876 15.8 9C15.8 9.124 15.7899 9.243 15.7702 9.364L16.7954 10.2608C17.1014 10.5292 17.1743 10.9765 16.9699 11.3295L15.6553 13.6705C15.4509 14.0236 15.0369 14.1892 14.6429 14.0905L13.3352 13.763C12.8668 14.1209 12.3536 14.4181 11.8071 14.6436L11.2629 15.8809C11.0941 16.2557 10.7234 16.5 10.3147 16.5H7.6853C7.2766 16.5 6.9059 16.2557 6.7371 15.8809L6.1929 14.6436C5.6464 14.4181 5.1332 14.1209 4.6648 13.763L3.3571 14.0905C2.9631 14.1892 2.5491 14.0236 2.3447 13.6705L1.0301 11.3295C0.8257 10.9765 0.8986 10.5292 1.2046 10.2608L2.2298 9.364C2.2101 9.243 2.2 9.124 2.2 9C2.2 8.876 2.2101 8.757 2.2298 8.636L1.2046 7.7392C0.8986 7.4708 0.8257 7.0235 1.0301 6.6705L2.3447 4.3295C2.5491 3.9764 2.9631 3.8108 3.3571 3.9095L4.6648 4.237C5.1332 3.8791 5.6464 3.5819 6.1929 3.3564L6.7371 2.1191C6.9059 1.7443 7.2766 1.5 7.6853 1.5Z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الإعدادات العامة' : 'General Settings' %></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Section: Utility ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'الأدوات' : 'Utility' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/utility" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M15.573 3.913C15.462 3.642 15.138 3.527 14.881 3.674L12.434 5.076L10.924 3.566L12.326 1.119C12.473 0.862 12.358 0.538 12.087 0.427C10.973 -0.0319999 9.667 0.218 8.808 1.077C7.94 1.945 7.692 3.264 8.169 4.385L1.292 11.262C0.236 12.318 0.236 14.032 1.292 15.088L2.912 16.708C3.968 17.764 5.682 17.764 6.738 16.708L13.615 9.831C14.736 10.308 16.055 10.06 16.923 9.192C17.782 8.333 18.032 7.027 17.573 5.913C17.462 5.642 17.138 5.527 16.881 5.674L14.434 7.076L12.924 5.566L14.326 3.119Z" fill="currentColor" fill-opacity="0.4"/><path fill-rule="evenodd" clip-rule="evenodd" d="M2 13.5C2 12.672 2.672 12 3.5 12C4.328 12 5 12.672 5 13.5C5 14.328 4.328 15 3.5 15C2.672 15 2 14.328 2 13.5Z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الأوامر العامة' : 'General Commands' %></span>
+            </a>
+            <a href="/dashboard/<%= guildId %>/moderation" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 1L2 4.5V9c0 4.418 3.083 8.572 7 9.5 3.917-.928 7-5.082 7-9.5V4.5L9 1z" fill="currentColor" fill-opacity="0.4"/><path fill-rule="evenodd" clip-rule="evenodd" d="M6.5 7.5l2.5 2.5 3.5-3.5 1 1-4.5 4.5-3.5-3.5 1-1z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الأوامر الإدارية' : 'Moderation' %></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Section: Protection ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'الحماية' : 'Protection' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/protection" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 1L2 4.5V9c0 4.418 3.083 8.572 7 9.5 3.917-.928 7-5.082 7-9.5V4.5L9 1z" fill="currentColor" fill-opacity="0.4"/><path fill-rule="evenodd" clip-rule="evenodd" d="M6.5 7.5l2.5 2.5 3.5-3.5 1 1-4.5 4.5-3.5-3.5 1-1z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الأمان' : 'Security' %></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Section: Members ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'الأعضاء' : 'Members' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/auto-roles" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 2a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zm0 9c4 0 6 2 6 3v1H3v-1c0-1 2-3 6-3z" fill="currentColor" fill-opacity="0.4"/><path d="M13.5 8a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm1.5 2c2 0 3 1 3 2v1h-3v-1c0-.6-.2-1.2-.5-1.7.3-.2.7-.3 1-.3l-.5.5z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الرتب التلقائية' : 'Auto Roles' %></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Section: Settings ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'الإعدادات' : 'Settings' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/setting" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 11.5C10.3807 11.5 11.5 10.3807 11.5 9C11.5 7.6193 10.3807 6.5 9 6.5C7.6193 6.5 6.5 7.6193 6.5 9C6.5 10.3807 7.6193 11.5 9 11.5Z" fill="currentColor"/><path opacity="0.4" fill-rule="evenodd" clip-rule="evenodd" d="M7.6853 1.5H10.3147C10.7234 1.5 11.0941 1.7443 11.2629 2.1191L11.8071 3.3564C12.3536 3.5819 12.8668 3.8791 13.3352 4.237L14.6429 3.9095C15.0369 3.8108 15.4509 3.9764 15.6553 4.3295L16.9699 6.6705C17.1743 7.0235 17.1014 7.4708 16.7954 7.7392L15.7702 8.636C15.7899 8.757 15.8 8.876 15.8 9C15.8 9.124 15.7899 9.243 15.7702 9.364L16.7954 10.2608C17.1014 10.5292 17.1743 10.9765 16.9699 11.3295L15.6553 13.6705C15.4509 14.0236 15.0369 14.1892 14.6429 14.0905L13.3352 13.763C12.8668 14.1209 12.3536 14.4181 11.8071 14.6436L11.2629 15.8809C11.0941 16.2557 10.7234 16.5 10.3147 16.5H7.6853C7.2766 16.5 6.9059 16.2557 6.7371 15.8809L6.1929 14.6436C5.6464 14.4181 5.1332 14.1209 4.6648 13.763L3.3571 14.0905C2.9631 14.1892 2.5491 14.0236 2.3447 13.6705L1.0301 11.3295C0.8257 10.9765 0.8986 10.5292 1.2046 10.2608L2.2298 9.364C2.2101 9.243 2.2 9.124 2.2 9C2.2 8.876 2.2101 8.757 2.2298 8.636L1.2046 7.7392C0.8986 7.4708 0.8257 7.0235 1.0301 6.6705L2.3447 4.3295C2.5491 3.9764 2.9631 3.8108 3.3571 3.9095L4.6648 4.237C5.1332 3.8791 5.6464 3.5819 6.1929 3.3564L6.7371 2.1191C6.9059 1.7443 7.2766 1.5 7.6853 1.5Z" fill="currentColor"/></svg></div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الإعدادات' : 'Settings' %></span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Bottom user bar -->
+    <div class="mgmt-footer">
+      <div class="mgmt-footer-user">
+        <% if (user.avatar) { %>
+          <img class="mgmt-footer-av"
+            src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=64"
+            alt="<%= user.displayName || user.username %>" />
+        <% } else { %>
+          <div class="mgmt-footer-av-fallback"><%= (user.displayName || user.username).charAt(0).toUpperCase() %></div>
+        <% } %>
+        <span class="mgmt-footer-name">@<%= user.username %></span>
+      </div>
+      <button class="mgmt-footer-dots open-profile-btn" aria-label="User menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 18 18">
+          <circle cx="9" cy="9" r="1.25" fill="currentColor"/>
+          <circle cx="3.25" cy="9" r="1.25" fill="currentColor"/>
+          <circle cx="14.75" cy="9" r="1.25" fill="currentColor"/>
+        </svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main">
+    <!-- Overview section -->
+    <section>
+      <div class="section-heading">
+        <div class="section-heading-icon">
+          <i data-lucide="layout-dashboard" style="width:16px;height:16px;stroke:var(--purple-l);"></i>
+        </div>
+        <h2>
+          <%= t.guild.overview %>
+        </h2>
+      </div>
+
+      <div class="stats-grid">
+        <!-- Level card -->
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">
+              <%= t.guild.levelLabel %>
+            </div>
+            <% if (userLevel && userLevel.level !=null) { %>
+              <div class="stat-value">
+                <%= userLevel.level %>
+              </div>
+              <% } else { %>
+                <div class="stat-value no-data">
+                  <%= t.guild.noData %>
+                </div>
+                <% } %>
+          </div>
+          <div class="stat-icon-wrap">
+            <i data-lucide="zap" style="width:22px;height:22px;stroke:var(--purple-l);fill:rgba(124,58,237,.12);"></i>
+          </div>
+        </div>
+
+        <!-- Rank card -->
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">
+              <%= t.guild.rankLabel %>
+            </div>
+            <% if (rank !=null) { %>
+              <div class="stat-value">
+                <%= rank %>
+              </div>
+              <% } else { %>
+                <div class="stat-value no-data">
+                  <%= t.guild.noData %>
+                </div>
+                <% } %>
+          </div>
+          <div class="stat-icon-wrap cyan">
+            <i data-lucide="award" style="width:22px;height:22px;stroke:var(--cyan-l);fill:rgba(6,182,212,.1);"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <a class="footer-logo" href="https://discord.gg/jfFSmVM5kK" target="_blank">
+      <img src="https://res.cloudinary.com/difucqa9h/image/upload/v1770643265/discord_images/yaix1pbnbdv3srvf12gl.png"
+        alt="CODE NEXUS" />
+      <span>CODE NEXUS</span>
+    </a>
+    <p>
+      <%= t.home.footerRights %>
+    </p>
+  </footer>
+
+  <!-- Lucide -->
+  <script src="/js/lucide.min.js"></script>
+  <script>lucide.createIcons();</script>
+
+  <!-- Stars -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script>
+    (function () {
+      const canvas = document.getElementById('c');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+      renderer.setPixelRatio(1); renderer.setSize(innerWidth, innerHeight);
+      renderer.setClearColor(0x040010, 1);
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 500);
+      camera.position.z = 1;
+      const N = 2800, pos = new Float32Array(N * 3);
+      for (let i = 0; i < N * 3; i++) pos[i] = (Math.random() - .5) * 240;
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const mat = new THREE.PointsMaterial({ color: 0xb8b0ff, size: 0.24, transparent: true, opacity: 0.45, depthWrite: false });
+      scene.add(new THREE.Points(geo, mat));
+      let mx = 0, t = 0;
+      document.addEventListener('mousemove', e => { mx = (e.clientX / innerWidth - .5) * .25; });
+      window.addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+      const stars = scene.children[0];
+      (function render() { requestAnimationFrame(render); t += 0.00022; stars.rotation.y = t + mx * .15; renderer.render(scene, camera); })();
+    })();
+  </script>
+
+  <!-- Page in overlay -->
+  <div id="ov"
+    style="position:fixed;inset:0;z-index:9999;background:#040010;animation:pIn .45s cubic-bezier(.4,0,.2,1) forwards;pointer-events:none;">
+  </div>
+  <style>
+    @keyframes pIn {
+      from {
+        opacity: 1
+      }
+
+      to {
+        opacity: 0
+      }
+    }
+
+    @keyframes pOut {
+      from {
+        opacity: 0
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    #ov.leave {
+      animation: pOut .35s cubic-bezier(.4, 0, .2, 1) forwards;
+      pointer-events: all;
+    }
+  </style>
+
+  <script>
+    /* ── Banner solid color ── */
+    const bannerSolid = document.querySelector('.prof-banner-solid');
+    if (bannerSolid && bannerSolid.dataset.bg) bannerSolid.style.background = bannerSolid.dataset.bg;
+
+    /* ── Profile sidebar ── */
+    const profSidebar = document.getElementById('prof-sidebar');
+    const profBackdrop = document.getElementById('prof-backdrop');
+    const openBtn = document.getElementById('open-profile');
+    const closeBtn = document.getElementById('close-profile');
+    const copyId = document.getElementById('prof-copy-id');
+
+    function openProfile() { profSidebar.classList.add('open'); profBackdrop.classList.add('open'); profSidebar.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden'; }
+    function closeProfile() { profSidebar.classList.remove('open'); profBackdrop.classList.remove('open'); profSidebar.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; }
+
+    openBtn.addEventListener('click', openProfile);
+    document.querySelectorAll('.open-profile-btn').forEach(b => b.addEventListener('click', openProfile));
+    if (closeBtn) closeBtn.addEventListener('click', closeProfile);
+    profBackdrop.addEventListener('click', closeProfile);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProfile(); });
+
+    if (copyId) {
+      copyId.addEventListener('click', () => {
+        navigator.clipboard.writeText(copyId.textContent.trim()).then(() => {
+          const orig = copyId.textContent;
+          copyId.textContent = '✓ Copied!';
+          copyId.style.color = 'var(--cyan-l)';
+          setTimeout(() => { copyId.textContent = orig; copyId.style.color = ''; }, 1500);
+        });
+      });
+    }
+
+    /* ── Language select ── */
+    const langSelectEl = document.getElementById('lang-select');
+    if (langSelectEl) {
+      langSelectEl.addEventListener('change', function () {
+        const u = new URL(window.location.href);
+        u.searchParams.set('lang', this.value);
+        window.location.href = u.toString();
+      });
+    }
+
+    /* ── Mobile nav toggle (mgmt sidebar) ── */
+    const menuToggle  = document.getElementById('menu-toggle');
+    const mgmtSidebar = document.getElementById('mgmt-sidebar');
+    const navSidebar  = document.querySelector('.nav-sidebar');
+    const navOverlay  = document.getElementById('nav-overlay');
+
+    function openMgmt()  { mgmtSidebar.classList.add('open'); navOverlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeMgmt() { mgmtSidebar.classList.remove('open'); navOverlay.classList.remove('open'); document.body.style.overflow = ''; }
+    function openNav()   { if (navSidebar) { navSidebar.classList.add('open'); navOverlay.classList.add('open'); document.body.style.overflow = 'hidden'; } }
+    function closeNav()  { if (navSidebar) { navSidebar.classList.remove('open'); navOverlay.classList.remove('open'); document.body.style.overflow = ''; } }
+
+    if (menuToggle) menuToggle.addEventListener('click', () => mgmtSidebar.classList.contains('open') ? closeMgmt() : openMgmt());
+    if (navOverlay) navOverlay.addEventListener('click', () => { closeMgmt(); closeNav(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMgmt(); closeNav(); closeProfile(); } });
+
+    /* Sort button in mgmt header = toggle server switcher panel */
+    const sortBtn = document.querySelector('.mgmt-sort-btn');
+    if (sortBtn) {
+      sortBtn.addEventListener('click', function () {
+        if (navSidebar && navSidebar.classList.contains('open')) {
+          closeNav();
+        } else {
+          closeMgmt();
+          openNav();
+        }
+      });
+    }
+
+    /* ── Mgmt section collapse ── */
+    document.querySelectorAll('.mgmt-section-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const body = this.nextElementSibling;
+        const isOpen = body.classList.contains('open');
+        body.classList.toggle('open', !isOpen);
+        this.classList.toggle('open', !isOpen);
+      });
+    });
+
+    /* ── Page transitions ── */
+    function fadeOut(href) {
+      const ov = document.getElementById('ov');
+      ov.classList.add('leave');
+      setTimeout(() => { window.location.href = href; }, 360);
+    }
+    document.querySelectorAll('a.nav-link, a#logout-link').forEach(a => {
+      a.addEventListener('click', function (e) {
+        if (this.target === '_blank') return;
+        e.preventDefault(); fadeOut(this.href);
+      });
+    });
+  </script>
+</body>
+
+</html>
+<%#
+  This project was programmed by the Code Nexus team.
+  If you encounter any problems, open an Issue or log into the Discord server:
+  https://discord.gg/UvEYbFd2rj
+%>

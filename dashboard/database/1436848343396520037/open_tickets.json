@@ -1,0 +1,53 @@
+{
+  "tickets": [
+    {
+      "id": "tkt_1772680774294",
+      "number": 1,
+      "panelId": "panel_1772680496224",
+      "guildId": "1436848343396520037",
+      "channelId": "1478955104940986390",
+      "userId": "756947441592303707",
+      "claimedBy": "756947441592303707",
+      "status": "closed",
+      "openedAt": "2026-03-05T03:19:34.295Z",
+      "closedAt": "2026-03-05T03:22:37.916Z",
+      "closedBy": "756947441592303707",
+      "closeReason": null,
+      "transcriptPath": "C:\\Users\\Jradi\\Desktop\\discord bot\\Bot Ds\\system-pro\\dashboard\\database\\1436848343396520037\\transcripts\\transcript-tkt_1772680774294.html",
+      "transcriptChannelMsgId": "1478955880849477816"
+    },
+    {
+      "id": "tkt_1772681248557",
+      "number": 2,
+      "panelId": "panel_1772680496224",
+      "guildId": "1436848343396520037",
+      "channelId": "1478957094295048253",
+      "userId": "756947441592303707",
+      "claimedBy": "756947441592303707",
+      "status": "closed",
+      "openedAt": "2026-03-05T03:27:28.558Z",
+      "closedAt": "2026-03-05T03:27:48.213Z",
+      "closedBy": "756947441592303707",
+      "closeReason": null,
+      "transcriptPath": "C:\\Users\\Jradi\\Desktop\\discord bot\\Bot Ds\\system-pro\\dashboard\\database\\1436848343396520037\\transcripts\\transcript-tkt_1772681248557.html",
+      "transcriptChannelMsgId": "1478957181985361972"
+    },
+    {
+      "id": "tkt_1772681659438",
+      "number": 3,
+      "panelId": "panel_1772680496224",
+      "guildId": "1436848343396520037",
+      "channelId": "1478958817373982762",
+      "userId": "756947441592303707",
+      "claimedBy": "756947441592303707",
+      "status": "closed",
+      "openedAt": "2026-03-05T03:34:19.438Z",
+      "closedAt": "2026-03-05T03:34:36.905Z",
+      "closedBy": "756947441592303707",
+      "closeReason": null,
+      "transcriptPath": "C:\\Users\\Jradi\\Desktop\\discord bot\\Bot Ds\\system-pro\\dashboard\\database\\1436848343396520037\\transcripts\\transcript-tkt_1772681659438.html",
+      "transcriptChannelMsgId": "1478958897850224712"
+    }
+  ],
+  "nextNumber": 4
+}

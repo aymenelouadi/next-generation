@@ -1,0 +1,58 @@
+{
+  "1": "kick",
+  "2": "remove role",
+  "3": "ban",
+  "4": "mute",
+  "5": "jail",
+  "user_permissions": [
+    "756947441592303707"
+  ],
+  "enable": true,
+  "whitelist_roles": [],
+  "anti_ban": {
+    "enabled": true,
+    "action": "2",
+    "limit": 5,
+    "whitelist_roles": []
+  },
+  "anti_kick": {
+    "enabled": true,
+    "action": "2",
+    "limit": 5,
+    "whitelist_roles": [
+      "1453360444327592018"
+    ]
+  },
+  "anti_channel_create": {
+    "enabled": true,
+    "action": "2",
+    "limit": 5,
+    "whitelist_roles": []
+  },
+  "anti_channel_delete": {
+    "enabled": true,
+    "action": "2",
+    "limit": 5,
+    "whitelist_roles": []
+  },
+  "anti_role_create": {
+    "enabled": true,
+    "action": "2",
+    "limit": 5,
+    "whitelist_roles": []
+  },
+  "anti_role_delete": {
+    "enabled": true,
+    "action": "2",
+    "limit": 5,
+    "whitelist_roles": []
+  },
+  "anti_bots": {
+    "enabled": true,
+    "action": "2"
+  },
+  "anti_webhooks": {
+    "enabled": true,
+    "action": "2"
+  }
+}

@@ -1,0 +1,395 @@
+﻿{
+  "system": {
+    "maintenance":      "🔧 This bot is currently under maintenance. Both prefix and slash commands are disabled.",
+    "prefix_disabled":  "❌ Prefix commands are disabled on this server.",
+    "slash_disabled":   "❌ Slash commands are disabled on this server.",
+    "disabled":         "❌ This command is currently disabled.",
+    "ignored_channel":  "❌ This command cannot be used in this channel.",
+    "wrong_channel":    "❌ This command is only available in specific channels.",
+    "ignored_role":     "❌ You cannot use this command.",
+    "no_permission":    "❌ You don't have permission to use this command.",
+    "error":            "❌ An error occurred while executing the command."
+  },
+  "afk": {
+    "enabled_title":    "💤  AFK Enabled",
+    "removed_title":    "✅  Welcome back!",
+    "reason_label":     "Reason",
+    "removed_sub":      "You were AFK for {time}",
+    "is_afk":           "is AFK"
+  },
+  "ping": {
+    "title":      "🏓  Pong!",
+    "measuring":  "measuring...",
+    "bot":        "Bot",
+    "api":        "API",
+    "ram":        "RAM",
+    "cpu":        "CPU",
+    "uptime":     "Uptime",
+    "servers":    "Servers",
+    "users":      "Users"
+  },
+  "avatar": {
+    "title":     "Avatar",
+    "open":      "Open full size"
+  },
+  "help": {
+    "title":   "Commands List",
+    "count":   "Total commands",
+    "public":  "Public",
+    "admin":   "Admin"
+  },
+  "banner_server": {
+    "no_banner": "This server has no banner.",
+    "title":     "Server Banner"
+  },
+  "banner_user": {
+    "no_banner": "This user has no banner.",
+    "title":     "User Banner"
+  },
+  "logo_server": {
+    "no_logo":   "This server has no icon.",
+    "title":     "Server Icon"
+  },
+  "roles": {
+    "title":    "Server Roles",
+    "page":     "Page",
+    "total":    "roles",
+    "no_roles": "This server has no roles."
+  },
+  "user": {
+    "title":         "User Info",
+    "joined":        "Joined",
+    "created":       "Account Created",
+    "boosting":      "Boosting Since",
+    "not_boosting":  "Not boosting",
+    "roles_label":   "Roles",
+    "no_roles":      "No roles"
+  },
+  "server": {
+    "title":         "Server Info",
+    "owner":         "Owner",
+    "created":       "Created",
+    "verification":  "Verification",
+    "members":       "Members",
+    "online":        "Online",
+    "in_voice":      "In Voice",
+    "channels":      "Channels",
+    "roles":         "Roles",
+    "boosts":        "Boosts"
+  },
+  "ban": {
+    "title":          "🔨  Ban Executed",
+    "label_target":   "Target",
+    "label_reason":   "Reason",
+    "label_duration": "Duration",
+    "label_case":     "Case ID",
+    "label_mod":      "Moderator",
+    "permanent":      "Permanent",
+    "self_ban":       "You cannot ban yourself.",
+    "not_bannable":   "I cannot ban this user — their role may be higher than mine.",
+    "already_banned": "This user is already banned.",
+    "no_perm_bot":    "I don't have the **Ban Members** permission.",
+    "not_found":      "User not found.",
+    "failed":         "Failed to ban the user.",
+    "usage":          "Usage",
+    "duration_line":  "Duration: {d}\n",
+    "dm_msg":         "You were banned from **{guild}**\nCase ID: `{case}`\nReason: {reason}\n{duration}By: <@{mod}>\nDate: {date}"
+  },
+  "kick": {
+    "title":          "👢  Kick Executed",
+    "label_target":   "Target",
+    "label_reason":   "Reason",
+    "label_case":     "Case ID",
+    "label_mod":      "Moderator",
+    "self_kick":      "You cannot kick yourself.",
+    "not_in_server":  "This user is not in the server.",
+    "not_kickable":   "I cannot kick this user — their role may be higher than mine.",
+    "no_perm_bot":    "I don't have the **Kick Members** permission.",
+    "not_found":      "User not found.",
+    "failed":         "Failed to kick the user.",
+    "usage":          "Usage",
+    "dm_msg":         "You were kicked from **{guild}**\nCase ID: `{case}`\nReason: {reason}\nBy: <@{mod}>\nDate: {date}"
+  },
+  "warn": {
+    "title":          "⚠️  Warning Issued",
+    "label_target":   "Target",
+    "label_reason":   "Reason",
+    "label_case":     "Case ID",
+    "label_mod":      "Moderator",
+    "total_warns":    "Total Warnings",
+    "self_warn":      "You cannot warn yourself.",
+    "not_found":      "User not found.",
+    "usage":          "Usage",
+    "dm_msg":         "You received a warning in **{guild}**\nCase ID: `{case}`\nReason: {reason}\nBy: <@{mod}>\nDate: {date}"
+  },
+  "mute": {
+    "title":             "🔇  Timeout Applied",
+    "label_target":      "Target",
+    "label_reason":      "Reason",
+    "label_duration":    "Duration",
+    "label_ends":        "Ends at",
+    "label_case":        "Case ID",
+    "label_mod":         "Moderator",
+    "self_mute":         "You cannot timeout yourself.",
+    "not_in_server":     "This user is not in the server.",
+    "already_muted":     "This user is already timed out until {until}.",
+    "invalid_duration":  "Invalid duration. Use: 5m 30m 1h 6h 1d 7d 28d",
+    "max_exceeded":      "Maximum timeout duration is 28 days.",
+    "no_perm_bot":       "I don't have the **Moderate Members** permission.",
+    "not_found":         "User not found.",
+    "failed":            "Failed to timeout the user.",
+    "usage":             "Usage",
+    "dm_msg":            "You were timed out in **{guild}**\nCase ID: `{case}`\nReason: {reason}\nDuration: {duration}\nEnds: {ends}\nBy: <@{mod}>\nDate: {date}"
+  },
+  "unban": {
+    "title":          "✅  Unban Executed",
+    "label_target":   "User",
+    "label_reason":   "Reason",
+    "label_case":     "Case ID",
+    "label_mod":      "Moderator",
+    "invalid_id":     "Invalid user ID — must be a 17–20 digit number.",
+    "not_banned":     "This user is not banned.",
+    "no_perm_bot":    "I don't have the **Ban Members** permission.",
+    "failed":         "Failed to unban the user.",
+    "usage":          "Usage",
+    "dm_msg":         "You were unbanned from **{guild}**\nCase ID: `{case}`\nReason: {reason}\nBy: <@{mod}>\nDate: {date}"
+  },
+  "clear": {
+    "title":           "🗑️  Messages Cleared",
+    "label_deleted":   "Deleted",
+    "label_channel":   "Channel",
+    "label_filter":    "Filtered user",
+    "label_reason":    "Reason",
+    "label_mod":       "Moderator",
+    "no_manage_perm":  "I don't have the **Manage Messages** permission in this channel.",
+    "no_msgs_old":     "All messages are older than 14 days and cannot be bulk-deleted.",
+    "no_msgs_user":    "No recent messages found from {user}.",
+    "too_old":         "Cannot delete messages older than 14 days.",
+    "failed":          "Failed to delete messages.",
+    "usage":           "Usage"
+  },
+  "unmute": {
+    "title":         "🔔  Timeout Removed",
+    "label_target":  "Target",
+    "label_reason":  "Reason",
+    "label_case":    "Case ID",
+    "label_mod":     "Moderator",
+    "not_in_server": "This user is not in the server.",
+    "not_muted":     "This user is not currently timed out.",
+    "no_perm_bot":   "I don't have the **Moderate Members** permission.",
+    "not_found":     "User not found.",
+    "failed":        "Failed to remove the timeout.",
+    "usage":         "Usage",
+    "dm_msg":        "Your timeout in **{guild}** has been removed.\nCase ID: `{case}`\nReason: {reason}\nBy: <@{mod}>\nDate: {date}"
+  },
+  "unwarn": {
+    "title":            "✅  Warning Removed",
+    "label_target":     "User",
+    "label_orig_reason":"Original Reason",
+    "label_orig_case":  "Removed Case",
+    "label_new_case":   "Removal Record",
+    "label_mod":        "Moderator",
+    "invalid_case":     "Invalid Case ID — must be exactly 8 characters.",
+    "case_not_found":   "No active warning found with ID `{id}`.",
+    "failed":           "Failed to remove the warning.",
+    "usage":            "Usage",
+    "dm_msg":           "A warning was removed from your record in **{guild}**\nCase ID: `{case}`\nBy: <@{mod}>\nDate: {date}"
+  },
+  "warning": {
+    "title":          "⚠️  Warning History",
+    "total_label":    "Total records",
+    "active_label":   "Active warnings",
+    "clean":          "This user has a clean record.",
+    "no_records":     "No records found.",
+    "not_found":      "User not found.",
+    "usage":          "Usage",
+    "showing_last":   "Showing last {n} of {total} records"
+  },
+  "slowmode": {
+    "title":          "🐢  Slowmode Updated",
+    "label_channel":  "Channel",
+    "label_duration": "Duration",
+    "label_mod":      "Moderator",
+    "text_only":      "Slowmode can only be set on text channels.",
+    "invalid_time":   "Invalid time format. Use: `5s` `10m` `1h` or `0` to disable.",
+    "failed":         "Failed to set slowmode.",
+    "usage":          "Usage"
+  },
+  "lock": {
+    "title":          "🔒  Channel Locked",
+    "notice_title":   "🔒  This channel is locked",
+    "label_channel":  "Channel",
+    "label_reason":   "Reason",
+    "label_mod":      "Moderator",
+    "no_reason":      "No reason provided",
+    "not_found":      "Channel not found.",
+    "no_perm_bot":    "I don't have **Manage Channels** permission.",
+    "failed":         "Failed to lock the channel.",
+    "usage":          "Usage"
+  },
+  "unlock": {
+    "title":          "🔓  Channel Unlocked",
+    "notice_title":   "🔓  This channel is now open",
+    "label_channel":  "Channel",
+    "label_reason":   "Reason",
+    "label_mod":      "Moderator",
+    "no_reason":      "No reason provided",
+    "not_found":      "Channel not found.",
+    "no_perm_bot":    "I don't have **Manage Channels** permission.",
+    "failed":         "Failed to unlock the channel.",
+    "usage":          "Usage"
+  },
+  "say": {
+    "title":         "📢  Message Sent",
+    "label_channel": "Channel",
+    "label_mod":     "Moderator",
+    "not_found":     "Channel not found.",
+    "empty":         "Message cannot be empty.",
+    "failed":        "Failed to send the message.",
+    "usage":         "Usage"
+  },
+  "rename": {
+    "title":          "✏️  Channel Renamed",
+    "label_old":      "Old Name",
+    "label_new":      "New Name",
+    "label_channel":  "Channel",
+    "label_mod":      "Moderator",
+    "empty_name":     "New name cannot be empty.",
+    "no_perm_bot":    "I don't have **Manage Channels** permission.",
+    "failed":         "Failed to rename the channel.",
+    "usage":          "Usage"
+  },
+  "jail": {
+    "title":          "🚨  Member Jailed",
+    "label_case":     "Case ID",
+    "label_target":   "Target",
+    "label_reason":   "Reason",
+    "label_duration": "Duration",
+    "label_ends":     "Ends",
+    "label_mod":      "Moderator",
+    "self":           "You cannot jail yourself.",
+    "not_found":      "User not found.",
+    "not_in_server":  "This user is not in the server.",
+    "invalid_dur":    "Invalid duration. Use: `1m` `1h` `1d` `1w` or `0`/`permanent`.",
+    "no_role_cfg":    "Jail role is not configured in settings.",
+    "role_not_found": "Jail role not found.",
+    "no_room_cfg":    "No allowed rooms configured for jail.",
+    "failed":         "Failed to jail the member.",
+    "usage":          "Usage",
+    "dm_msg":         "You have been jailed in **{guild}**\nCase ID: `{case}`\nReason: {reason}\nDuration: {duration}\nExpires: {ends}\nBy: <@{mod}>\nDate: {date}"
+  },
+  "temp_role": {
+    "title":            "⏳  Temporary Role Assigned",
+    "label_target":     "Target",
+    "label_role":       "Role",
+    "label_duration":   "Duration",
+    "label_ends":       "Expires",
+    "label_mod":        "Moderator",
+    "mention_required": "You must mention a user and a role.",
+    "invalid_time":     "Invalid time format. Use: `30s` `5m` `2h` `1d` `1mo`.",
+    "not_in_server":    "This user is not in the server.",
+    "role_too_high":    "I cannot manage that role — it is above my highest role.",
+    "already_has":      "This user already has that role.",
+    "failed":           "Failed to assign the role.",
+    "usage":            "Usage",
+    "dm_msg":           "You received the role **{role}** in **{guild}** for **{duration}** (expires {ends}) by <@{mod}>"
+  },
+  "multipe_role": {
+    "title":          "🔧  Bulk Role Update",
+    "label_role":     "Role",
+    "label_action":   "Action",
+    "label_scope":    "Scope",
+    "label_success":  "Updated",
+    "label_failed":   "Failed",
+    "label_mod":      "Moderator",
+    "role_too_high":  "I cannot manage that role — it is above my highest role.",
+    "processing":     "Processing, please wait...",
+    "usage":          "Usage"
+  },
+  "unban_all": {
+    "title":           "✅  Mass Unban Complete",
+    "label_unbanned":  "Unbanned",
+    "label_failed":    "Failed",
+    "label_mod":       "Moderator",
+    "no_perm_bot":     "I don't have the **Ban Members** permission.",
+    "processing":      "Fetching bans and unbanning, please wait...",
+    "fetch_failed":    "Failed to fetch the ban list.",
+    "no_bans":         "There are no active bans on this server."
+  },
+  "set_prefix": {
+    "title":     "⚙️  Prefix Updated",
+    "label_new": "New Prefix",
+    "label_mod": "Changed By",
+    "too_long":  "Prefix cannot be longer than 3 characters.",
+    "failed":    "Failed to save the new prefix.",
+    "usage":     "Usage"
+  },
+  "set_perm": {
+    "no_commands": "No admin commands found in settings."
+  },
+  "set_perm_reset": {
+    "title":       "♻️  Permissions Reset",
+    "label_count": "Commands Reset",
+    "label_mod":   "Reset By",
+    "note":        "All commands are now accessible to everyone.",
+    "failed":      "Failed to reset permissions."
+  },
+
+  "set_perm_all": {
+    "title":       "Role Added to All Commands",
+    "label_role":  "Role",
+    "label_count": "Commands Updated",
+    "label_mod":   "Updated By",
+    "no_role":     "Please mention a valid role.",
+    "failed":      "Failed to update permissions.",
+    "usage":       "Usage"
+  },
+
+  "set_whitelist": {
+    "title":       "Whitelist Updated",
+    "label_action":"Action",
+    "label_role":  "Role",
+    "label_total": "Total Whitelisted",
+    "label_mod":   "Updated By",
+    "added":       "Added",
+    "removed":     "Removed",
+    "already_in":  "This role is already in the whitelist.",
+    "not_in":      "This role is not in the whitelist.",
+    "failed":      "Failed to update the whitelist.",
+    "usage":       "Usage"
+  },
+
+  "court_set_color": {
+    "title":       "Court Color Updated",
+    "label_color": "New Color",
+    "label_mod":   "Updated By",
+    "invalid":     "Invalid hex color. Example: #FFD700",
+    "failed":      "Failed to update court color.",
+    "usage":       "Usage"
+  },
+
+  "court_set_log": {
+    "title":       "Court Log Channel Updated",
+    "label_channel":"New Channel",
+    "label_mod":   "Updated By",
+    "failed":      "Failed to update log channel.",
+    "usage":       "Usage"
+  },
+
+  "court_set_logo": {
+    "title":       "Court Logo Updated",
+    "label_url":   "New Logo URL",
+    "label_mod":   "Updated By",
+    "invalid_url": "Invalid URL. Must start with http:// or https://",
+    "failed":      "Failed to update court logo.",
+    "usage":       "Usage"
+  },
+
+  "court_set_name": {
+    "title":       "Court Name Updated",
+    "label_name":  "New Name",
+    "label_mod":   "Updated By",
+    "failed":      "Failed to update court name.",
+    "usage":       "Usage"
+  }
+}

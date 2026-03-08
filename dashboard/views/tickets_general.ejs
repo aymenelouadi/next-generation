@@ -1,0 +1,1840 @@
+<%#
+  This project was programmed by the Code Nexus team.
+  If you encounter any problems, open an Issue or log into the Discord server:
+  https://discord.gg/UvEYbFd2rj
+%>
+<!DOCTYPE html>
+<html lang="<%= t.lang %>" dir="<%= t.dir %>">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= t.tickets.generalTitle %> — <%= guildInfo.name %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Tajawal:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #040010; --surface: rgba(255,255,255,.04); --surface-2: rgba(255,255,255,.07);
+      --card: rgba(10,3,30,.78); --purple: #7c3aed; --purple-l: #a78bfa;
+      --cyan: #06b6d4; --cyan-l: #67e8f9; --gold: #d97706; --gold-l: #fcd34d;
+      --green: #22c55e; --red: #ef4444; --orange: #f97316;
+      --border: rgba(124,58,237,.2); --border-h: rgba(124,58,237,.5);
+      --muted: rgba(203,194,255,.5); --white: #f8fafc;
+      --nav-w: 64px; --mgmt-w: 220px;
+    }
+    html, body { min-height: 100%; }
+    body { background: var(--bg); color: var(--white); font-family: '<%= t.fontBody %>', 'Tajawal', 'Inter', system-ui, sans-serif; line-height: 1.6; overflow-x: hidden; }
+    #c { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .glow { position: fixed; border-radius: 50%; pointer-events: none; z-index: 1; filter: blur(120px); animation: glow-drift 22s ease-in-out infinite alternate; }
+    .glow-a { width: min(600px,80vw); height: min(600px,80vw); top: -20%; right: -16%; background: radial-gradient(circle,rgba(124,58,237,.28) 0%,transparent 65%); }
+    .glow-b { width: min(500px,70vw); height: min(500px,70vw); bottom: -18%; left: -12%; background: radial-gradient(circle,rgba(6,182,212,.18) 0%,transparent 65%); animation-delay: -11s; }
+    @keyframes glow-drift { from { transform: translate(0,0) scale(1); } to { transform: translate(20px,15px) scale(1.06); } }
+
+    /* Topbar */
+    .topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: rgba(4,0,16,.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,.06); gap: 12px; }
+    .topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
+    .guild-icon-top { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; flex-shrink: 0; filter: drop-shadow(0 4px 18px rgba(124, 58, 237, 0.35)); }
+    .guild-icon-top-fallback { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg,rgba(124,58,237,.35),rgba(6,182,212,.2)); border: 1px solid rgba(124,58,237,.35); display: flex; align-items: center; justify-content: center; font-family: 'Orbitron',monospace; font-size: .85rem; font-weight: 800; color: var(--purple-l); flex-shrink: 0; }
+    .guild-meta { min-width: 0; }
+    .guild-meta-name { font-size: .88rem; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+    .guild-meta-id { font-size: .6rem; color: var(--muted); font-family: 'Orbitron',monospace; letter-spacing: .05em; white-space: nowrap; }
+    .topbar-sep { width: 1px; height: 28px; background: rgba(255,255,255,.08); flex-shrink: 0; }
+    .topbar-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
+    .topbar-brand img { width: 26px; height: 26px; border-radius: 7px; filter: drop-shadow(0 4px 18px rgba(124, 58, 237, 0.35)); }
+    .topbar-brand span { font-family: 'Orbitron',monospace; font-size: .78rem; font-weight: 800; letter-spacing: .1em; background: linear-gradient(135deg,var(--white),var(--purple-l)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .user-chip { display: flex; align-items: center; gap: 7px; padding: 4px 10px 4px 5px; border-radius: 99px; background: var(--surface); border: 1px solid rgba(255,255,255,.08); cursor: pointer; }
+    .user-chip-av { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; display: block; flex-shrink: 0; }
+    .user-chip-av-fallback { width: 26px; height: 26px; border-radius: 50%; background: rgba(124,58,237,.25); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .user-chip span { font-size: .78rem; font-weight: 500; }
+    .lang-select { background: var(--surface); border: 1px solid rgba(255,255,255,.12); border-radius: 10px; color: var(--white); font-size: .8rem; font-weight: 600; padding: 6px 30px 6px 10px; cursor: pointer; outline: none; -webkit-appearance: none; appearance: none; font-family: inherit; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a78bfa' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; background-size: 12px; transition: border-color .18s; min-width: 100px; }
+    .lang-select:hover { border-color: rgba(124,58,237,.5); }
+    .lang-select option { background: #0a0022; color: var(--white); }
+    .menu-toggle { display: none; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: var(--surface); border: 1px solid rgba(255,255,255,.08); color: var(--white); cursor: pointer; transition: background .18s; flex-shrink: 0; }
+    .nav-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 83; backdrop-filter: blur(2px); }
+    .nav-overlay.open { display: block; }
+
+    /* Nav Sidebar */
+    .nav-sidebar { position: fixed; top: 60px; bottom: 0; left: 0; width: var(--nav-w); z-index: 90; background: rgba(4,0,16,.92); border-right: 1px solid rgba(255,255,255,.06); backdrop-filter: blur(20px); display: flex; flex-direction: column; align-items: center; padding: 10px 0 16px; gap: 4px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; transition: width .28s cubic-bezier(.22,1,.36,1); }
+    .nav-sidebar::-webkit-scrollbar { display: none; }
+    .nav-sidebar:hover { width: 220px; align-items: stretch; overflow-x: unset; }
+    [dir="rtl"] .nav-sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid rgba(255,255,255,.06); }
+    .nav-back { display: flex; align-items: center; gap: 0; width: 40px; min-height: 40px; color: var(--purple-l); text-decoration: none; transition: width 350ms cubic-bezier(0.4,0,0.2,1), gap 350ms cubic-bezier(0.4,0,0.2,1), padding 350ms cubic-bezier(0.4,0,0.2,1); flex-shrink: 0; padding: 0; justify-content: flex-start; border-radius: 0; background: none; border: none; }
+    .nav-back .nav-icon { flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: var(--purple); border-radius: .6rem; padding: 7px; box-sizing: border-box; transition: background 350ms; }
+    .nav-back:hover .nav-icon { background: #8b5cf6; }
+    .nav-back .nav-label { font-size: .78rem; font-weight: 600; white-space: nowrap; opacity: 0; visibility: hidden; transition: opacity 350ms, visibility 350ms; pointer-events: none; color: var(--white); }
+    .nav-sidebar:hover .nav-back { width: 100%; gap: 10px; padding: 0 12px 0 8px; }
+    .nav-sidebar:hover .nav-back .nav-label { opacity: 1; visibility: visible; pointer-events: auto; }
+    [dir="rtl"] .nav-sidebar:hover .nav-back { padding: 0 8px 0 12px; }
+    .nav-divider { width: 32px; height: 1px; background: rgba(255,255,255,.08); margin: 4px 0; flex-shrink: 0; transition: width .28s; }
+    .nav-sidebar:hover .nav-divider { width: calc(100% - 24px); }
+    .nav-item { display: flex; align-items: center; gap: 0; width: 40px; min-height: 40px; border-radius: 0; background: none; text-decoration: none; flex-shrink: 0; position: relative; padding: 0; justify-content: flex-start; transition: gap 350ms cubic-bezier(0.4,0,0.2,1), width 350ms cubic-bezier(0.4,0,0.2,1), padding 350ms cubic-bezier(0.4,0,0.2,1); }
+    .nav-item-icon { width: 40px; height: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; overflow: hidden; position: relative; }
+    .nav-item-icon img { width: 40px; height: 40px; object-fit: cover; display: block; border-radius: 50%; }
+    .nav-item-fallback { width: 40px; height: 40px; background: linear-gradient(135deg,rgba(124,58,237,.5),rgba(6,182,212,.3)); display: flex; align-items: center; justify-content: center; font-family: 'Orbitron',monospace; font-size: .8rem; font-weight: 800; color: var(--white); border-radius: 50%; }
+    .nav-status { position: absolute; bottom: 2px; right: 2px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid rgba(4,0,16,.92); flex-shrink: 0; transition: opacity .2s; }
+    .nav-status.on { background: #23a55a; box-shadow: 0 0 5px rgba(35,165,90,.7); }
+    .nav-status.off { background: #ef4444; box-shadow: 0 0 5px rgba(239,68,68,.6); }
+    .nav-item-label { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; opacity: 0; visibility: hidden; transition: opacity 350ms, visibility 350ms; pointer-events: none; }
+    .nav-item-name { font-size: .78rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--white); }
+    .nav-item-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-left: auto; }
+    .nav-item-dot.on { background: #23a55a; box-shadow: 0 0 4px rgba(35,165,90,.7); }
+    .nav-item-dot.off { background: #ef4444; box-shadow: 0 0 4px rgba(239,68,68,.6); }
+    .nav-sidebar:hover .nav-item { width: 100%; gap: 10px; padding: 0 12px 0 8px; justify-content: flex-start; border-radius: 10px; }
+    [dir="rtl"] .nav-sidebar:hover .nav-item { padding: 0 8px 0 12px; }
+    .nav-sidebar:hover .nav-item-label { opacity: 1; visibility: visible; pointer-events: auto; }
+    .nav-sidebar:hover .nav-status { opacity: 0; }
+    .nav-item:hover .nav-item-icon { box-shadow: 0 0 0 2px rgba(124,58,237,.4); }
+    .nav-item.active .nav-item-icon { box-shadow: 0 0 0 2.5px var(--purple-l), 0 0 16px rgba(124,58,237,.35); }
+    .nav-item.active::before { content: ''; position: absolute; left: -8px; top: 50%; transform: translateY(-50%); width: 3px; height: 22px; border-radius: 0 3px 3px 0; background: var(--purple-l); }
+
+    /* Mgmt Sidebar */
+    .mgmt-sidebar { position: fixed; top: 60px; bottom: 0; left: var(--nav-w); width: var(--mgmt-w); z-index: 85; background: rgba(6,2,20,.97); border-right: 1px solid rgba(255,255,255,.06); backdrop-filter: blur(20px); display: flex; flex-direction: column; overflow: hidden; transition: transform 350ms cubic-bezier(0.4,0,0.2,1); }
+    [dir="rtl"] .mgmt-sidebar { left: auto; right: var(--nav-w); border-right: none; border-left: 1px solid rgba(255,255,255,.06); }
+    .mgmt-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 12px 10px; flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+    .mgmt-header-inner { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .mgmt-header-icon { display: flex; align-items: center; justify-content: center; background: rgba(136,144,161,.12); border-radius: 11px; width: 35px; height: 35px; flex-shrink: 0; color: var(--muted); }
+    .mgmt-header-title { font-size: .78rem; font-weight: 700; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mgmt-sort-btn { background: none; border: none; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 7px; padding: 0; flex-shrink: 0; transition: background .15s, color .15s; }
+    .mgmt-sort-btn:hover { background: rgba(255,255,255,.06); color: var(--white); }
+    .mgmt-body { flex: 1; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: rgba(124,58,237,.25) transparent; padding-bottom: 8px; }
+    .mgmt-body::-webkit-scrollbar { width: 3px; }
+    .mgmt-body::-webkit-scrollbar-thumb { background: rgba(124,58,237,.3); border-radius: 3px; }
+    .mgmt-nav { padding: 8px 10px 0; }
+    .mgmt-section { margin-bottom: 2px; }
+    .mgmt-section-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: none; border: none; border-radius: 10px; cursor: pointer; color: var(--white); font-family: inherit; font-size: .76rem; font-weight: 700; letter-spacing: .02em; transition: background .15s; }
+    .mgmt-section-btn:hover { background: rgba(255,255,255,.04); }
+    .mgmt-sec-chevron { color: var(--muted); flex-shrink: 0; transform: rotate(180deg); transition: transform 300ms cubic-bezier(0.4,0,0.2,1); }
+    .mgmt-section-btn.open .mgmt-sec-chevron { transform: rotate(0deg); }
+    .mgmt-sec-body { overflow: hidden; max-height: 0; transition: max-height 350ms cubic-bezier(0.4,0,0.2,1); }
+    .mgmt-sec-body.open { max-height: 800px; }
+    .mgmt-item { display: flex; align-items: center; gap: 0; padding: 5px 8px 5px 0; border-radius: 8px; text-decoration: none; color: var(--muted); font-size: .78rem; font-weight: 600; position: relative; cursor: pointer; transition: background .15s, color .15s; width: 100%; border: none; background: none; font-family: inherit; }
+    .mgmt-item:hover:not(.disabled) { background: rgba(255,255,255,.04); color: var(--white); }
+    .mgmt-item.active { color: var(--white); }
+    .mgmt-item.disabled { cursor: default; opacity: .6; }
+    .mgmt-item-indicator { width: 3px; height: 0; border-radius: 0 3px 3px 0; background: var(--purple); box-shadow: 0 0 10px rgba(104,31,209,.6); margin-right: 8px; flex-shrink: 0; transition: height 300ms cubic-bezier(0.4,0,0.2,1); }
+    .mgmt-item.active .mgmt-item-indicator { height: 1.6rem; }
+    [dir="rtl"] .mgmt-item-indicator { border-radius: 3px 0 0 3px; margin-right: 0; margin-left: 8px; }
+    .mgmt-item-icon { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; flex-shrink: 0; border-radius: 8px; margin-right: 8px; color: inherit; }
+    [dir="rtl"] .mgmt-item-icon { margin-right: 0; margin-left: 8px; }
+    .mgmt-item-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mgmt-footer { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--purple); border-radius: 16px 16px 0 0; flex-shrink: 0; position: sticky; bottom: 0; }
+    .mgmt-footer-user { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .mgmt-footer-av { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid rgba(255,255,255,.25); }
+    .mgmt-footer-av-fallback { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; font-size: .82rem; font-weight: 700; color: var(--white); flex-shrink: 0; }
+    .mgmt-footer-name { font-size: .78rem; font-weight: 700; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .mgmt-footer-dots { background: none; border: none; color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 6px; flex-shrink: 0; transition: background .15s; }
+    .mgmt-footer-dots:hover { background: rgba(255,255,255,.18); }
+
+    /* Main */
+    .main { position: relative; z-index: 10; min-height: calc(100vh - 60px); margin-top: 60px; margin-left: calc(var(--nav-w) + var(--mgmt-w)); padding: 36px 32px 100px; max-width: calc(1200px + var(--nav-w) + var(--mgmt-w)); }
+    [dir="rtl"] .main { margin-left: 0; margin-right: calc(var(--nav-w) + var(--mgmt-w)); }
+
+    /* Page Header */
+    .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; gap: 16px; flex-wrap: wrap; }
+    .page-header-left { display: flex; flex-direction: column; gap: 6px; }
+    .page-header h2 { font-size: 1.6rem; font-weight: 800; letter-spacing: -.02em; }
+    .page-header p { font-size: .88rem; color: var(--muted); max-width: 560px; }
+    .divider { width: 100%; height: 1px; background: rgba(255,255,255,.08); margin: 24px 0; }
+
+    /* Card */
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 0; overflow: hidden; backdrop-filter: blur(20px); }
+    .card-header { padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,.07); display: flex; align-items: center; gap: 12px; }
+    .card-header-icon { width: 34px; height: 34px; border-radius: 10px; background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--purple-l); }
+    .card-header h3 { font-size: .95rem; font-weight: 700; }
+    .card-body { padding: 0 24px 8px; }
+
+    /* Form rows */
+    .form-row { padding: 18px 0; border-bottom: 1px solid rgba(255,255,255,.05); display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .form-row:last-child { border-bottom: none; }
+    .form-row-left { flex: 1; min-width: 0; }
+    .form-label { display: block; font-size: .85rem; font-weight: 700; color: var(--white); margin-bottom: 3px; }
+    .form-help { font-size: .75rem; color: var(--muted); line-height: 1.5; }
+    .form-input { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-radius: 10px; color: var(--white); font-size: .88rem; font-family: inherit; padding: 9px 13px; outline: none; transition: border-color .18s; width: 110px; text-align: center; }
+    .form-input:focus { border-color: var(--purple); background: rgba(124,58,237,.1); }
+    .form-input::-webkit-inner-spin-button, .form-input::-webkit-outer-spin-button { opacity: 1; }
+    .form-select { background: rgba(10,3,30,.9); border: 1px solid rgba(255,255,255,.12); border-radius: 10px; color: var(--white); font-size: .85rem; font-weight: 600; padding: 9px 34px 9px 13px; cursor: pointer; outline: none; -webkit-appearance: none; appearance: none; font-family: inherit; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a78bfa' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 12px; transition: border-color .18s; min-width: 180px; }
+    .form-select:hover, .form-select:focus { border-color: var(--purple); }
+    .form-select option { background: #0a0022; color: var(--white); }
+    .toggle-switch { position: relative; display: inline-block; width: 50px; height: 27px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,.12); border-radius: 34px; transition: .3s; }
+    .toggle-slider:before { position: absolute; content: ""; height: 19px; width: 19px; left: 4px; bottom: 4px; background: var(--white); border-radius: 50%; transition: .3s; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+    input:checked + .toggle-slider { background: var(--purple); box-shadow: 0 0 12px rgba(124,58,237,.4); }
+    input:checked + .toggle-slider:before { transform: translateX(23px); }
+
+    /* Save Bar */
+    .save-bar { position: fixed; bottom: 0; left: calc(var(--nav-w) + var(--mgmt-w)); right: 0; z-index: 80; background: rgba(6,2,20,.95); border-top: 1px solid rgba(124,58,237,.25); backdrop-filter: blur(20px); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; gap: 16px; transition: transform .3s cubic-bezier(0.4,0,0.2,1); transform: translateY(100%); }
+    [dir="rtl"] .save-bar { left: 0; right: calc(var(--nav-w) + var(--mgmt-w)); }
+    .save-bar.visible { transform: translateY(0); }
+    .save-bar-text { font-size: .85rem; color: var(--muted); }
+    .save-bar-actions { display: flex; gap: 10px; align-items: center; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 9px 22px; border-radius: 10px; font-size: .85rem; font-weight: 700; font-family: inherit; cursor: pointer; transition: all .18s; border: none; text-decoration: none; letter-spacing: .01em; }
+    .btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,.12); color: var(--muted); }
+    .btn-ghost:hover { background: rgba(255,255,255,.06); color: var(--white); border-color: rgba(255,255,255,.2); }
+    .btn-primary { background: linear-gradient(135deg,var(--purple),#5b21b6); color: var(--white); box-shadow: 0 4px 18px rgba(124,58,237,.3); }
+    .btn-primary:hover { background: linear-gradient(135deg,#8b5cf6,#7c3aed); box-shadow: 0 6px 24px rgba(124,58,237,.45); transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+    .btn-success { background: linear-gradient(135deg,#16a34a,#15803d); color: var(--white); box-shadow: 0 4px 14px rgba(34,197,94,.3); cursor: default; }
+
+    /* Textarea */
+    .form-textarea { width: 100%; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-radius: 10px; color: var(--white); font-size: .88rem; font-family: inherit; padding: 10px 13px; outline: none; resize: vertical; min-height: 96px; transition: border-color .18s; }
+    .form-textarea:focus { border-color: var(--purple); background: rgba(124,58,237,.1); }
+    .form-row-col { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .form-row-col .form-row-left { width: 100%; }
+    .var-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .var-chip { font-size: .72rem; font-family: 'Orbitron', monospace; background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.25); border-radius: 6px; padding: 2px 8px; color: var(--purple-l); cursor: pointer; transition: background .15s; user-select: none; }
+    .var-chip:hover { background: rgba(124,58,237,.25); }
+    .card-mt { margin-top: 20px; }
+    .section-heading-sm { display: flex; align-items: center; gap: 8px; margin: 28px 0 16px; }
+    .section-heading-sm h3 { font-size: .95rem; font-weight: 700; }
+
+    .ac-time-group { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .ac-time-inp { display: flex; align-items: center; gap: 5px; }
+    .ac-time-inp .form-input { width: 68px; }
+    .ac-time-label { font-size: .8rem; font-weight: 700; color: var(--muted); min-width: 10px; }
+    .ac-row { align-items: flex-start; flex-wrap: wrap; gap: 14px; }
+    .ac-row-left { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+    .ac-row-toggle-line { display: flex; align-items: center; gap: 10px; }
+    .ac-row-toggle-line .form-label { margin: 0; }
+    .form-row-group-label { font-size: .78rem; font-weight: 700; color: var(--purple-l); text-transform: uppercase; letter-spacing: .07em; margin: 22px 0 6px; border-top: 1px solid rgba(255,255,255,.06); padding-top: 18px; }
+    .perm-role-row-hidden { display: none; }
+    .color-swatch { width: 38px; height: 38px; border-radius: 10px; border: 2px solid rgba(255,255,255,.18); flex-shrink: 0; position: relative; overflow: hidden; transition: border-color .2s, transform .15s; cursor: pointer; }
+    .color-swatch:hover { border-color: var(--purple); transform: scale(1.08); }
+    .color-swatch input[type="color"] { position: absolute; inset: -6px; width: calc(100% + 12px); height: calc(100% + 12px); opacity: 0; cursor: pointer; }
+    .color-picker-wrap { display: flex; align-items: center; gap: 10px; }
+    .color-hex-tag { font-size: .78rem; font-weight: 700; font-family: 'Orbitron', monospace; color: var(--purple-l); background: var(--surface); border: 1px solid rgba(255,255,255,.1); border-radius: 6px; padding: 4px 9px; letter-spacing: .04em; }
+
+    /* Mobile */
+    @media (max-width: 860px) {
+      .menu-toggle { display: flex; }
+      .nav-sidebar { transform: translateX(-100%); width: 220px !important; align-items: stretch; overflow-x: unset; z-index: 95; transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1); }
+      [dir="rtl"] .nav-sidebar { transform: translateX(100%); }
+      .nav-sidebar.open { transform: translateX(0) !important; box-shadow: 4px 0 24px rgba(0,0,0,.5); }
+      .nav-sidebar.open .nav-back { width: 100%; gap: 10px; padding: 0 12px 0 8px; }
+      .nav-sidebar.open .nav-back .nav-label { opacity: 1; visibility: visible; pointer-events: auto; }
+      .nav-sidebar.open .nav-item { width: 100%; gap: 10px; padding: 0 12px 0 8px; justify-content: flex-start; border-radius: 10px; }
+      .nav-sidebar.open .nav-item-label { opacity: 1; visibility: visible; pointer-events: auto; }
+      .nav-sidebar.open .nav-status { opacity: 0; }
+      .nav-sidebar.open .nav-divider { width: calc(100% - 24px); }
+      .mgmt-sidebar { left: 0 !important; right: auto !important; width: 260px !important; z-index: 92; transform: translateX(-100%); }
+      [dir="rtl"] .mgmt-sidebar { left: auto !important; right: 0 !important; transform: translateX(100%); }
+      .mgmt-sidebar.open { transform: translateX(0) !important; }
+      .main { margin-left: 0 !important; margin-right: 0 !important; padding: 20px 16px 80px; }
+      [dir="rtl"] .main { margin-left: 0 !important; margin-right: 0 !important; }
+      .save-bar { left: 0 !important; right: 0 !important; padding: 12px 16px; }
+      [dir="rtl"] .save-bar { left: 0 !important; right: 0 !important; }
+    }
+    @media (max-width: 600px) {
+      .page-header h2 { font-size: 1.2rem; }
+      .card-header { padding: 14px 16px; }
+      .card-body { padding: 0 14px 8px; }
+      .form-row { flex-wrap: wrap; gap: 12px; }
+      .form-row-left { min-width: 0; width: 100%; }
+      .form-select { min-width: 0; width: 100%; }
+      .form-input { width: 100%; text-align: start; }
+      #ticket-naming { width: 100% !important; }
+      .form-textarea { font-size: .82rem; }
+      .form-row > *:not(.form-row-left):not(.toggle-switch) { width: 100%; }
+      .ac-row-left { width: 100%; }
+      .ac-time-group { flex-wrap: wrap; width: 100%; }
+      .ac-time-inp { flex: 1; }
+      .ac-time-inp .form-input { width: 100%; min-width: 48px; }
+      .color-picker-wrap { flex-wrap: wrap; }
+      .save-bar { flex-direction: column; align-items: stretch; gap: 10px; }
+      .save-bar-actions { justify-content: flex-end; }
+      .btn { padding: 9px 16px; }
+      .topbar-brand span { display: none; }
+      .guild-meta-id { display: none; }
+      .esc-select-wrap { max-width: 100%; }
+    }
+    /* ── Footer dots dropdown ────────────────────────────────── */
+    .footer-drop { position:absolute; bottom:calc(100% + 6px); right:10px; left:10px; z-index:200; background:#1a1a2e; border:1.5px solid rgba(255,255,255,.12); border-radius:12px; padding:6px; box-shadow:0 -8px 32px rgba(0,0,0,.5); display:none; flex-direction:column; gap:2px; }
+    .footer-drop.open { display:flex; }
+    .footer-drop-item { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:8px; color:var(--text); font-size:.85rem; text-decoration:none; background:none; border:none; width:100%; cursor:pointer; transition:background .15s; text-align:start; }
+    .footer-drop-item:hover { background:rgba(255,255,255,.07); }
+    .footer-drop-item.danger { color:#ff6b6b; }
+    .footer-drop-item.danger:hover { background:rgba(237,66,69,.12); }
+    .footer-drop-divider { height:1px; background:rgba(255,255,255,.08); margin:3px 0; }
+    /* ── Escalate select + chips ────────────────────────────────────── */
+    .esc-select-wrap { display:flex; flex-direction:column; gap:10px; width:100%; max-width:420px; }
+    .esc-chips { display:flex; flex-wrap:wrap; gap:6px; min-height:28px; }
+    .esc-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 8px 4px 12px; border-radius:20px; background:rgba(124,58,237,.18); border:1.5px solid rgba(124,58,237,.5); color:#c4b5fd; font-size:.8rem; user-select:none; }
+    .esc-chip-rm { background:none; border:none; color:#c4b5fd; cursor:pointer; opacity:.65; padding:0 1px; line-height:1; font-size:15px; display:flex; align-items:center; }
+    .esc-chip-rm:hover { opacity:1; }
+    /* ── Rules btn appearance config ────────────────────────────────── */
+    .rules-btn-cfg { display:flex; flex-direction:column; gap:10px; }
+    .rules-btn-cfg-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .rules-cfg-lbl { font-size:.82rem; color:var(--muted); width:60px; flex-shrink:0; text-align:end; }
+    .rules-style-group { display:flex; gap:5px; flex-wrap:wrap; }
+    .rules-style-opt { padding:5px 12px; border-radius:7px; border:1.5px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); color:var(--muted); font-size:.78rem; font-weight:600; font-family:inherit; cursor:pointer; transition:all .18s; }
+    .rules-style-opt.active[data-val="1"] { background:rgba(88,101,242,.22); border-color:rgba(88,101,242,.6); color:#98a9ff; }
+    .rules-style-opt.active[data-val="2"] { background:rgba(116,127,141,.22); border-color:rgba(116,127,141,.6); color:#b8c0cc; }
+    .rules-style-opt.active[data-val="3"] { background:rgba(87,242,135,.12); border-color:rgba(87,242,135,.45); color:#57f287; }
+    .rules-style-opt.active[data-val="4"] { background:rgba(237,66,69,.16); border-color:rgba(237,66,69,.5); color:#ff6b6b; }
+    .rules-emoji-picker-btn { background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.12); border-radius:7px; padding:5px 7px; cursor:pointer; color:var(--muted); transition:all .18s; vertical-align:middle; line-height:1; display:inline-flex; align-items:center; justify-content:center; }
+    .rules-emoji-picker-btn:hover { background:rgba(255,255,255,.14); color:var(--text); border-color:rgba(255,255,255,.25); }
+    .rules-emoji-pop { position:fixed; top:0; left:0; z-index:9999; background:#16161f; border:1.5px solid rgba(255,255,255,.13); border-radius:12px; padding:10px; display:grid; grid-template-columns:repeat(7,1fr); gap:4px; width:260px; max-height:210px; overflow-y:auto; box-shadow:0 12px 40px rgba(0,0,0,.6); scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.15) transparent; }
+    .rules-emoji-pop::-webkit-scrollbar { width:5px; }
+    .rules-emoji-pop::-webkit-scrollbar-thumb { background:rgba(255,255,255,.15); border-radius:4px; }
+    .rules-emoji-item { background:none; border:none; border-radius:6px; padding:4px; cursor:pointer; transition:background .13s; display:flex; align-items:center; justify-content:center; }
+    .rules-emoji-item:hover { background:rgba(255,255,255,.12); }
+    .rules-emoji-item img { width:22px; height:22px; display:block; }
+    /* ── Profile Sidebar ─────────────────────────────── */
+    .profile-backdrop { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0); pointer-events: none; transition: background .28s; }
+    .profile-backdrop.open { background: rgba(0,0,0,.55); pointer-events: all; }
+    .profile-sidebar { position: fixed; top: 0; right: 0; bottom: 0; z-index: 201; width: 300px; max-width: 92vw; background: rgba(8,2,22,.97); border-left: 1px solid rgba(124,58,237,.18); box-shadow: -12px 0 60px rgba(0,0,0,.7); display: flex; flex-direction: column; transform: translateX(110%); transition: transform .32s cubic-bezier(.22,1,.36,1); overflow: hidden; }
+    [dir="rtl"] .profile-sidebar { right:auto; left:0; border-left:none; border-right:1px solid rgba(124,58,237,.18); box-shadow:12px 0 60px rgba(0,0,0,.7); transform:translateX(-110%); }
+    .profile-sidebar.open { transform: translateX(0); }
+    .prof-banner { width:100%; height:100px; flex-shrink:0; position:relative; background:linear-gradient(135deg,#2d0b6b 0%,#0a0020 60%,#06b6d4 100%); }
+    .prof-banner-solid { width:100%; height:100%; }
+    .prof-banner-overlay { position:absolute; inset:0; background:linear-gradient(to bottom,transparent 50%,rgba(8,2,22,.95) 100%); }
+    .prof-close { position:absolute; top:10px; right:10px; width:28px; height:28px; border-radius:50%; background:rgba(0,0,0,.5); border:1px solid rgba(255,255,255,.1); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--muted); transition:background .18s,color .18s; z-index:5; }
+    [dir="rtl"] .prof-close { right:auto; left:10px; }
+    .prof-close:hover { background:rgba(220,38,38,.25); color:#fca5a5; }
+    .prof-avatar-wrap { position:relative; margin:-38px 0 0 20px; width:80px; height:80px; flex-shrink:0; }
+    [dir="rtl"] .prof-avatar-wrap { margin:-38px 20px 0 0; }
+    .prof-avatar { width:80px; height:80px; border-radius:50%; object-fit:cover; display:block; border:3px solid rgba(8,2,22,.97); box-shadow:0 0 0 2px rgba(124,58,237,.5); }
+    .prof-avatar-fallback { width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg,rgba(124,58,237,.4),rgba(6,182,212,.2)); border:3px solid rgba(8,2,22,.97); box-shadow:0 0 0 2px rgba(124,58,237,.5); display:flex; align-items:center; justify-content:center; font-family:'Orbitron',monospace; font-size:1.6rem; font-weight:800; color:var(--purple-l); }
+    .prof-online-dot { position:absolute; bottom:6px; right:6px; width:14px; height:14px; border-radius:50%; background:#23a55a; border:3px solid rgba(8,2,22,.97); box-shadow:0 0 6px rgba(35,165,90,.7); z-index:4; }
+    .prof-body { flex:1; overflow-y:auto; padding:12px 20px 24px; scrollbar-width:thin; scrollbar-color:rgba(124,58,237,.3) transparent; }
+    .prof-names { margin-bottom:14px; }
+    .prof-display-name { font-size:1.15rem; font-weight:700; color:var(--white); letter-spacing:-.01em; line-height:1.2; }
+    .prof-username { font-size:.75rem; color:var(--muted); margin-top:2px; }
+    .prof-block { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:12px 14px; margin-bottom:10px; }
+    .prof-block-label { font-size:.6rem; font-weight:700; letter-spacing:.12em; color:rgba(203,194,255,.5); text-transform:uppercase; margin-bottom:8px; font-family:'Orbitron',monospace; }
+    .prof-id-text { font-size:.75rem; font-family:'Orbitron',monospace; color:var(--muted); letter-spacing:.06em; cursor:pointer; transition:color .15s; }
+    .prof-id-text:hover { color:var(--purple-l); }
+    .prof-badges { display:flex; flex-wrap:wrap; gap:8px; }
+    .prof-badge { display:flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:9px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); position:relative; cursor:default; transition:transform .15s,background .15s,box-shadow .15s; }
+    .prof-badge:hover { transform:translateY(-2px) scale(1.08); background:rgba(255,255,255,.09); box-shadow:0 4px 14px rgba(0,0,0,.4); }
+    .prof-badge img { width:20px; height:20px; object-fit:contain; }
+    .prof-badge-tip { position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); background:rgba(10,3,30,.97); border:1px solid rgba(124,58,237,.3); border-radius:7px; padding:5px 10px; font-size:.65rem; white-space:nowrap; color:var(--white); opacity:0; pointer-events:none; transition:opacity .15s; z-index:10; box-shadow:0 4px 16px rgba(0,0,0,.5); }
+    .prof-badge:hover .prof-badge-tip { opacity:1; }
+    .prof-footer { padding:14px 20px; border-top:1px solid rgba(255,255,255,.06); display:flex; flex-direction:column; gap:8px; }
+    .prof-btn { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; font-size:.82rem; font-weight:600; text-decoration:none; cursor:pointer; border:1px solid transparent; transition:background .18s,border-color .18s,transform .12s; font-family:inherit; }
+    .prof-btn:active { transform:scale(.97); }
+    .prof-btn.help { background:rgba(6,182,212,.08); border-color:rgba(6,182,212,.3); color:var(--cyan-l); }
+    .prof-btn.help:hover { background:rgba(6,182,212,.14); border-color:rgba(6,182,212,.5); }
+    .prof-btn.logout { background:rgba(220,38,38,.07); border-color:rgba(220,38,38,.25); color:#fca5a5; }
+    .prof-btn.logout:hover { background:rgba(220,38,38,.12); border-color:rgba(220,38,38,.45); }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div class="glow glow-a"></div>
+  <div class="glow glow-b"></div>
+  <div class="nav-overlay" id="nav-overlay"></div>
+
+  <!-- Profile Sidebar backdrop -->
+  <div class="profile-backdrop" id="prof-backdrop"></div>
+
+  <!-- Profile Sidebar -->
+  <aside class="profile-sidebar" id="prof-sidebar" aria-hidden="true">
+    <div class="prof-banner">
+      <% if (user.banner) { %>
+        <img src="https://cdn.discordapp.com/banners/<%= user.id %>/<%= user.banner %>.png?size=480" alt="" style="width:100%;height:100%;object-fit:cover;" />
+      <% } else if (user.bannerColor) { %>
+        <div class="prof-banner-solid" data-bg="<%= user.bannerColor %>"></div>
+      <% } %>
+      <div class="prof-banner-overlay"></div>
+      <button class="prof-close" id="close-profile" aria-label="Close">
+        <i data-lucide="x" style="width:14px;height:14px;stroke:currentColor;"></i>
+      </button>
+    </div>
+    <div class="prof-avatar-wrap">
+      <% if (user.avatar) { %>
+        <img class="prof-avatar" src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=160" alt="<%= user.displayName || user.username %>" />
+      <% } else { %>
+        <div class="prof-avatar-fallback"><%= (user.displayName || user.username).charAt(0).toUpperCase() %></div>
+      <% } %>
+      <div class="prof-online-dot"></div>
+    </div>
+    <div class="prof-body">
+      <div class="prof-names">
+        <div class="prof-display-name"><%= user.displayName || user.username %></div>
+        <div class="prof-username">@<%= user.username %></div>
+      </div>
+      <div class="prof-block">
+        <div class="prof-block-label"><%= t.home.profileId %></div>
+        <div class="prof-id-text" id="prof-copy-id"><%= user.id %></div>
+      </div>
+      <% const flags2 = Number(user.publicFlags || 0); const BADGE_CDN = 'https://cdn.discordapp.com/badge-icons/'; const badges2 = [];
+        if (flags2 & 1)      badges2.push({ label: t.home.badgeStaff,      img: 'staff.png' });
+        if (flags2 & 2)      badges2.push({ label: t.home.badgePartner,    img: 'partner.png' });
+        if (flags2 & 4)      badges2.push({ label: t.home.badgeHsEvents,   img: 'hypesquad.png' });
+        if (flags2 & 8)      badges2.push({ label: t.home.badgeBug1,       img: 'bug_hunter_level_1.png' });
+        if (flags2 & 64)     badges2.push({ label: t.home.badgeBravery,    img: 'hypesquad_house_1.png' });
+        if (flags2 & 128)    badges2.push({ label: t.home.badgeBrilliance, img: 'hypesquad_house_2.png' });
+        if (flags2 & 256)    badges2.push({ label: t.home.badgeBalance,    img: 'hypesquad_house_3.png' });
+        if (flags2 & 512)    badges2.push({ label: t.home.badgeEarlySupp,  img: 'early_supporter.png' });
+        if (flags2 & 16384)  badges2.push({ label: t.home.badgeBug2,       img: 'bug_hunter_level_2.png' });
+        if (flags2 & 131072) badges2.push({ label: t.home.badgeVerifDev,   img: 'verified_bot_developer.png' });
+        if (flags2 & 262144) badges2.push({ label: t.home.badgeModAlumni,  img: 'certified_moderator.png' });
+        if (flags2 & 4194304)badges2.push({ label: t.home.badgeActiveDev,  img: 'active_developer.png' }); %>
+      <% if (badges2.length > 0) { %>
+        <div class="prof-block">
+          <div class="prof-block-label"><%= t.home.profileBadges %></div>
+          <div class="prof-badges">
+            <% badges2.forEach(b => { %>
+              <div class="prof-badge">
+                <img src="<%= BADGE_CDN %><%= b.img %>" alt="<%= b.label %>" onerror="this.closest('.prof-badge').style.display='none'" />
+                <span class="prof-badge-tip"><%= b.label %></span>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+    </div>
+    <div class="prof-footer">
+      <% if (typeof isShip !== 'undefined' && isShip) { %>
+      <a href="/settings" class="prof-btn" style="background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);color:var(--purple-l);">
+        <i data-lucide="settings-2" style="width:16px;height:16px;stroke:currentColor;"></i>
+        <%= lang === 'ar' ? 'إعدادات النظام' : 'System Settings' %>
+      </a>
+      <% } %>
+      <a href="https://discord.gg/jfFSmVM5kK" target="_blank" class="prof-btn help">
+        <i data-lucide="help-circle" style="width:16px;height:16px;stroke:currentColor;"></i>
+        <%= t.home.profileHelp %>
+      </a>
+      <a href="/auth/logout" class="prof-btn logout" id="logout-link">
+        <i data-lucide="log-out" style="width:16px;height:16px;stroke:currentColor;"></i>
+        <%= t.home.profileLogout %>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <% if (guildInfo.icon) { %>
+        <img class="guild-icon-top" src="https://cdn.discordapp.com/icons/<%= guildId %>/<%= guildInfo.icon %>.png?size=64" alt="<%= guildInfo.name %>" />
+      <% } else { %>
+        <div class="guild-icon-top-fallback"><%= guildInfo.name.charAt(0).toUpperCase() %></div>
+      <% } %>
+      <div class="guild-meta">
+        <div class="guild-meta-name"><%= guildInfo.name %></div>
+        <div class="guild-meta-id"><%= guildId %></div>
+      </div>
+      <div class="topbar-sep"></div>
+      <a href="/dashboard" class="topbar-brand nav-link">
+        <img src="https://res.cloudinary.com/difucqa9h/image/upload/v1770643265/discord_images/yaix1pbnbdv3srvf12gl.png" alt="CODE NEXUS" />
+        <span>CODE NEXUS</span>
+      </a>
+    </div>
+    <div class="topbar-right">
+      <button class="user-chip" id="open-profile" aria-label="Profile">
+        <% if (user.avatar) { %>
+          <img class="user-chip-av" src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=64" alt="<%= user.displayName || user.username %>" />
+        <% } else { %>
+          <div class="user-chip-av-fallback"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--purple-l)" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+        <% } %>
+        <span><%= user.displayName || user.username %></span>
+        <i data-lucide="chevron-down" style="width:12px;height:12px;stroke:var(--muted);"></i>
+      </button>
+      <select class="lang-select" id="lang-select" aria-label="Language">
+        <% supported.forEach(code => { %>
+          <option value="<%= code %>" <%= lang === code ? 'selected' : '' %>><%= langFlags[code] %> <%= langLabels[code] %></option>
+        <% }) %>
+      </select>
+      <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation">
+        <i data-lucide="menu" style="width:18px;height:18px;stroke:currentColor;"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Nav sidebar -->
+  <aside class="nav-sidebar" aria-label="Server navigation">
+    <a href="/dashboard" class="nav-back nav-link" aria-label="<%= t.guild.backBtn %>">
+      <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+      <span class="nav-label"><%= t.guild.backBtn %></span>
+    </a>
+    <div class="nav-divider"></div>
+    <% guilds.forEach(g => { %>
+      <a href="/dashboard/<%= g.id %>" class="nav-item <%= g.id === guildId ? 'active' : '' %> nav-link" aria-label="<%= g.name %>">
+        <div class="nav-item-icon">
+          <% if (g.icon) { %>
+            <img src="https://cdn.discordapp.com/icons/<%= g.id %>/<%= g.icon %>.png?size=64" alt="<%= g.name %>" />
+          <% } else { %>
+            <div class="nav-item-fallback"><%= g.name.charAt(0).toUpperCase() %></div>
+          <% } %>
+          <span class="nav-status <%= g.inBot ? 'on' : 'off' %>"></span>
+        </div>
+        <div class="nav-item-label">
+          <span class="nav-item-name"><%= g.name %></span>
+          <span class="nav-item-dot <%= g.inBot ? 'on' : 'off' %>"></span>
+        </div>
+      </a>
+    <% }) %>
+  </aside>
+
+  <!-- Management Sidebar -->
+  <aside class="mgmt-sidebar" id="mgmt-sidebar">
+    <div class="mgmt-header">
+      <div class="mgmt-header-inner">
+        <div class="mgmt-header-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 18 18"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 2C2.00779 2 1 3.00779 1 4.25V5.75C1 6.99221 2.00779 8 3.25 8H14.75C15.9922 8 17 6.99221 17 5.75V4.25C17 3.00779 15.9922 2 14.75 2H3.25ZM3 5C3 5.5522 3.4477 6 4 6C4.5522 6 5 5.5522 5 5C5 4.4478 4.5523 4 4 4C3.4477 4 3 4.4478 3 5ZM6 5C6 5.5522 6.4477 6 7 6C7.5522 6 8 5.5522 8 5C8 4.4478 7.5523 4 7 4C6.4477 4 6 4.4478 6 5Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 10C2.00779 10 1 11.0078 1 12.25V13.75C1 14.9922 2.00779 16 3.25 16H14.75C15.9922 16 17 14.9922 17 13.75V12.25C17 11.0078 15.9922 10 14.75 10H3.25Z" fill="currentColor" fill-opacity="0.4"/></svg>
+        </div>
+        <span class="mgmt-header-title"><%= lang === 'ar' ? 'إدارة السيرفر' : 'Manage Server' %></span>
+      </div>
+      <button class="mgmt-sort-btn" aria-label="sort">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M9.53,2.22c-.293-.293-.768-.293-1.061,0l-3.5,3.5c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l2.97-2.97,2.97,2.97c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-3.5-3.5Z" fill="currentColor"/><path d="M11.97,11.22l-2.97,2.97-2.97-2.97c-.293-.293-.768-.293-1.061,0s-.293,.768,0,1.061l3.5,3.5c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22l3.5-3.5c.293-.293,.293-.768,0-1.061s-.768-.293-1.061,0Z" fill="currentColor" fill-opacity="0.4"/></svg>
+      </button>
+    </div>
+    <div class="mgmt-body">
+      <div class="mgmt-nav">
+        <!-- General -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'عام' : 'General' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path opacity="0.4" d="M14.25 2H12.75C11.784 2 11 2.784 11 3.75V6.25C11 7.216 11.784 8 12.75 8H14.25C15.216 8 16 7.216 16 6.25V3.75C16 2.784 15.216 2 14.25 2Z" fill="currentColor"/><path opacity="0.4" d="M5.25 10H3.75C2.784 10 2 10.784 2 11.75V14.25C2 15.216 2.784 16 3.75 16H5.25C6.216 16 7 15.216 7 14.25V11.75C7 10.784 6.216 10 5.25 10Z" fill="currentColor"/><path d="M7.75 2H3.75C2.784 2 2 2.784 2 3.75V6.25C2 7.216 2.784 8 3.75 8H7.75C8.716 8 9.5 7.216 9.5 6.25V3.75C9.5 2.784 8.716 2 7.75 2Z" fill="currentColor"/><path d="M14.25 10H10.25C9.284 10 8.5 10.784 8.5 11.75V14.25C8.5 15.216 9.284 16 10.25 16H14.25C15.216 16 16 15.216 16 14.25V11.75C16 10.784 15.216 10 14.25 10Z" fill="currentColor"/></svg></div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'نظرة عامة' : 'Overview' %></span>
+            </a>
+          </div>
+        </div>
+        <!-- Levels -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'المستويات' : 'Levels' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/levels" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 6C5.962 6 3.5 8.463 3.5 11.5C3.5 14.537 5.962 17 9 17C12.038 17 14.5 14.537 14.5 11.5C14.5 8.463 12.038 6 9 6Z" fill="currentColor" fill-opacity="0.4"/><path d="M14.283 1C13.842 1 13.437 1.231 13.212 1.606L10.463 6.197C11.932 6.601 13.155 7.6 13.858 8.918L17.44 2.891C17.939 2.058 17.338 1 16.367 1H14.283Z" fill="currentColor"/><path d="M1.633 1C0.662 1 0.061 2.059 0.561 2.892L4.151 8.903C4.854 7.592 6.074 6.599 7.537 6.197L4.789 1.608C4.565 1.234 4.153 1 3.717 1H1.633Z" fill="currentColor"/></svg></div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'إعدادات المستوى' : 'Level Settings' %></span>
+            </a>
+          </div>
+        </div>
+        <!-- Tickets -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'التذاكر' : 'Tickets' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/tickets" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path opacity="0.4" d="M14.25 2H12.75C11.784 2 11 2.784 11 3.75V6.25C11 7.216 11.784 8 12.75 8H14.25C15.216 8 16 7.216 16 6.25V3.75C16 2.784 15.216 2 14.25 2Z" fill="currentColor"/><path opacity="0.4" d="M5.25 10H3.75C2.784 10 2 10.784 2 11.75V14.25C2 15.216 2.784 16 3.75 16H5.25C6.216 16 7 15.216 7 14.25V11.75C7 10.784 6.216 10 5.25 10Z" fill="currentColor"/><path d="M7.75 2H3.75C2.784 2 2 2.784 2 3.75V6.25C2 7.216 2.784 8 3.75 8H7.75C8.716 8 9.5 7.216 9.5 6.25V3.75C9.5 2.784 8.716 2 7.75 2Z" fill="currentColor"/><path d="M14.25 10H10.25C9.284 10 8.5 10.784 8.5 11.75V14.25C8.5 15.216 9.284 16 10.25 16H14.25C15.216 16 16 15.216 16 14.25V11.75C16 10.784 15.216 10 14.25 10Z" fill="currentColor"/></svg></div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'نظرة عامة' : 'Overview' %></span>
+            </a>
+            <a href="/dashboard/<%= guildId %>/tickets/general" class="mgmt-item active nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 11.5C10.3807 11.5 11.5 10.3807 11.5 9C11.5 7.6193 10.3807 6.5 9 6.5C7.6193 6.5 6.5 7.6193 6.5 9C6.5 10.3807 7.6193 11.5 9 11.5Z" fill="currentColor"/><path opacity="0.4" fill-rule="evenodd" clip-rule="evenodd" d="M7.6853 1.5H10.3147C10.7234 1.5 11.0941 1.7443 11.2629 2.1191L11.8071 3.3564C12.3536 3.5819 12.8668 3.8791 13.3352 4.237L14.6429 3.9095C15.0369 3.8108 15.4509 3.9764 15.6553 4.3295L16.9699 6.6705C17.1743 7.0235 17.1014 7.4708 16.7954 7.7392L15.7702 8.636C15.7899 8.757 15.8 8.876 15.8 9C15.8 9.124 15.7899 9.243 15.7702 9.364L16.7954 10.2608C17.1014 10.5292 17.1743 10.9765 16.9699 11.3295L15.6553 13.6705C15.4509 14.0236 15.0369 14.1892 14.6429 14.0905L13.3352 13.763C12.8668 14.1209 12.3536 14.4181 11.8071 14.6436L11.2629 15.8809C11.0941 16.2557 10.7234 16.5 10.3147 16.5H7.6853C7.2766 16.5 6.9059 16.2557 6.7371 15.8809L6.1929 14.6436C5.6464 14.4181 5.1332 14.1209 4.6648 13.763L3.3571 14.0905C2.9631 14.1892 2.5491 14.0236 2.3447 13.6705L1.0301 11.3295C0.8257 10.9765 0.8986 10.5292 1.2046 10.2608L2.2298 9.364C2.2101 9.243 2.2 9.124 2.2 9C2.2 8.876 2.2101 8.757 2.2298 8.636L1.2046 7.7392C0.8986 7.4708 0.8257 7.0235 1.0301 6.6705L2.3447 4.3295C2.5491 3.9764 2.9631 3.8108 3.3571 3.9095L4.6648 4.237C5.1332 3.8791 5.6464 3.5819 6.1929 3.3564L6.7371 2.1191C6.9059 1.7443 7.2766 1.5 7.6853 1.5Z" fill="currentColor"/></svg></div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الإعدادات العامة' : 'General Settings' %></span>
+            </a>
+            <a href="/dashboard/<%= guildId %>/tickets/panels" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><rect x="2" y="4" width="14" height="11" rx="1.75" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="1.3"/><path d="M6 8h6M6 11h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M2 7h14" stroke="currentColor" stroke-width="1.3"/></svg></div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'اللوحات' : 'Panels' %></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Section: Utility ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'الأدوات' : 'Utility' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/utility" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M15.573 3.913C15.462 3.642 15.138 3.527 14.881 3.674L12.434 5.076L10.924 3.566L12.326 1.119C12.473 0.862 12.358 0.538 12.087 0.427C10.973 -0.0319999 9.667 0.218 8.808 1.077C7.94 1.945 7.692 3.264 8.169 4.385L1.292 11.262C0.236 12.318 0.236 14.032 1.292 15.088L2.912 16.708C3.968 17.764 5.682 17.764 6.738 16.708L13.615 9.831C14.736 10.308 16.055 10.06 16.923 9.192C17.782 8.333 18.032 7.027 17.573 5.913C17.462 5.642 17.138 5.527 16.881 5.674L14.434 7.076L12.924 5.566L14.326 3.119Z" fill="currentColor" fill-opacity="0.4"/><path fill-rule="evenodd" clip-rule="evenodd" d="M2 13.5C2 12.672 2.672 12 3.5 12C4.328 12 5 12.672 5 13.5C5 14.328 4.328 15 3.5 15C2.672 15 2 14.328 2 13.5Z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الأوامر العامة' : 'General Commands' %></span>
+            </a>
+            <a href="/dashboard/<%= guildId %>/moderation" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 1L2 4.5V9c0 4.418 3.083 8.572 7 9.5 3.917-.928 7-5.082 7-9.5V4.5L9 1z" fill="currentColor" fill-opacity="0.4"/><path fill-rule="evenodd" clip-rule="evenodd" d="M6.5 7.5l2.5 2.5 3.5-3.5 1 1-4.5 4.5-3.5-3.5 1-1z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الأوامر الإدارية' : 'Moderation' %></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Section: Protection ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'الحماية' : 'Protection' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/protection" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 1L2 4.5V9c0 4.418 3.083 8.572 7 9.5 3.917-.928 7-5.082 7-9.5V4.5L9 1z" fill="currentColor" fill-opacity="0.4"/><path fill-rule="evenodd" clip-rule="evenodd" d="M6.5 7.5l2.5 2.5 3.5-3.5 1 1-4.5 4.5-3.5-3.5 1-1z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الأمان' : 'Security' %></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Section: Members ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'الأعضاء' : 'Members' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/auto-roles" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 2a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zm0 9c4 0 6 2 6 3v1H3v-1c0-1 2-3 6-3z" fill="currentColor" fill-opacity="0.4"/><path d="M13.5 8a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm1.5 2c2 0 3 1 3 2v1h-3v-1c0-.6-.2-1.2-.5-1.7.3-.2.7-.3 1-.3l-.5.5z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الرتب التلقائية' : 'Auto Roles' %></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Section: Settings ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'الإعدادات' : 'Settings' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/setting" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 11.5C10.3807 11.5 11.5 10.3807 11.5 9C11.5 7.6193 10.3807 6.5 9 6.5C7.6193 6.5 6.5 7.6193 6.5 9C6.5 10.3807 7.6193 11.5 9 11.5Z" fill="currentColor"/><path opacity="0.4" fill-rule="evenodd" clip-rule="evenodd" d="M7.6853 1.5H10.3147C10.7234 1.5 11.0941 1.7443 11.2629 2.1191L11.8071 3.3564C12.3536 3.5819 12.8668 3.8791 13.3352 4.237L14.6429 3.9095C15.0369 3.8108 15.4509 3.9764 15.6553 4.3295L16.9699 6.6705C17.1743 7.0235 17.1014 7.4708 16.7954 7.7392L15.7702 8.636C15.7899 8.757 15.8 8.876 15.8 9C15.8 9.124 15.7899 9.243 15.7702 9.364L16.7954 10.2608C17.1014 10.5292 17.1743 10.9765 16.9699 11.3295L15.6553 13.6705C15.4509 14.0236 15.0369 14.1892 14.6429 14.0905L13.3352 13.763C12.8668 14.1209 12.3536 14.4181 11.8071 14.6436L11.2629 15.8809C11.0941 16.2557 10.7234 16.5 10.3147 16.5H7.6853C7.2766 16.5 6.9059 16.2557 6.7371 15.8809L6.1929 14.6436C5.6464 14.4181 5.1332 14.1209 4.6648 13.763L3.3571 14.0905C2.9631 14.1892 2.5491 14.0236 2.3447 13.6705L1.0301 11.3295C0.8257 10.9765 0.8986 10.5292 1.2046 10.2608L2.2298 9.364C2.2101 9.243 2.2 9.124 2.2 9C2.2 8.876 2.2101 8.757 2.2298 8.636L1.2046 7.7392C0.8986 7.4708 0.8257 7.0235 1.0301 6.6705L2.3447 4.3295C2.5491 3.9764 2.9631 3.8108 3.3571 3.9095L4.6648 4.237C5.1332 3.8791 5.6464 3.5819 6.1929 3.3564L6.7371 2.1191C6.9059 1.7443 7.2766 1.5 7.6853 1.5Z" fill="currentColor"/></svg></div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الإعدادات' : 'Settings' %></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mgmt-footer">
+      <div class="mgmt-footer-user">
+        <% if (user.avatar) { %>
+          <img class="mgmt-footer-av" src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=64" alt="<%= user.displayName || user.username %>" />
+        <% } else { %>
+          <div class="mgmt-footer-av-fallback"><%= (user.displayName || user.username).charAt(0).toUpperCase() %></div>
+        <% } %>
+        <span class="mgmt-footer-name">@<%= user.username %></span>
+      </div>
+      <button class="mgmt-footer-dots" id="footer-dots-btn" aria-label="User menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 18 18"><circle cx="9" cy="9" r="1.25" fill="currentColor"/><circle cx="3.25" cy="9" r="1.25" fill="currentColor"/><circle cx="14.75" cy="9" r="1.25" fill="currentColor"/></svg>
+      </button>
+      <!-- Footer dropdown -->
+      <div class="footer-drop" id="footer-drop">
+        <a href="/dashboard" class="footer-drop-item nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <%= lang === 'ar' ? 'الرئيسية' : 'Home' %>
+        </a>
+        <a href="/dashboard/<%= guildId %>" class="footer-drop-item nav-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <%= lang === 'ar' ? 'السيرفر' : 'Server' %>
+        </a>
+        <div class="footer-drop-divider"></div>
+        <a href="/auth/logout" class="footer-drop-item danger" id="logout-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <%= lang === 'ar' ? 'تسجيل خروج' : 'Logout' %>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <div class="page-header">
+      <div class="page-header-left">
+        <h2><%= t.tickets.generalTitle %></h2>
+        <p><%= t.tickets.generalDesc %></p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Settings Card -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M9 11.5C10.3807 11.5 11.5 10.3807 11.5 9C11.5 7.6193 10.3807 6.5 9 6.5C7.6193 6.5 6.5 7.6193 6.5 9C6.5 10.3807 7.6193 11.5 9 11.5Z" fill="currentColor"/><path opacity="0.4" fill-rule="evenodd" clip-rule="evenodd" d="M7.6853 1.5H10.3147C10.7234 1.5 11.0941 1.7443 11.2629 2.1191L11.8071 3.3564C12.3536 3.5819 12.8668 3.8791 13.3352 4.237L14.6429 3.9095C15.0369 3.8108 15.4509 3.9764 15.6553 4.3295L16.9699 6.6705C17.1743 7.0235 17.1014 7.4708 16.7954 7.7392L15.7702 8.636C15.7899 8.757 15.8 8.876 15.8 9C15.8 9.124 15.7899 9.243 15.7702 9.364L16.7954 10.2608C17.1014 10.5292 17.1743 10.9765 16.9699 11.3295L15.6553 13.6705C15.4509 14.0236 15.0369 14.1892 14.6429 14.0905L13.3352 13.763C12.8668 14.1209 12.3536 14.4181 11.8071 14.6436L11.2629 15.8809C11.0941 16.2557 10.7234 16.5 10.3147 16.5H7.6853C7.2766 16.5 6.9059 16.2557 6.7371 15.8809L6.1929 14.6436C5.6464 14.4181 5.1332 14.1209 4.6648 13.763L3.3571 14.0905C2.9631 14.1892 2.5491 14.0236 2.3447 13.6705L1.0301 11.3295C0.8257 10.9765 0.8986 10.5292 1.2046 10.2608L2.2298 9.364C2.2101 9.243 2.2 9.124 2.2 9C2.2 8.876 2.2101 8.757 2.2298 8.636L1.2046 7.7392C0.8986 7.4708 0.8257 7.0235 1.0301 6.6705L2.3447 4.3295C2.5491 3.9764 2.9631 3.8108 3.3571 3.9095L4.6648 4.237C5.1332 3.8791 5.6464 3.5819 6.1929 3.3564L6.7371 2.1191C6.9059 1.7443 7.2766 1.5 7.6853 1.5Z" fill="currentColor"/></svg>
+        </div>
+        <h3><%= t.tickets.generalTitle %></h3>
+      </div>
+      <div class="card-body">
+
+        <!-- 1. Ticket Limit Per User -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label" for="ticket-limit"><%= t.tickets.limitLabel %></label>
+            <p class="form-help"><%= t.tickets.limitHelp %></p>
+          </div>
+          <input type="number" id="ticket-limit" class="form-input" min="1" max="100" value="<%= ticketSettings.TICKET_LIMIT_PER_USER %>" />
+        </div>
+
+        <!-- 2. Language -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label" for="ticket-lang"><%= t.tickets.langLabel %></label>
+            <p class="form-help"><%= t.tickets.langHelp %></p>
+          </div>
+          <select id="ticket-lang" class="form-select">
+            <option value="server_default" <%= ticketSettings.LANGUAGE === 'server_default' ? 'selected' : '' %>><%= t.tickets.langDefault %></option>
+            <option value="en" <%= ticketSettings.LANGUAGE === 'en' ? 'selected' : '' %>><%= t.tickets.langEn %></option>
+            <option value="ar" <%= ticketSettings.LANGUAGE === 'ar' ? 'selected' : '' %>><%= t.tickets.langAr %></option>
+          </select>
+        </div>
+
+        <!-- 3. Allow Users To Close -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.allowCloseLabel %></label>
+            <p class="form-help"><%= t.tickets.allowCloseHelp %></p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ticket-allow-close" <%= ticketSettings.ALLOW_USER_CLOSE ? 'checked' : '' %> />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- 4. Close Confirmation -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.confirmLabel %></label>
+            <p class="form-help"><%= t.tickets.confirmHelp %></p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ticket-close-confirm" <%= ticketSettings.CLOSE_CONFIRMATION ? 'checked' : '' %> />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- 5. Enable Feedback -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.feedbackLabel %></label>
+            <p class="form-help"><%= t.tickets.feedbackHelp %></p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ticket-feedback" <%= ticketSettings.ENABLE_FEEDBACK ? 'checked' : '' %> />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- 6. Anonymise Responses -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.anonLabel %></label>
+            <p class="form-help"><%= t.tickets.anonHelp %></p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ticket-anon" <%= ticketSettings.ANONYMISE_RESPONSES ? 'checked' : '' %> />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- 7. Thread Mode -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.threadLabel %></label>
+            <p class="form-help"><%= t.tickets.threadHelp %></p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ticket-thread" <%= ticketSettings.THREAD_MODE ? 'checked' : '' %> />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- 8. Disable /open Command -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.disableOpenLabel %></label>
+            <p class="form-help"><%= t.tickets.disableOpenHelp %></p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ticket-disable-open" <%= ticketSettings.DISABLE_OPEN_COMMAND ? 'checked' : '' %> />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Channels & Categories Card -->
+    <div class="card card-mt">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M2 5.75C2 4.784 2.784 4 3.75 4H7.5L9 6H14.25C15.216 6 16 6.784 16 7.75V13.25C16 14.216 15.216 15 14.25 15H3.75C2.784 15 2 14.216 2 13.25V5.75Z" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="1.3"/>
+          </svg>
+        </div>
+        <h3><%= t.tickets.channelsSectionTitle %></h3>
+      </div>
+      <div class="card-body">
+
+        <!-- 1. Notification Channel -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label" for="ticket-notif-channel"><%= t.tickets.notifChannelLabel %></label>
+            <p class="form-help"><%= t.tickets.notifChannelHelp %></p>
+          </div>
+          <select id="ticket-notif-channel" class="form-select">
+            <option value=""><%= t.tickets.noneOption %></option>
+            <% guildChannels.forEach(ch => { %>
+              <option value="<%= ch.id %>" <%= ticketSettings.NOTIFICATION_CHANNEL === ch.id ? 'selected' : '' %>>#&nbsp;<%= ch.name %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- 2. Transcripts Channel -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label" for="ticket-transcript-channel"><%= t.tickets.transcriptChannelLabel %></label>
+            <p class="form-help"><%= t.tickets.transcriptChannelHelp %></p>
+          </div>
+          <select id="ticket-transcript-channel" class="form-select">
+            <option value=""><%= t.tickets.noneOption %></option>
+            <% guildChannels.forEach(ch => { %>
+              <option value="<%= ch.id %>" <%= ticketSettings.TRANSCRIPTS_CHANNEL === ch.id ? 'selected' : '' %>>#&nbsp;<%= ch.name %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- 3. Channel Category -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label" for="ticket-channel-category"><%= t.tickets.channelCategoryLabel %></label>
+            <p class="form-help"><%= t.tickets.channelCategoryHelp %></p>
+          </div>
+          <select id="ticket-channel-category" class="form-select">
+            <option value=""><%= t.tickets.noneOption %></option>
+            <% guildCategories.forEach(cat => { %>
+              <option value="<%= cat.id %>" <%= ticketSettings.CHANNEL_CATEGORY === cat.id ? 'selected' : '' %>>&#128193;&nbsp;<%= cat.name %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- 4. Overflow Category -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label" for="ticket-overflow-category"><%= t.tickets.overflowCategoryLabel %></label>
+            <p class="form-help"><%= t.tickets.overflowCategoryHelp %></p>
+          </div>
+          <select id="ticket-overflow-category" class="form-select">
+            <option value=""><%= t.tickets.noneOption %></option>
+            <% guildCategories.forEach(cat => { %>
+              <option value="<%= cat.id %>" <%= ticketSettings.OVERFLOW_CATEGORY === cat.id ? 'selected' : '' %>>&#128193;&nbsp;<%= cat.name %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- 5. Naming Scheme -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label" for="ticket-naming"><%= t.tickets.namingSchemeLabel %></label>
+            <p class="form-help"><%= t.tickets.namingSchemeHelp %></p>
+            <div class="var-chips" id="naming-chips">
+              <span class="var-chip" data-val="{user}">{user}</span>
+              <span class="var-chip" data-val="{number}">{number}</span>
+              <span class="var-chip" data-val="{date}">{date}</span>
+            </div>
+          </div>
+          <input type="text" id="ticket-naming" class="form-input" style="width:220px;text-align:left" value="<%= ticketSettings.NAMING_SCHEME || 'ticket-{number}' %>" placeholder="<%= t.tickets.namingSchemePlaceholder %>" />
+        </div>
+
+        <!-- 6. Welcome Message -->
+        <div class="form-row form-row-col">
+          <div class="form-row-left">
+            <label class="form-label" for="ticket-welcome"><%= t.tickets.welcomeMsgLabel %></label>
+            <p class="form-help"><%= t.tickets.welcomeMsgHelp %></p>
+          </div>
+          <textarea id="ticket-welcome" class="form-textarea" placeholder="<%= t.tickets.welcomeMsgPlaceholder %>"><%= ticketSettings.WELCOME_MESSAGE || '' %></textarea>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Claim Settings Card -->
+    <div class="card card-mt">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="7" r="3.5" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M3 16c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M12 5l1.5 1.5L16 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3><%= t.tickets.claimSectionTitle %></h3>
+      </div>
+      <div class="card-body">
+
+        <!-- Support can view claimed -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.claimViewLabel %></label>
+            <p class="form-help"><%= t.tickets.claimViewHelp %></p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ticket-claim-view" <%= ticketSettings.CLAIM_SUPPORT_VIEW !== false ? 'checked' : '' %> />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- Support can type in claimed -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.claimTypeLabel %></label>
+            <p class="form-help"><%= t.tickets.claimTypeHelp %></p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ticket-claim-type" <%= ticketSettings.CLAIM_SUPPORT_TYPE !== false ? 'checked' : '' %> />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Auto Close Card -->
+    <div class="card card-mt">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="7" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M9 5v4l2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3><%= t.tickets.autoCloseSectionTitle %></h3>
+      </div>
+      <div class="card-body">
+
+        <!-- Close on user leave -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.acLeaveLabel %></label>
+            <p class="form-help"><%= t.tickets.acLeaveHelp %></p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ticket-ac-leave" <%= ticketSettings.AUTO_CLOSE_ON_LEAVE ? 'checked' : '' %> />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- Since open with no response -->
+        <div class="form-row ac-row">
+          <div class="ac-row-left">
+            <div class="ac-row-toggle-line">
+              <label class="toggle-switch">
+                <input type="checkbox" id="ticket-ac-noresponse-enabled" <%= ticketSettings.AC_NO_RESPONSE_ENABLED ? 'checked' : '' %> />
+                <span class="toggle-slider"></span>
+              </label>
+              <label class="form-label"><%= t.tickets.acNoResponseLabel %></label>
+            </div>
+            <p class="form-help"><%= t.tickets.acNoResponseHelp %></p>
+          </div>
+          <div class="ac-time-group">
+            <div class="ac-time-inp">
+              <input type="number" id="ticket-ac-noresponse-days" class="form-input" min="0" max="365" value="<%= ticketSettings.AC_NO_RESPONSE_DAYS || 0 %>" />
+              <span class="ac-time-label"><%= t.tickets.acDays %></span>
+            </div>
+            <div class="ac-time-inp">
+              <input type="number" id="ticket-ac-noresponse-hours" class="form-input" min="0" max="23" value="<%= ticketSettings.AC_NO_RESPONSE_HOURS || 0 %>" />
+              <span class="ac-time-label"><%= t.tickets.acHours %></span>
+            </div>
+            <div class="ac-time-inp">
+              <input type="number" id="ticket-ac-noresponse-mins" class="form-input" min="0" max="59" value="<%= ticketSettings.AC_NO_RESPONSE_MINS || 0 %>" />
+              <span class="ac-time-label"><%= t.tickets.acMins %></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Since last message -->
+        <div class="form-row ac-row">
+          <div class="ac-row-left">
+            <div class="ac-row-toggle-line">
+              <label class="toggle-switch">
+                <input type="checkbox" id="ticket-ac-lastmsg-enabled" <%= ticketSettings.AC_LAST_MSG_ENABLED ? 'checked' : '' %> />
+                <span class="toggle-slider"></span>
+              </label>
+              <label class="form-label"><%= t.tickets.acLastMsgLabel %></label>
+            </div>
+            <p class="form-help"><%= t.tickets.acLastMsgHelp %></p>
+          </div>
+          <div class="ac-time-group">
+            <div class="ac-time-inp">
+              <input type="number" id="ticket-ac-lastmsg-days" class="form-input" min="0" max="365" value="<%= ticketSettings.AC_LAST_MSG_DAYS || 0 %>" />
+              <span class="ac-time-label"><%= t.tickets.acDays %></span>
+            </div>
+            <div class="ac-time-inp">
+              <input type="number" id="ticket-ac-lastmsg-hours" class="form-input" min="0" max="23" value="<%= ticketSettings.AC_LAST_MSG_HOURS || 0 %>" />
+              <span class="ac-time-label"><%= t.tickets.acHours %></span>
+            </div>
+            <div class="ac-time-inp">
+              <input type="number" id="ticket-ac-lastmsg-mins" class="form-input" min="0" max="59" value="<%= ticketSettings.AC_LAST_MSG_MINS || 0 %>" />
+              <span class="ac-time-label"><%= t.tickets.acMins %></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Permissions Card -->
+    <div class="card card-mt">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" fill="currentColor" fill-opacity="0.15"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <h3><%= t.tickets.permSectionTitle %></h3>
+      </div>
+      <div class="card-body">
+
+        <!-- Required Permission Level -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.openPermLabel %></label>
+            <p class="form-help"><%= t.tickets.openPermHelp %></p>
+          </div>
+          <select id="ticket-open-perm" class="form-select">
+            <option value="everyone"      <%= ticketSettings.OPEN_PERMISSION === 'everyone'      || !ticketSettings.OPEN_PERMISSION ? 'selected' : '' %>><%= t.tickets.openPermEveryone %></option>
+            <option value="role_required" <%= ticketSettings.OPEN_PERMISSION === 'role_required' ? 'selected' : '' %>><%= t.tickets.openPermRole %></option>
+            <option value="admin_only"    <%= ticketSettings.OPEN_PERMISSION === 'admin_only'    ? 'selected' : '' %>><%= t.tickets.openPermAdmin %></option>
+          </select>
+        </div>
+
+        <!-- Required Role (shown only when role_required) -->
+        <div class="form-row<%= ticketSettings.OPEN_PERMISSION === 'role_required' ? '' : ' perm-role-row-hidden' %>" id="perm-role-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.openPermRoleLabel %></label>
+          </div>
+          <select id="ticket-open-perm-role" class="form-select">
+            <option value=""><%= t.tickets.noneOption %></option>
+            <% guildRoles.forEach(function(r) { %>
+            <option value="<%= r.id %>" <%= ticketSettings.OPEN_PERMISSION_ROLE === r.id ? 'selected' : '' %>><%= r.name %></option>
+            <% }); %>
+          </select>
+        </div>
+
+        <!-- Add Message Sender -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.addMsgSenderLabel %></label>
+            <p class="form-help"><%= t.tickets.addMsgSenderHelp %></p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ticket-add-msg-sender" <%= ticketSettings.ADD_MSG_SENDER ? 'checked' : '' %> />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- Ticket Channel Permissions sub-group -->
+        <p class="form-row-group-label"><%= t.tickets.ticketPermsLabel %></p>
+
+        <!-- Attach Files -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.permAttachLabel %></label>
+            <p class="form-help"><%= t.tickets.permAttachHelp %></p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ticket-perm-attach" <%= ticketSettings.PERM_ATTACH_FILES !== false ? 'checked' : '' %> />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- Embed Links -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.permEmbedLabel %></label>
+            <p class="form-help"><%= t.tickets.permEmbedHelp %></p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ticket-perm-embed" <%= ticketSettings.PERM_EMBED_LINKS !== false ? 'checked' : '' %> />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- Add Reactions -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.permReactLabel %></label>
+            <p class="form-help"><%= t.tickets.permReactHelp %></p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ticket-perm-reactions" <%= ticketSettings.PERM_ADD_REACTIONS !== false ? 'checked' : '' %> />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Appearance Card -->
+    <div class="card card-mt">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="13.5" cy="6.5" r="2.5" fill="currentColor" fill-opacity="0.2"/>
+            <circle cx="6.5" cy="11.5" r="2.5" fill="currentColor" fill-opacity="0.2"/>
+            <circle cx="13.5" cy="16.5" r="2.5" fill="currentColor" fill-opacity="0.2"/>
+            <path d="M17.5 4.5c1.5 0 3 1 3 3s-1.5 3-3 3h-8c-1.5 0-3-1-3-3s1.5-3 3-3"/>
+          </svg>
+        </div>
+        <h3><%= t.tickets.appearSectionTitle %></h3>
+      </div>
+      <div class="card-body">
+
+        <!-- Success colour -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.colorSuccessLabel %></label>
+            <p class="form-help"><%= t.tickets.colorSuccessHelp %></p>
+          </div>
+          <div class="color-picker-wrap">
+            <div class="color-swatch" id="color-success-swatch">
+              <input type="color" id="ticket-color-success" value="<%= ticketSettings.COLOR_SUCCESS || '#22c55e' %>" />
+            </div>
+            <span class="color-hex-tag" id="color-success-hex"><%= ticketSettings.COLOR_SUCCESS || '#22c55e' %></span>
+          </div>
+        </div>
+
+        <!-- Failure colour -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.colorFailureLabel %></label>
+            <p class="form-help"><%= t.tickets.colorFailureHelp %></p>
+          </div>
+          <div class="color-picker-wrap">
+            <div class="color-swatch" id="color-failure-swatch">
+              <input type="color" id="ticket-color-failure" value="<%= ticketSettings.COLOR_FAILURE || '#ef4444' %>" />
+            </div>
+            <span class="color-hex-tag" id="color-failure-hex"><%= ticketSettings.COLOR_FAILURE || '#ef4444' %></span>
+          </div>
+        </div>
+
+        <!-- Hide Close Button -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.hideCloseLabel %></label>
+            <p class="form-help"><%= t.tickets.hideCloseHelp %></p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ticket-hide-close" <%= ticketSettings.HIDE_CLOSE_BTN ? 'checked' : '' %> />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- Hide Close With Reason Button -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.hideCloseReasonLabel %></label>
+            <p class="form-help"><%= t.tickets.hideCloseReasonHelp %></p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ticket-hide-close-reason" <%= ticketSettings.HIDE_CLOSE_REASON_BTN ? 'checked' : '' %> />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- Hide Claim Button -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= t.tickets.hideClaimLabel %></label>
+            <p class="form-help"><%= t.tickets.hideClaimHelp %></p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ticket-hide-claim" <%= ticketSettings.HIDE_CLAIM_BTN ? 'checked' : '' %> />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Rules Button Card -->
+    <div class="card card-mt">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="currentColor" fill-opacity="0.12"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <line x1="10" y1="9" x2="8" y2="9"/>
+          </svg>
+        </div>
+        <h3><%= lang === 'ar' ? 'زر القوانين' : 'Rules Button' %></h3>
+      </div>
+      <div class="card-body">
+
+        <!-- Enable Rules Button -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= lang === 'ar' ? 'تفعيل زر القوانين' : 'Enable Rules Button' %></label>
+            <p class="form-help"><%= lang === 'ar' ? 'يظهر زر في رسالة ترحيب التكت، عند الضغط عليه يرى المستخدم نص القوانين.' : 'Adds a Rules button to the ticket welcome message. Clicking it shows the rules text ephemerally.' %></p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ticket-rules-enabled" <%= ticketSettings.RULES_BTN_ENABLED ? 'checked' : '' %> />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- Rules Text -->
+        <div class="form-row form-row-col" id="rules-text-row" <%- ticketSettings.RULES_BTN_ENABLED ? '' : 'style="display:none"' %>>
+          <div class="form-row-left" style="width:100%">
+            <label class="form-label"><%= lang === 'ar' ? 'نص القوانين' : 'Rules Text' %></label>
+            <p class="form-help"><%= lang === 'ar' ? 'النص الذي يظهر للمستخدم عند الضغط على زر القوانين (يدعم Markdown).' : 'Text shown to the user when they click the Rules button (supports Markdown).' %></p>
+          </div>
+          <textarea id="ticket-rules-text" class="form-textarea" rows="6" maxlength="3000" placeholder="<%= lang === 'ar' ? 'اكتب قوانين السيرفر هنا...' : 'Write your server rules here...' %>"><%= ticketSettings.RULES_BTN_TEXT || '' %></textarea>
+        </div>
+
+        <!-- Rules Button Appearance -->
+        <div class="form-row" id="rules-btn-style-row" <%- ticketSettings.RULES_BTN_ENABLED ? '' : 'style="display:none"' %>>
+          <div class="form-row-left">
+            <label class="form-label"><%= lang === 'ar' ? 'مظهر زر القوانين' : 'Rules Button Appearance' %></label>
+            <p class="form-help"><%= lang === 'ar' ? 'نص الزر وايموجيه ولونه في رسالة الترحيب.' : 'Button label, emoji and color shown in the ticket welcome message.' %></p>
+          </div>
+          <div class="rules-btn-cfg">
+            <div class="rules-btn-cfg-row">
+              <label class="rules-cfg-lbl"><%= lang === 'ar' ? 'النص' : 'Label' %></label>
+              <input type="text" id="ticket-rules-label" class="form-input" style="width:180px" maxlength="40"
+                     placeholder="Rules" value="<%= ticketSettings.RULES_BTN_LABEL || '' %>" />
+            </div>
+            <div class="rules-btn-cfg-row">
+              <label class="rules-cfg-lbl"><%= lang === 'ar' ? 'الايموجي' : 'Emoji' %></label>
+              <div style="position:relative;display:inline-flex;align-items:center;gap:6px">
+                <input type="text" id="ticket-rules-emoji" class="form-input" style="width:170px"
+                       maxlength="64" placeholder="📜 or &lt;:name:id&gt;"
+                       value="<%= ticketSettings.RULES_BTN_EMOJI || '' %>" />
+<% if (typeof guildEmojis !== 'undefined' && guildEmojis && guildEmojis.length) { %>
+                <button type="button" id="rules-emoji-picker-btn" class="rules-emoji-picker-btn" title="<%= lang === 'ar' ? 'ايموجيات السيرفر' : 'Server Emojis' %>">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/><path d="M16 5c0-1.1.9-1 2-1"/></svg>
+                </button>
+                <div id="rules-emoji-picker-pop" class="rules-emoji-pop" style="display:none">
+<% guildEmojis.forEach(function(em) { %>
+                  <button type="button" class="rules-emoji-item" data-val="<:<%=em.name%>:<%=em.id%>>" title=":<%=em.name%>:">
+                    <img src="<%=em.url%>" alt="<%=em.name%>" loading="lazy" />
+                  </button>
+<% }); %>
+                </div>
+<% } %>
+              </div>
+            </div>
+            <div class="rules-btn-cfg-row">
+              <label class="rules-cfg-lbl"><%= lang === 'ar' ? 'اللون' : 'Style' %></label>
+              <div class="rules-style-group" id="ticket-rules-style-group">
+                <button type="button" class="rules-style-opt<%= (ticketSettings.RULES_BTN_STYLE||2)==1?' active':'' %>" data-val="1">Primary</button>
+                <button type="button" class="rules-style-opt<%= (ticketSettings.RULES_BTN_STYLE||2)==2?' active':'' %>" data-val="2">Secondary</button>
+                <button type="button" class="rules-style-opt<%= (ticketSettings.RULES_BTN_STYLE||2)==3?' active':'' %>" data-val="3">Success</button>
+                <button type="button" class="rules-style-opt<%= (ticketSettings.RULES_BTN_STYLE||2)==4?' active':'' %>" data-val="4">Danger</button>
+              </div>
+              <input type="hidden" id="ticket-rules-style-val" value="<%= ticketSettings.RULES_BTN_STYLE || 2 %>" />
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══════════════════ Escalate Feature Card ═══════════════════ -->
+    <div class="card card-mt">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="17 11 21 7 17 3"/>
+            <line x1="21" y1="7" x2="9" y2="7"/>
+            <polyline points="7 21 3 17 7 13"/>
+            <line x1="15" y1="17" x2="3" y2="17"/>
+          </svg>
+        </div>
+        <h3><%= lang === 'ar' ? 'تصعيد التكت' : 'Escalate Ticket' %></h3>
+      </div>
+      <div class="card-body">
+
+        <!-- Enable Escalate -->
+        <div class="form-row">
+          <div class="form-row-left">
+            <label class="form-label"><%= lang === 'ar' ? 'تفعيل زر التصعيد' : 'Enable Escalate Button' %></label>
+            <p class="form-help"><%= lang === 'ar' ? 'يظهر زر Escalate في رسالة الترحيب بالتكت. عند الضغط يتم نقل التكت إلى كاتيغوري أخرى.' : 'Shows an Escalate button in the ticket welcome message. Clicking it moves the ticket to another category.' %></p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ticket-escalate-enabled" <%= ticketSettings.ESCALATE_ENABLED ? 'checked' : '' %> />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- Escalation Categories -->
+        <div class="form-row form-row-col" id="escalate-cats-row" <%- ticketSettings.ESCALATE_ENABLED ? '' : 'style="display:none"' %>>
+          <div class="form-row-left" style="width:100%">
+            <label class="form-label"><%= lang === 'ar' ? 'الكاتيغوريات المتاحة للتصعيد' : 'Escalation Categories' %></label>
+            <p class="form-help"><%= lang === 'ar' ? 'اختر الكاتيغوريات التي يمكن نقل التكت إليها (بحد أقصى 25).' : 'Select the categories the ticket can be moved to (max 25).' %></p>
+          </div>
+          <div class="esc-select-wrap">
+            <select id="ticket-escalate-cats-sel" class="form-select">
+              <option value=""><%= lang === 'ar' ? '-- اختر كاتيغوري --' : '-- Select a category --' %></option>
+<% guildCategories.forEach(function(cat) { %>
+              <option value="<%= cat.id %>"><%= cat.name %></option>
+<% }) %>
+            </select>
+            <div class="esc-chips" id="esc-chips-box"></div>
+          </div>
+          <input type="hidden" id="ticket-escalate-cats-json" value="<%= JSON.stringify(ticketSettings.ESCALATE_CATEGORIES || []) %>" />
+<% if (!guildCategories.length) { %>
+            <p class="form-help" style="margin:0"><%= lang === 'ar' ? 'لا توجد كاتيغوريات في هذا السيرفر.' : 'No categories found in this server.' %></p>
+<% } %>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <input type="hidden" id="ticket-enable-val" value="<%= ticketSettings.ENABLE ? '1' : '0' %>" />
+
+  <!-- Save Bar -->
+  <div class="save-bar" id="save-bar">
+    <span class="save-bar-text" id="save-bar-text"><%= lang === 'ar' ? 'لديك تغييرات غير محفوظة' : 'You have unsaved changes' %></span>
+    <div class="save-bar-actions">
+      <button class="btn btn-ghost" id="reset-btn"><%= lang === 'ar' ? 'إلغاء' : 'Reset' %></button>
+      <button class="btn btn-primary" id="save-btn"><%= t.tickets.saveBtn %></button>
+    </div>
+  </div>
+
+  <!-- Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script>
+    try {
+    (function () {
+      const canvas = document.getElementById('c');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+      renderer.setPixelRatio(1); renderer.setSize(innerWidth, innerHeight);
+      renderer.setClearColor(0x040010, 1);
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 500);
+      camera.position.z = 1;
+      const N = 2800, pos = new Float32Array(N * 3);
+      for (let i = 0; i < N * 3; i++) pos[i] = (Math.random() - .5) * 240;
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const mat = new THREE.PointsMaterial({ color: 0xb8b0ff, size: 0.24, transparent: true, opacity: 0.45, depthWrite: false });
+      scene.add(new THREE.Points(geo, mat));
+      let mx = 0, t = 0;
+      document.addEventListener('mousemove', e => { mx = (e.clientX / innerWidth - .5) * .25; });
+      window.addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+      const stars = scene.children[0];
+      (function render() { requestAnimationFrame(render); t += 0.00022; stars.rotation.y = t + mx * .15; renderer.render(scene, camera); })();
+    })();
+    } catch(e) { console.warn('Three.js background failed:', e); }
+
+    // Nav links
+    document.querySelectorAll('.nav-link').forEach(a => {
+      a.addEventListener('click', e => { e.preventDefault(); window.location.href = a.href; });
+    });
+
+    // Mobile menu
+    const menuBtn  = document.getElementById('menu-toggle');
+    const sidebar  = document.getElementById('mgmt-sidebar');
+    const overlay  = document.getElementById('nav-overlay');
+    const navSidebar = document.querySelector('.nav-sidebar');
+    function openSidebar()  { sidebar.classList.add('open');  overlay.classList.add('open');  document.body.style.overflow = 'hidden'; }
+    function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+    function openNav()  { if (navSidebar) { navSidebar.classList.add('open');  overlay.classList.add('open');  document.body.style.overflow = 'hidden'; } }
+    function closeNav() { if (navSidebar) { navSidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; } }
+    if (menuBtn) menuBtn.addEventListener('click', () => sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
+    if (overlay) overlay.addEventListener('click', () => { closeSidebar(); closeNav(); closeFooterDrop(); });
+    // Sort button → toggle server switcher
+    const sortBtn = document.querySelector('.mgmt-sort-btn');
+    if (sortBtn) sortBtn.addEventListener('click', () => {
+      if (navSidebar && navSidebar.classList.contains('open')) { closeNav(); }
+      else { closeSidebar(); openNav(); }
+    });
+    // Footer dots dropdown
+    const footerDotsBtn = document.getElementById('footer-dots-btn');
+    const footerDrop    = document.getElementById('footer-drop');
+    function openFooterDrop()  { if (footerDrop) footerDrop.classList.add('open'); }
+    function closeFooterDrop() { if (footerDrop) footerDrop.classList.remove('open'); }
+    if (footerDotsBtn) footerDotsBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      footerDrop.classList.toggle('open');
+    });
+    document.addEventListener('click', e => {
+      if (footerDrop && !footerDrop.contains(e.target) && e.target !== footerDotsBtn) closeFooterDrop();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSidebar(); closeNav(); closeFooterDrop(); } });
+
+    // Section collapse
+    document.querySelectorAll('.mgmt-section-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('open');
+        btn.nextElementSibling.classList.toggle('open');
+      });
+    });
+
+    // Naming scheme variable chip insertion
+    document.querySelectorAll('#naming-chips .var-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const input = document.getElementById('ticket-naming');
+        const val = chip.dataset.val;
+        const start = input.selectionStart ?? input.value.length;
+        const end   = input.selectionEnd   ?? input.value.length;
+        input.value = input.value.slice(0, start) + val + input.value.slice(end);
+        input.focus();
+        input.setSelectionRange(start + val.length, start + val.length);
+        checkDirty();
+      });
+    });
+
+    // Language select
+    document.getElementById('lang-select')?.addEventListener('change', function() {
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', this.value);
+      window.location.href = url.toString();
+    });
+
+    // Save bar logic
+    const saveBar = document.getElementById('save-bar');
+    const saveBtn = document.getElementById('save-btn');
+    const resetBtn = document.getElementById('reset-btn');
+
+    // Original values snapshot
+    const originals = {
+      limit:        document.getElementById('ticket-limit').value,
+      lang:         document.getElementById('ticket-lang').value,
+      allowClose:   document.getElementById('ticket-allow-close').checked,
+      closeConfirm: document.getElementById('ticket-close-confirm').checked,
+      feedback:     document.getElementById('ticket-feedback').checked,
+      anon:         document.getElementById('ticket-anon').checked,
+      thread:       document.getElementById('ticket-thread').checked,
+      disableOpen:       document.getElementById('ticket-disable-open').checked,
+      notifChannel:      document.getElementById('ticket-notif-channel').value,
+      transcriptChannel: document.getElementById('ticket-transcript-channel').value,
+      channelCategory:   document.getElementById('ticket-channel-category').value,
+      overflowCategory:  document.getElementById('ticket-overflow-category').value,
+      namingScheme:      document.getElementById('ticket-naming').value,
+      welcomeMsg:              document.getElementById('ticket-welcome').value,
+      claimView:               document.getElementById('ticket-claim-view').checked,
+      claimType:               document.getElementById('ticket-claim-type').checked,
+      acLeave:                 document.getElementById('ticket-ac-leave').checked,
+      acNoResponseEnabled:     document.getElementById('ticket-ac-noresponse-enabled').checked,
+      acNoResponseDays:        document.getElementById('ticket-ac-noresponse-days').value,
+      acNoResponseHours:       document.getElementById('ticket-ac-noresponse-hours').value,
+      acNoResponseMins:        document.getElementById('ticket-ac-noresponse-mins').value,
+      acLastMsgEnabled:        document.getElementById('ticket-ac-lastmsg-enabled').checked,
+      acLastMsgDays:           document.getElementById('ticket-ac-lastmsg-days').value,
+      acLastMsgHours:          document.getElementById('ticket-ac-lastmsg-hours').value,
+      acLastMsgMins:           document.getElementById('ticket-ac-lastmsg-mins').value,
+      openPerm:      document.getElementById('ticket-open-perm').value,
+      openPermRole:  document.getElementById('ticket-open-perm-role').value,
+      addMsgSender:  document.getElementById('ticket-add-msg-sender').checked,
+      permAttach:    document.getElementById('ticket-perm-attach').checked,
+      permEmbed:     document.getElementById('ticket-perm-embed').checked,
+      permReact:     document.getElementById('ticket-perm-reactions').checked,
+      colorSuccess:    document.getElementById('ticket-color-success').value,
+      colorFailure:    document.getElementById('ticket-color-failure').value,
+      hideClose:       document.getElementById('ticket-hide-close').checked,
+      hideCloseReason: document.getElementById('ticket-hide-close-reason').checked,
+      hideClaim:       document.getElementById('ticket-hide-claim').checked,
+      rulesEnabled:    document.getElementById('ticket-rules-enabled').checked,
+      rulesText:       document.getElementById('ticket-rules-text').value,
+      rulesLabel:      document.getElementById('ticket-rules-label').value,
+      rulesEmoji:      document.getElementById('ticket-rules-emoji').value,
+      rulesBtnStyle:   document.getElementById('ticket-rules-style-val').value,
+      escalateEnabled: document.getElementById('ticket-escalate-enabled').checked,
+      escalateCats:    JSON.stringify(_getEscalateCats()),
+    };
+
+    function isDirty() {
+      return (
+        document.getElementById('ticket-limit').value           !== originals.limit        ||
+        document.getElementById('ticket-lang').value            !== originals.lang         ||
+        document.getElementById('ticket-allow-close').checked   !== originals.allowClose   ||
+        document.getElementById('ticket-close-confirm').checked !== originals.closeConfirm ||
+        document.getElementById('ticket-feedback').checked      !== originals.feedback      ||
+        document.getElementById('ticket-anon').checked          !== originals.anon          ||
+        document.getElementById('ticket-thread').checked        !== originals.thread        ||
+        document.getElementById('ticket-disable-open').checked  !== originals.disableOpen       ||
+        document.getElementById('ticket-notif-channel').value      !== originals.notifChannel      ||
+        document.getElementById('ticket-transcript-channel').value !== originals.transcriptChannel ||
+        document.getElementById('ticket-channel-category').value   !== originals.channelCategory   ||
+        document.getElementById('ticket-overflow-category').value  !== originals.overflowCategory  ||
+        document.getElementById('ticket-naming').value             !== originals.namingScheme      ||
+        document.getElementById('ticket-welcome').value            !== originals.welcomeMsg              ||
+        document.getElementById('ticket-claim-view').checked        !== originals.claimView              ||
+        document.getElementById('ticket-claim-type').checked        !== originals.claimType              ||
+        document.getElementById('ticket-ac-leave').checked          !== originals.acLeave                ||
+        document.getElementById('ticket-ac-noresponse-enabled').checked !== originals.acNoResponseEnabled ||
+        document.getElementById('ticket-ac-noresponse-days').value   !== originals.acNoResponseDays      ||
+        document.getElementById('ticket-ac-noresponse-hours').value  !== originals.acNoResponseHours     ||
+        document.getElementById('ticket-ac-noresponse-mins').value   !== originals.acNoResponseMins      ||
+        document.getElementById('ticket-ac-lastmsg-enabled').checked !== originals.acLastMsgEnabled      ||
+        document.getElementById('ticket-ac-lastmsg-days').value      !== originals.acLastMsgDays         ||
+        document.getElementById('ticket-ac-lastmsg-hours').value     !== originals.acLastMsgHours        ||
+        document.getElementById('ticket-ac-lastmsg-mins').value      !== originals.acLastMsgMins      ||
+        document.getElementById('ticket-open-perm').value             !== originals.openPerm           ||
+        document.getElementById('ticket-open-perm-role').value        !== originals.openPermRole       ||
+        document.getElementById('ticket-add-msg-sender').checked      !== originals.addMsgSender       ||
+        document.getElementById('ticket-perm-attach').checked         !== originals.permAttach         ||
+        document.getElementById('ticket-perm-embed').checked          !== originals.permEmbed          ||
+        document.getElementById('ticket-perm-reactions').checked      !== originals.permReact          ||
+        document.getElementById('ticket-color-success').value          !== originals.colorSuccess       ||
+        document.getElementById('ticket-color-failure').value          !== originals.colorFailure       ||
+        document.getElementById('ticket-hide-close').checked           !== originals.hideClose          ||
+        document.getElementById('ticket-hide-close-reason').checked    !== originals.hideCloseReason    ||
+        document.getElementById('ticket-hide-claim').checked           !== originals.hideClaim          ||
+        document.getElementById('ticket-rules-enabled').checked          !== originals.rulesEnabled        ||
+        document.getElementById('ticket-rules-text').value               !== originals.rulesText           ||
+        document.getElementById('ticket-rules-label').value              !== originals.rulesLabel          ||
+        document.getElementById('ticket-rules-emoji').value              !== originals.rulesEmoji          ||
+        document.getElementById('ticket-rules-style-val').value          !== originals.rulesBtnStyle       ||
+        document.getElementById('ticket-escalate-enabled').checked       !== originals.escalateEnabled     ||
+        JSON.stringify(_getEscalateCats()) !== originals.escalateCats
+      );
+    }
+
+    function checkDirty() {
+      if (isDirty()) {
+        saveBar.classList.add('visible');
+      } else {
+        saveBar.classList.remove('visible');
+      }
+    }
+
+    const watchIds = ['ticket-limit','ticket-lang','ticket-allow-close','ticket-close-confirm','ticket-feedback','ticket-anon','ticket-thread','ticket-disable-open','ticket-notif-channel','ticket-transcript-channel','ticket-channel-category','ticket-overflow-category','ticket-naming','ticket-welcome','ticket-claim-view','ticket-claim-type','ticket-ac-leave','ticket-ac-noresponse-enabled','ticket-ac-noresponse-days','ticket-ac-noresponse-hours','ticket-ac-noresponse-mins','ticket-ac-lastmsg-enabled','ticket-ac-lastmsg-days','ticket-ac-lastmsg-hours','ticket-ac-lastmsg-mins','ticket-open-perm','ticket-open-perm-role','ticket-add-msg-sender','ticket-perm-attach','ticket-perm-embed','ticket-perm-reactions','ticket-color-success','ticket-color-failure','ticket-hide-close','ticket-hide-close-reason','ticket-hide-claim','ticket-rules-enabled','ticket-rules-text','ticket-rules-label','ticket-rules-emoji','ticket-escalate-enabled'];
+
+    // Show/hide rules text row + appearance row
+    document.getElementById('ticket-rules-enabled').addEventListener('change', function () {
+      const show = this.checked;
+      document.getElementById('rules-text-row').style.display     = show ? '' : 'none';
+      document.getElementById('rules-btn-style-row').style.display = show ? '' : 'none';
+    });
+    // ── Escalate cats helpers ───────────────────────────────────────
+    function _getEscalateCats() {
+      return [...document.querySelectorAll('#esc-chips-box .esc-chip')].map(c => c.dataset.val).sort();
+    }
+    function _addEscChip(id, label) {
+      const box = document.getElementById('esc-chips-box');
+      if (box.querySelector(`.esc-chip[data-val="${id}"]`)) return;
+      const chip = document.createElement('span');
+      chip.className = 'esc-chip'; chip.dataset.val = id;
+      chip.innerHTML = `${label}<button type="button" class="esc-chip-rm" title="Remove">&times;</button>`;
+      chip.querySelector('.esc-chip-rm').addEventListener('click', () => {
+        chip.remove();
+        const opt = document.querySelector(`#ticket-escalate-cats-sel option[value="${id}"]`);
+        if (opt) opt.disabled = false;
+        checkDirty();
+      });
+      box.appendChild(chip);
+      const opt = document.querySelector(`#ticket-escalate-cats-sel option[value="${id}"]`);
+      if (opt) opt.disabled = true;
+    }
+    // Init existing cats as chips
+    (function() {
+      const saved = JSON.parse(document.getElementById('ticket-escalate-cats-json')?.value || '[]');
+      const sel = document.getElementById('ticket-escalate-cats-sel');
+      saved.forEach(id => {
+        const opt = sel ? sel.querySelector(`option[value="${id}"]`) : null;
+        if (opt) _addEscChip(id, opt.textContent);
+      });
+    })();
+    // Select change → add chip
+    document.getElementById('ticket-escalate-cats-sel')?.addEventListener('change', function() {
+      const id = this.value;
+      if (!id) return;
+      const label = this.options[this.selectedIndex].textContent;
+      _addEscChip(id, label);
+      this.value = '';
+      checkDirty();
+    });
+    watchIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('change', checkDirty);
+      el.addEventListener('input', checkDirty);
+    });
+
+    // Rules btn style pills
+    document.querySelectorAll('.rules-style-opt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.rules-style-opt').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('ticket-rules-style-val').value = btn.dataset.val;
+        checkDirty();
+      });
+    });
+    // Server emoji picker for rules button
+    const _rEmojiBtn = document.getElementById('rules-emoji-picker-btn');
+    const _rEmojiPop = document.getElementById('rules-emoji-picker-pop');
+    if (_rEmojiBtn && _rEmojiPop) {
+      document.body.appendChild(_rEmojiPop); // escape overflow:hidden ancestors
+      _rEmojiBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        if (_rEmojiPop.style.display !== 'none') { _rEmojiPop.style.display = 'none'; return; }
+        const r = _rEmojiBtn.getBoundingClientRect();
+        const popH = 220;
+        const spaceBelow = window.innerHeight - r.bottom;
+        _rEmojiPop.style.top  = (spaceBelow >= popH || spaceBelow >= r.top ? r.bottom + 4 : r.top - popH - 4) + 'px';
+        _rEmojiPop.style.left = Math.min(r.left, window.innerWidth - 270) + 'px';
+        _rEmojiPop.style.display = 'grid';
+      });
+      _rEmojiPop.querySelectorAll('.rules-emoji-item').forEach(item => {
+        item.addEventListener('click', () => {
+          document.getElementById('ticket-rules-emoji').value = item.dataset.val;
+          _rEmojiPop.style.display = 'none';
+          checkDirty();
+        });
+      });
+      document.addEventListener('click', e => {
+        if (!_rEmojiBtn.contains(e.target) && !_rEmojiPop.contains(e.target)) {
+          _rEmojiPop.style.display = 'none';
+        }
+      });
+    }
+    // Show/hide escalate categories row
+    document.getElementById('ticket-escalate-enabled').addEventListener('change', function () {
+      document.getElementById('escalate-cats-row').style.display = this.checked ? '' : 'none';
+    });
+    // Show/hide required-role row when permission level changes
+    document.getElementById('ticket-open-perm').addEventListener('change', function () {
+      document.getElementById('perm-role-row').classList.toggle('perm-role-row-hidden', this.value !== 'role_required');
+    });
+
+    // Live color swatch update
+    ['success', 'failure'].forEach(key => {
+      const inp    = document.getElementById(`ticket-color-${key}`);
+      const swatch = document.getElementById(`color-${key}-swatch`);
+      const hex    = document.getElementById(`color-${key}-hex`);
+      swatch.style.background = inp.value;  // init from input value
+      inp.addEventListener('input', () => {
+        swatch.style.background = inp.value;
+        hex.textContent = inp.value;
+      });
+    });
+
+    resetBtn.addEventListener('click', () => {
+      document.getElementById('ticket-limit').value             = originals.limit;
+      document.getElementById('ticket-lang').value              = originals.lang;
+      document.getElementById('ticket-allow-close').checked     = originals.allowClose;
+      document.getElementById('ticket-close-confirm').checked   = originals.closeConfirm;
+      document.getElementById('ticket-feedback').checked        = originals.feedback;
+      document.getElementById('ticket-anon').checked            = originals.anon;
+      document.getElementById('ticket-thread').checked          = originals.thread;
+      document.getElementById('ticket-disable-open').checked    = originals.disableOpen;
+      document.getElementById('ticket-notif-channel').value      = originals.notifChannel;
+      document.getElementById('ticket-transcript-channel').value = originals.transcriptChannel;
+      document.getElementById('ticket-channel-category').value   = originals.channelCategory;
+      document.getElementById('ticket-overflow-category').value  = originals.overflowCategory;
+      document.getElementById('ticket-naming').value             = originals.namingScheme;
+      document.getElementById('ticket-welcome').value            = originals.welcomeMsg;
+      document.getElementById('ticket-claim-view').checked        = originals.claimView;
+      document.getElementById('ticket-claim-type').checked        = originals.claimType;
+      document.getElementById('ticket-ac-leave').checked          = originals.acLeave;
+      document.getElementById('ticket-ac-noresponse-enabled').checked = originals.acNoResponseEnabled;
+      document.getElementById('ticket-ac-noresponse-days').value   = originals.acNoResponseDays;
+      document.getElementById('ticket-ac-noresponse-hours').value  = originals.acNoResponseHours;
+      document.getElementById('ticket-ac-noresponse-mins').value   = originals.acNoResponseMins;
+      document.getElementById('ticket-ac-lastmsg-enabled').checked = originals.acLastMsgEnabled;
+      document.getElementById('ticket-ac-lastmsg-days').value      = originals.acLastMsgDays;
+      document.getElementById('ticket-ac-lastmsg-hours').value     = originals.acLastMsgHours;
+      document.getElementById('ticket-ac-lastmsg-mins').value      = originals.acLastMsgMins;
+      document.getElementById('ticket-open-perm').value             = originals.openPerm;
+      document.getElementById('ticket-open-perm-role').value        = originals.openPermRole;
+      document.getElementById('ticket-add-msg-sender').checked      = originals.addMsgSender;
+      document.getElementById('ticket-perm-attach').checked         = originals.permAttach;
+      document.getElementById('ticket-perm-embed').checked          = originals.permEmbed;
+      document.getElementById('ticket-perm-reactions').checked      = originals.permReact;
+      document.getElementById('ticket-color-success').value          = originals.colorSuccess;
+      document.getElementById('ticket-color-failure').value          = originals.colorFailure;
+      document.getElementById('ticket-hide-close').checked           = originals.hideClose;
+      document.getElementById('ticket-hide-close-reason').checked    = originals.hideCloseReason;
+      document.getElementById('ticket-hide-claim').checked           = originals.hideClaim;
+      document.getElementById('ticket-rules-enabled').checked          = originals.rulesEnabled;
+      document.getElementById('ticket-rules-text').value               = originals.rulesText;
+      document.getElementById('ticket-rules-label').value              = originals.rulesLabel;
+      document.getElementById('ticket-rules-emoji').value              = originals.rulesEmoji;
+      document.getElementById('ticket-rules-style-val').value          = originals.rulesBtnStyle;
+      document.querySelectorAll('.rules-style-opt').forEach(b => b.classList.toggle('active', b.dataset.val === originals.rulesBtnStyle));
+      document.getElementById('rules-text-row').style.display           = originals.rulesEnabled ? '' : 'none';
+      document.getElementById('rules-btn-style-row').style.display      = originals.rulesEnabled ? '' : 'none';
+      document.getElementById('ticket-escalate-enabled').checked        = originals.escalateEnabled;
+      document.getElementById('escalate-cats-row').style.display        = originals.escalateEnabled ? '' : 'none';
+      const _savedCats = JSON.parse(originals.escalateCats);
+      const _chipsBox  = document.getElementById('esc-chips-box');
+      const _escSel    = document.getElementById('ticket-escalate-cats-sel');
+      _chipsBox.innerHTML = '';
+      [..._escSel.options].forEach(o => { o.disabled = false; });
+      _savedCats.forEach(id => {
+        const opt = _escSel.querySelector(`option[value="${id}"]`);
+        if (opt) _addEscChip(id, opt.textContent);
+      });
+      document.getElementById('color-success-swatch').style.background = originals.colorSuccess;
+      document.getElementById('color-failure-swatch').style.background = originals.colorFailure;
+      document.getElementById('color-success-hex').textContent = originals.colorSuccess;
+      document.getElementById('color-failure-hex').textContent = originals.colorFailure;
+      document.getElementById('perm-role-row').classList.toggle('perm-role-row-hidden', originals.openPerm !== 'role_required');
+      saveBar.classList.remove('visible');
+    });
+
+    saveBtn.addEventListener('click', async () => {
+      saveBtn.disabled = true;
+      const savingLabel = '<%= t.tickets.savingBtn %>';
+      const savedLabel  = '<%= t.tickets.savedBtn %>';
+      const saveLabel   = '<%= t.tickets.saveBtn %>';
+      saveBtn.textContent = savingLabel;
+
+      const payload = {
+        ENABLE:                 document.getElementById('ticket-enable-val').value === '1',
+        LANGUAGE:               document.getElementById('ticket-lang').value,
+        TICKET_LIMIT_PER_USER:  parseInt(document.getElementById('ticket-limit').value, 10) || 1,
+        ALLOW_USER_CLOSE:       document.getElementById('ticket-allow-close').checked,
+        CLOSE_CONFIRMATION:     document.getElementById('ticket-close-confirm').checked,
+        ENABLE_FEEDBACK:        document.getElementById('ticket-feedback').checked,
+        ANONYMISE_RESPONSES:    document.getElementById('ticket-anon').checked,
+        THREAD_MODE:            document.getElementById('ticket-thread').checked,
+        DISABLE_OPEN_COMMAND:   document.getElementById('ticket-disable-open').checked,
+        NOTIFICATION_CHANNEL:   document.getElementById('ticket-notif-channel').value || null,
+        TRANSCRIPTS_CHANNEL:    document.getElementById('ticket-transcript-channel').value || null,
+        CHANNEL_CATEGORY:       document.getElementById('ticket-channel-category').value || null,
+        OVERFLOW_CATEGORY:      document.getElementById('ticket-overflow-category').value || null,
+        NAMING_SCHEME:          document.getElementById('ticket-naming').value || 'ticket-{number}',
+        WELCOME_MESSAGE:        document.getElementById('ticket-welcome').value,
+        CLAIM_SUPPORT_VIEW:     document.getElementById('ticket-claim-view').checked,
+        CLAIM_SUPPORT_TYPE:     document.getElementById('ticket-claim-type').checked,
+        AUTO_CLOSE_ON_LEAVE:    document.getElementById('ticket-ac-leave').checked,
+        AC_NO_RESPONSE_ENABLED: document.getElementById('ticket-ac-noresponse-enabled').checked,
+        AC_NO_RESPONSE_DAYS:    parseInt(document.getElementById('ticket-ac-noresponse-days').value, 10)  || 0,
+        AC_NO_RESPONSE_HOURS:   parseInt(document.getElementById('ticket-ac-noresponse-hours').value, 10) || 0,
+        AC_NO_RESPONSE_MINS:    parseInt(document.getElementById('ticket-ac-noresponse-mins').value, 10)  || 0,
+        AC_LAST_MSG_ENABLED:    document.getElementById('ticket-ac-lastmsg-enabled').checked,
+        AC_LAST_MSG_DAYS:       parseInt(document.getElementById('ticket-ac-lastmsg-days').value, 10)  || 0,
+        AC_LAST_MSG_HOURS:      parseInt(document.getElementById('ticket-ac-lastmsg-hours').value, 10) || 0,
+        AC_LAST_MSG_MINS:       parseInt(document.getElementById('ticket-ac-lastmsg-mins').value, 10)  || 0,
+        OPEN_PERMISSION:        document.getElementById('ticket-open-perm').value,
+        OPEN_PERMISSION_ROLE:   document.getElementById('ticket-open-perm-role').value || null,
+        ADD_MSG_SENDER:         document.getElementById('ticket-add-msg-sender').checked,
+        PERM_ATTACH_FILES:      document.getElementById('ticket-perm-attach').checked,
+        PERM_EMBED_LINKS:       document.getElementById('ticket-perm-embed').checked,
+        PERM_ADD_REACTIONS:     document.getElementById('ticket-perm-reactions').checked,
+        COLOR_SUCCESS:          document.getElementById('ticket-color-success').value,
+        COLOR_FAILURE:          document.getElementById('ticket-color-failure').value,
+        HIDE_CLOSE_BTN:         document.getElementById('ticket-hide-close').checked,
+        HIDE_CLOSE_REASON_BTN:  document.getElementById('ticket-hide-close-reason').checked,
+        HIDE_CLAIM_BTN:         document.getElementById('ticket-hide-claim').checked,
+        RULES_BTN_ENABLED:      document.getElementById('ticket-rules-enabled').checked,
+        RULES_BTN_TEXT:         document.getElementById('ticket-rules-text').value.trim(),
+        RULES_BTN_LABEL:        document.getElementById('ticket-rules-label').value.trim(),
+        RULES_BTN_EMOJI:        document.getElementById('ticket-rules-emoji').value.trim(),
+        RULES_BTN_STYLE:        parseInt(document.getElementById('ticket-rules-style-val').value, 10) || 2,
+        ESCALATE_ENABLED:       document.getElementById('ticket-escalate-enabled').checked,
+        ESCALATE_CATEGORIES:    _getEscalateCats(),
+      };
+
+      try {
+        const res = await fetch('/dashboard/<%= guildId %>/tickets/general/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error('Save failed');
+
+        // Update originals
+        originals.limit        = String(payload.TICKET_LIMIT_PER_USER);
+        originals.lang         = payload.LANGUAGE;
+        originals.allowClose   = payload.ALLOW_USER_CLOSE;
+        originals.closeConfirm = payload.CLOSE_CONFIRMATION;
+        originals.feedback     = payload.ENABLE_FEEDBACK;
+        originals.anon         = payload.ANONYMISE_RESPONSES;
+        originals.thread       = payload.THREAD_MODE;
+        originals.disableOpen       = payload.DISABLE_OPEN_COMMAND;
+        originals.notifChannel      = document.getElementById('ticket-notif-channel').value;
+        originals.transcriptChannel = document.getElementById('ticket-transcript-channel').value;
+        originals.channelCategory   = document.getElementById('ticket-channel-category').value;
+        originals.overflowCategory  = document.getElementById('ticket-overflow-category').value;
+        originals.namingScheme      = document.getElementById('ticket-naming').value;
+        originals.welcomeMsg        = document.getElementById('ticket-welcome').value;
+        originals.claimView              = document.getElementById('ticket-claim-view').checked;
+        originals.claimType              = document.getElementById('ticket-claim-type').checked;
+        originals.acLeave                = document.getElementById('ticket-ac-leave').checked;
+        originals.acNoResponseEnabled    = document.getElementById('ticket-ac-noresponse-enabled').checked;
+        originals.acNoResponseDays       = document.getElementById('ticket-ac-noresponse-days').value;
+        originals.acNoResponseHours      = document.getElementById('ticket-ac-noresponse-hours').value;
+        originals.acNoResponseMins       = document.getElementById('ticket-ac-noresponse-mins').value;
+        originals.acLastMsgEnabled       = document.getElementById('ticket-ac-lastmsg-enabled').checked;
+        originals.acLastMsgDays          = document.getElementById('ticket-ac-lastmsg-days').value;
+        originals.acLastMsgHours         = document.getElementById('ticket-ac-lastmsg-hours').value;
+        originals.acLastMsgMins          = document.getElementById('ticket-ac-lastmsg-mins').value;
+        originals.openPerm     = document.getElementById('ticket-open-perm').value;
+        originals.openPermRole = document.getElementById('ticket-open-perm-role').value;
+        originals.addMsgSender = document.getElementById('ticket-add-msg-sender').checked;
+        originals.permAttach   = document.getElementById('ticket-perm-attach').checked;
+        originals.permEmbed    = document.getElementById('ticket-perm-embed').checked;
+        originals.permReact    = document.getElementById('ticket-perm-reactions').checked;
+        originals.colorSuccess    = document.getElementById('ticket-color-success').value;
+        originals.colorFailure    = document.getElementById('ticket-color-failure').value;
+        originals.hideClose       = document.getElementById('ticket-hide-close').checked;
+        originals.hideCloseReason = document.getElementById('ticket-hide-close-reason').checked;
+        originals.hideClaim       = document.getElementById('ticket-hide-claim').checked;
+        originals.rulesEnabled    = document.getElementById('ticket-rules-enabled').checked;
+        originals.rulesText       = document.getElementById('ticket-rules-text').value;
+        originals.rulesLabel      = document.getElementById('ticket-rules-label').value;
+        originals.rulesEmoji      = document.getElementById('ticket-rules-emoji').value;
+        originals.rulesBtnStyle   = document.getElementById('ticket-rules-style-val').value;
+        originals.escalateEnabled = document.getElementById('ticket-escalate-enabled').checked;
+        originals.escalateCats    = JSON.stringify(_getEscalateCats());
+
+        saveBtn.textContent = savedLabel;
+        saveBtn.classList.remove('btn-primary');
+        saveBtn.classList.add('btn-success');
+        setTimeout(() => {
+          saveBar.classList.remove('visible');
+          saveBtn.textContent = saveLabel;
+          saveBtn.classList.remove('btn-success');
+          saveBtn.classList.add('btn-primary');
+          saveBtn.disabled = false;
+        }, 1800);
+      } catch (err) {
+        console.error(err);
+        saveBtn.textContent = saveLabel;
+        saveBtn.disabled = false;
+        alert('<%= lang === "ar" ? "فشل الحفظ، حاول مجدداً" : "Save failed, please try again." %>');
+      }
+    });
+  </script>
+
+  <script>
+    /* ── Profile sidebar ── */
+    const profSidebar  = document.getElementById('prof-sidebar');
+    const profBackdrop = document.getElementById('prof-backdrop');
+    const openBtn      = document.getElementById('open-profile');
+    const closeBtn     = document.getElementById('close-profile');
+    const copyId       = document.getElementById('prof-copy-id');
+    const bannerSolid  = document.querySelector('.prof-banner-solid');
+    if (bannerSolid && bannerSolid.dataset.bg) bannerSolid.style.background = bannerSolid.dataset.bg;
+    function openProfile()  { if (!profSidebar) return; profSidebar.classList.add('open'); profBackdrop.classList.add('open'); profSidebar.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+    function closeProfile() { if (!profSidebar) return; profSidebar.classList.remove('open'); profBackdrop.classList.remove('open'); profSidebar.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+    if (openBtn)  openBtn.addEventListener('click', openProfile);
+    document.querySelectorAll('.open-profile-btn').forEach(b => b.addEventListener('click', openProfile));
+    if (closeBtn) closeBtn.addEventListener('click', closeProfile);
+    if (profBackdrop) profBackdrop.addEventListener('click', closeProfile);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProfile(); });
+    if (copyId) {
+      copyId.addEventListener('click', () => {
+        navigator.clipboard.writeText(copyId.textContent.trim()).then(() => {
+          const orig = copyId.textContent;
+          copyId.textContent = '✓ Copied!'; copyId.style.color = 'var(--cyan-l)';
+          setTimeout(() => { copyId.textContent = orig; copyId.style.color = ''; }, 1500);
+        });
+      });
+    }
+  </script>
+  <!-- Lucide -->
+  <script src="/js/lucide.min.js"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>
+
+<%#
+  This project was programmed by the Code Nexus team.
+  If you encounter any problems, open an Issue or log into the Discord server:
+  https://discord.gg/UvEYbFd2rj
+%>

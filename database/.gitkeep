@@ -1,0 +1,2 @@
+# This file keeps the database/ directory in git while ignoring the actual JSON files.
+# The bot will create and manage JSON files here at runtime.

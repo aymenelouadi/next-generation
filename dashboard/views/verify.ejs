@@ -1,0 +1,447 @@
+<%#
+  This project was programmed by the Code Nexus team.
+  If you encounter any problems, open an Issue or log into the Discord server:
+  https://discord.gg/UvEYbFd2rj
+%>
+<!DOCTYPE html>
+<html lang="<%= t.lang %>" dir="<%= t.dir %>">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= t.verify.pageTitle %></title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Tajawal:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #040010;
+      --card:      rgba(10, 3, 30, 0.82);
+      --surface:   rgba(255,255,255,0.04);
+      --purple:    #7c3aed;
+      --purple-l:  #a78bfa;
+      --cyan:      #06b6d4;
+      --cyan-l:    #67e8f9;
+      --border:    rgba(124,58,237,.22);
+      --border-h:  rgba(124,58,237,.55);
+      --muted:     rgba(203,194,255,.5);
+      --white:     #f8fafc;
+      --error-bg:  rgba(220,38,38,.08);
+      --error-bd:  rgba(220,38,38,.3);
+      --error-tx:  #fca5a5;
+    }
+
+    html, body { min-height: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: '<%= t.fontBody %>', 'Tajawal', 'Inter', system-ui, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    #c { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+    .glow {
+      position: fixed; border-radius: 50%; pointer-events: none; z-index: 1;
+      filter: blur(110px);
+      animation: glow-drift 22s ease-in-out infinite alternate;
+    }
+    .glow-a {
+      width: min(640px,90vw); height: min(640px,90vw);
+      top: -25%; right: -18%;
+      background: radial-gradient(circle, rgba(124,58,237,.32) 0%, transparent 65%);
+    }
+    .glow-b {
+      width: min(540px,80vw); height: min(540px,80vw);
+      bottom: -20%; left: -14%;
+      background: radial-gradient(circle, rgba(6,182,212,.2) 0%, transparent 65%);
+      animation-delay: -11s;
+    }
+    @keyframes glow-drift {
+      from { transform: translate(0,0) scale(1); }
+      to   { transform: translate(22px,16px) scale(1.06); }
+    }
+
+    /* Lang bar */
+    .lang-bar {
+      position: fixed; top: 18px; right: 20px; z-index: 100;
+      display: flex; gap: 6px;
+    }
+    [dir="rtl"] .lang-bar { right: auto; left: 20px; }
+    .lang-btn {
+      padding: 5px 13px; border-radius: 99px;
+      font-size: .7rem; font-weight: 600; letter-spacing: .04em;
+      text-decoration: none; border: 1px solid transparent;
+      font-family: 'Inter', sans-serif; transition: all .2s;
+    }
+    .lang-btn.active  { background: rgba(124,58,237,.2); border-color: rgba(124,58,237,.5); color: var(--purple-l); }
+    .lang-btn.inactive{ background: var(--surface); border-color: rgba(255,255,255,.08); color: var(--muted); }
+    .lang-btn.inactive:hover { border-color: rgba(124,58,237,.35); color: var(--purple-l); }
+
+    /* Page */
+    .page {
+      position: relative; z-index: 10;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 80px 20px 32px;
+    }
+
+    /* Card */
+    .card {
+      width: 100%; max-width: 420px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 44px 36px 38px;
+      backdrop-filter: blur(32px) saturate(180%);
+      -webkit-backdrop-filter: blur(32px) saturate(180%);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.04) inset,
+        0 1px 0 rgba(255,255,255,.06) inset,
+        0 32px 80px rgba(0,0,0,.7),
+        0 0 60px -8px rgba(124,58,237,.25);
+      position: relative; overflow: hidden;
+      animation: card-enter .5s cubic-bezier(.22,1,.36,1) both;
+      animation-delay: .15s;
+    }
+    @keyframes card-enter {
+      from { opacity:0; transform: translateY(28px) scale(.97); }
+      to   { opacity:1; transform: translateY(0)    scale(1);   }
+    }
+    .card::before {
+      content:''; position:absolute; top:0; left:15%; right:15%; height:1px;
+      background: linear-gradient(90deg, transparent, var(--purple-l), var(--cyan-l), transparent);
+      opacity: .55;
+    }
+
+    /* Avatar */
+    .avatar-wrap {
+      display: flex; justify-content: center; margin-bottom: 20px;
+    }
+    .avatar {
+      width: 68px; height: 68px; border-radius: 50%;
+      object-fit: cover; display: block;
+      border: 2px solid rgba(124,58,237,.4);
+      box-shadow: 0 0 18px rgba(124,58,237,.25);
+    }
+    .avatar-fallback {
+      width: 68px; height: 68px; border-radius: 50%;
+      background: rgba(124,58,237,.2);
+      border: 2px solid rgba(124,58,237,.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+    }
+
+    /* Tag */
+    .tag {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 5px 14px; border-radius: 99px;
+      border: 1px solid rgba(6,182,212,.25);
+      background: rgba(6,182,212,.06);
+      font-size: .65rem; letter-spacing: .14em;
+      color: var(--cyan-l);
+      font-family: 'Orbitron', monospace;
+      margin-bottom: 18px;
+    }
+    .tag-dot {
+      width:5px; height:5px; border-radius:50%;
+      background: var(--cyan); box-shadow: 0 0 6px var(--cyan);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 6px var(--cyan); }
+      50%      { box-shadow: 0 0 14px var(--cyan); }
+    }
+
+    /* Welcome */
+    .card-title {
+      font-size: 1.35rem; font-weight: 700; margin-bottom: 4px; letter-spacing: -.01em;
+    }
+    .card-username {
+      font-family: 'Orbitron', monospace;
+      font-size: 1rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--purple-l), var(--cyan-l));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .card-desc {
+      font-size: .875rem; color: var(--muted); line-height: 1.75;
+      font-weight: 300; margin-bottom: 28px; margin-top: 6px;
+    }
+
+    /* Error */
+    .err {
+      display: flex; align-items: flex-start; gap: 9px;
+      padding: 11px 14px; border-radius: 11px;
+      border: 1px solid var(--error-bd); background: var(--error-bg);
+      color: var(--error-tx); font-size: .82rem; margin-bottom: 20px; line-height: 1.55;
+    }
+
+    /* Input */
+    .input-wrap {
+      position: relative; margin-bottom: 14px;
+    }
+    .code-input {
+      width: 100%;
+      padding: 13px 18px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(124,58,237,.3);
+      border-radius: 12px;
+      color: var(--white);
+      font-family: 'Orbitron', monospace;
+      font-size: .95rem;
+      letter-spacing: .15em;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .code-input::placeholder { color: var(--muted); letter-spacing: .06em; font-family: inherit; }
+    .code-input:focus {
+      border-color: rgba(124,58,237,.65);
+      box-shadow: 0 0 0 3px rgba(124,58,237,.12), 0 0 20px rgba(124,58,237,.15);
+    }
+
+    /* Button */
+    .btn {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; padding: 14px 22px;
+      border-radius: 13px; border: none; cursor: pointer;
+      font-family: inherit; font-size: .95rem; font-weight: 600;
+      color: var(--white);
+      background: linear-gradient(135deg, rgba(124,58,237,.35), rgba(6,182,212,.2));
+      border: 1px solid rgba(124,58,237,.45);
+      transition: border-color .22s, box-shadow .22s, transform .15s, background .22s;
+      margin-bottom: 20px; position: relative; overflow: hidden;
+    }
+    .btn::before {
+      content:''; position:absolute; inset:0;
+      background: linear-gradient(135deg, rgba(124,58,237,.45), rgba(6,182,212,.25));
+      opacity:0; transition: opacity .2s;
+    }
+    .btn:hover { border-color: rgba(124,58,237,.75); box-shadow: 0 0 28px rgba(124,58,237,.3), 0 8px 20px rgba(0,0,0,.4); transform: translateY(-2px); }
+    .btn:hover::before { opacity:1; }
+    .btn:active { transform: translateY(0) scale(.98); }
+    .btn span { position: relative; z-index: 1; }
+
+    /* Divider */
+    .divider {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--muted); font-size: .72rem; margin-bottom: 14px;
+    }
+    .divider::before, .divider::after {
+      content:''; flex:1; height:1px; background: rgba(255,255,255,.08);
+    }
+
+    /* Logout */
+    .logout-link {
+      display: block; text-align: center;
+      font-size: .78rem; color: var(--muted); text-decoration: none;
+      transition: color .2s;
+    }
+    .logout-link:hover { color: var(--error-tx); }
+
+    /* Footer */
+    .cfoot {
+      margin-top: 26px; padding-top: 18px;
+      border-top: 1px solid rgba(255,255,255,.06);
+      text-align: center; font-size: .62rem;
+      color: rgba(255,255,255,.2); letter-spacing: .08em;
+      font-family: 'Orbitron', monospace;
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 32px 20px 26px; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div class="glow glow-a"></div>
+  <div class="glow glow-b"></div>
+
+  <!-- Lang Switcher -->
+  <div class="lang-bar">
+    <a class="lang-btn <%= lang === 'ar' ? 'active' : 'inactive' %>" href="/verify?lang=ar">ع</a>
+    <a class="lang-btn <%= lang === 'en' ? 'active' : 'inactive' %>" href="/verify?lang=en">EN</a>
+  </div>
+
+  <div class="page">
+    <div class="card">
+
+      <!-- Avatar -->
+      <div class="avatar-wrap">
+        <% if (user.avatar) { %>
+          <img class="avatar"
+            src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=128"
+            alt="<%= user.displayName || user.username %>" />
+        <% } else { %>
+          <div class="avatar-fallback"><i data-lucide="user" style="width:32px;height:32px;stroke:var(--purple-l);"></i></div>
+        <% } %>
+      </div>
+
+      <div class="tag"><span class="tag-dot"></span><%= t.verify.tag %></div>
+
+      <div class="card-title">
+        <%= t.verify.welcome %>
+        <span class="card-username"><%= user.displayName || user.username %></span>
+      </div>
+      <div class="card-desc"><%= t.verify.desc %></div>
+
+      <% if (error === 'wrong_code') { %>
+      <div class="err"><i data-lucide="alert-triangle" style="width:16px;height:16px;flex-shrink:0;stroke:var(--error-tx);margin-top:1px;"></i><span><%= t.verify.errorWrong %></span></div>
+      <% } %>
+
+      <form method="POST" action="/verify" id="verify-form">
+        <div class="input-wrap">
+          <input
+            class="code-input"
+            type="password"
+            name="code"
+            autocomplete="off"
+            placeholder="<%= t.verify.placeholder %>"
+            autofocus
+            required />
+        </div>
+        <button type="submit" class="btn">
+          <i data-lucide="lock-open" style="width:18px;height:18px;flex-shrink:0;stroke:var(--white);position:relative;z-index:1;"></i>
+          <span><%= t.verify.btnVerify %></span>
+        </button>
+      </form>
+
+      <div class="divider">or</div>
+      <a href="/auth/logout" class="logout-link"><%= t.verify.logoutLink %></a>
+
+      <div class="cfoot"><%= t.verify.footer %> &nbsp;•&nbsp; 2026</div>
+    </div>
+  </div>
+
+  <!-- Lucide Icons -->
+  <script src="/js/lucide.min.js"></script>
+  <script>lucide.createIcons();</script>
+
+  <!-- Stars -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script>
+    (function () {
+      const canvas   = document.getElementById('c');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+      renderer.setPixelRatio(1);
+      renderer.setSize(innerWidth, innerHeight);
+      renderer.setClearColor(0x040010, 1);
+      const scene  = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 500);
+      camera.position.z = 1;
+      const N = 3200, pos = new Float32Array(N * 3);
+      for (let i = 0; i < N * 3; i++) pos[i] = (Math.random() - .5) * 240;
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const mat = new THREE.PointsMaterial({ color: 0xb8b0ff, size: 0.26, transparent: true, opacity: 0.65, depthWrite: false });
+      scene.add(new THREE.Points(geo, mat));
+      let mx = 0, my = 0, t = 0;
+      document.addEventListener('mousemove', e => { mx = (e.clientX / innerWidth - .5) * .3; my = (e.clientY / innerHeight - .5) * .15; });
+      window.addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+      const stars = scene.children[0];
+      (function render() { requestAnimationFrame(render); t += 0.00028; stars.rotation.y = t + mx * .2; stars.rotation.x = my * .1; renderer.render(scene, camera); })();
+    })();
+  </script>
+
+  <!-- Page-transition keyframes (must always be defined) -->
+  <style>
+    @keyframes page-in  { from{opacity:1} to{opacity:0} }
+    @keyframes page-out { from{opacity:0} to{opacity:1} }
+    #page-overlay.leaving { animation:page-out .38s cubic-bezier(.4,0,.2,1) forwards; pointer-events:all; }
+  </style>
+
+  <!-- Page transition overlay (fade-in on load) -->
+  <div id="page-overlay" style="
+    position:fixed;inset:0;z-index:9999;
+    background:#040010;
+    animation:page-in .45s cubic-bezier(.4,0,.2,1) forwards;
+    pointer-events:none;
+  "></div>
+
+  <% if (typeof success !== 'undefined' && success) { %>
+  <!-- Success overlay -->
+  <div id="success-ov" style="
+    position:fixed;inset:0;z-index:9998;
+    display:flex;align-items:center;justify-content:center;
+    backdrop-filter:blur(22px) saturate(160%);
+    -webkit-backdrop-filter:blur(22px) saturate(160%);
+    background:rgba(4,0,16,.55);
+    animation:succ-in .5s cubic-bezier(.22,1,.36,1) both;
+  ">
+    <div style="
+      display:flex;flex-direction:column;align-items:center;gap:22px;
+      text-align:center;padding:48px 36px;
+      background:rgba(10,3,30,.82);
+      border:1px solid rgba(34,197,94,.3);
+      border-radius:24px;
+      box-shadow:0 0 60px -10px rgba(34,197,94,.3),0 32px 80px rgba(0,0,0,.7);
+      animation:succ-card .55s cubic-bezier(.22,1,.36,1) .1s both;
+    ">
+      <div style="
+        width:64px;height:64px;border-radius:50%;
+        background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35);
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:0 0 30px rgba(34,197,94,.25);
+        animation:icon-pop .5s cubic-bezier(.22,1,.36,1) .3s both;
+      ">
+        <i data-lucide="check" style="width:30px;height:30px;stroke:#86efac;stroke-width:2.5;"></i>
+      </div>
+      <div>
+        <div style="font-size:1.25rem;font-weight:700;margin-bottom:8px;color:#f8fafc;"><%= t.verify.successTitle %></div>
+        <div style="font-size:.85rem;color:rgba(203,194,255,.6);font-weight:300;"><%= t.verify.successSub %></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:.72rem;color:rgba(203,194,255,.4);font-family:'Orbitron',monospace;letter-spacing:.08em;">
+        <i data-lucide="loader-circle" style="width:13px;height:13px;stroke:currentColor;animation:spin 1.2s linear infinite;"></i>
+        <span id="countdown">3</span>
+      </div>
+    </div>
+  </div>
+  <style>
+    @keyframes succ-in   { from{opacity:0} to{opacity:1} }
+    @keyframes succ-card { from{opacity:0;transform:translateY(24px) scale(.95)} to{opacity:1;transform:translateY(0) scale(1)} }
+    @keyframes icon-pop  { from{transform:scale(0) rotate(-30deg)} to{transform:scale(1) rotate(0)} }
+    @keyframes spin      { to{transform:rotate(360deg)} }
+  </style>
+  <script>
+    lucide.createIcons();
+    let secs = 3;
+    const cd = document.getElementById('countdown');
+    const iv = setInterval(() => {
+      secs--;
+      if (cd) cd.textContent = secs;
+      if (secs <= 0) { clearInterval(iv); window.location.href = '/dashboard'; }
+    }, 1000);
+  </script>
+  <% } else { %>
+  <script>
+    // Fade-out on form submit
+    document.getElementById('verify-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const ov = document.getElementById('page-overlay');
+      ov.classList.add('leaving');
+      const form = this;
+      setTimeout(() => form.submit(), 400);
+    });
+    // Fade-out on logout link
+    document.querySelector('a.logout-link').addEventListener('click', function(e) {
+      e.preventDefault();
+      const href = this.href;
+      const ov = document.getElementById('page-overlay');
+      ov.classList.add('leaving');
+      setTimeout(() => { window.location.href = href; }, 400);
+    });
+  </script>
+  <% } %>
+</body>
+</html>
+
+<%#
+  This project was programmed by the Code Nexus team.
+  If you encounter any problems, open an Issue or log into the Discord server:
+  https://discord.gg/UvEYbFd2rj
+%>

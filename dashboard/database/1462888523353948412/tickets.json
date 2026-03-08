@@ -1,0 +1,183 @@
+{
+  "enabled": true,
+  "createdAt": "2026-03-04T23:18:06.565Z",
+  "updatedAt": "2026-03-05T13:01:29.971Z",
+  "general": {
+    "LANGUAGE": "en",
+    "TICKET_LIMIT_PER_USER": 9,
+    "ALLOW_USER_CLOSE": true,
+    "CLOSE_CONFIRMATION": false,
+    "ENABLE_FEEDBACK": false,
+    "ANONYMISE_RESPONSES": false,
+    "THREAD_MODE": false,
+    "DISABLE_OPEN_COMMAND": false,
+    "NOTIFICATION_CHANNEL": null,
+    "TRANSCRIPTS_CHANNEL": null,
+    "CHANNEL_CATEGORY": null,
+    "OVERFLOW_CATEGORY": null,
+    "NAMING_SCHEME": "ticket-{number}",
+    "WELCOME_MESSAGE": "Thank you for contacting support.\nPlease describe your issue.",
+    "CLAIM_SUPPORT_VIEW": true,
+    "CLAIM_SUPPORT_TYPE": true,
+    "AUTO_CLOSE_ON_LEAVE": false,
+    "AC_NO_RESPONSE_ENABLED": false,
+    "AC_NO_RESPONSE_DAYS": 0,
+    "AC_NO_RESPONSE_HOURS": 0,
+    "AC_NO_RESPONSE_MINS": 0,
+    "AC_LAST_MSG_ENABLED": false,
+    "AC_LAST_MSG_DAYS": 0,
+    "AC_LAST_MSG_HOURS": 0,
+    "AC_LAST_MSG_MINS": 0,
+    "OPEN_PERMISSION": "everyone",
+    "OPEN_PERMISSION_ROLE": null,
+    "ADD_MSG_SENDER": false,
+    "PERM_ATTACH_FILES": true,
+    "PERM_EMBED_LINKS": true,
+    "PERM_ADD_REACTIONS": true,
+    "COLOR_SUCCESS": "#22c55e",
+    "COLOR_FAILURE": "#ef4444",
+    "HIDE_CLOSE_BTN": false,
+    "HIDE_CLOSE_REASON_BTN": false,
+    "HIDE_CLAIM_BTN": false,
+    "RULES_BTN_ENABLED": true,
+    "RULES_BTN_TEXT": "ممنوع سبام تكت",
+    "RULES_BTN_LABEL": "rules",
+    "RULES_BTN_EMOJI": "",
+    "RULES_BTN_STYLE": 2,
+    "ESCALATE_ENABLED": true,
+    "ESCALATE_CATEGORIES": [
+      "1478752701574811729"
+    ]
+  },
+  "panels": [
+    {
+      "id": "panel_1772676035285",
+      "createdAt": "2026-03-05T02:00:35.284Z",
+      "updatedAt": "2026-03-05T09:30:47.451Z",
+      "name": "Welcome to Code Nexus",
+      "mentionRole": "1463227106287681590",
+      "transcriptChannel": "1478752505587437773",
+      "deleteMentions": true,
+      "threadMode": false,
+      "threadNotifChannel": null,
+      "cooldown": 60,
+      "category": "1478752701574811729",
+      "maxOpen": 2,
+      "hideClose": false,
+      "hideCloseReason": true,
+      "hideClaim": false,
+      "form": null,
+      "exitSurvey": null,
+      "awaitingCat": null,
+      "namingMode": "global",
+      "namingCustom": "ticket-{number}",
+      "panelTitle": "Welcome to Code Nexus",
+      "panelChannel": "1478554167219065009",
+      "disabled": false,
+      "bannerImage": "/uploads/1462888523353948412/banner_1772702823130.webp",
+      "description": "Choose the ticket you want below",
+      "accentColor": null,
+      "btnText": "Open Ticket",
+      "btnEmoji": "🚀",
+      "btnColor": 2,
+      "useSelectMenu": false,
+      "selectMenuPlaceholder": "",
+      "acl": [],
+      "alwaysOpen": true,
+      "timezone": "UTC",
+      "hours": {
+        "monday": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "tuesday": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "wednesday": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "thursday": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "friday": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "saturday": {
+          "open": "09:00",
+          "close": "17:00"
+        },
+        "sunday": {
+          "open": "09:00",
+          "close": "17:00"
+        }
+      },
+      "transcriptEnabled": true,
+      "transcriptDm": true,
+      "formEnabled": true,
+      "formQuestions": [
+        {
+          "label": "لماذا فتحت تكت؟",
+          "placeholder": "",
+          "style": "paragraph",
+          "required": true
+        }
+      ],
+      "feedbackEnabled": true,
+      "feedbackDm": true,
+      "feedbackChannel": "1478554167219065009",
+      "feedbackRole": "1463227106287681590",
+      "supportRoles": [
+        "1463227106287681590"
+      ],
+      "actionBtnsMode": "buttons",
+      "actionBtns": {
+        "close": {
+          "emoji": "",
+          "style": 2,
+          "labelMode": "text_only"
+        },
+        "claim": {
+          "emoji": "",
+          "style": 2,
+          "labelMode": "text_only"
+        },
+        "unclaim": {
+          "emoji": "",
+          "style": 2,
+          "labelMode": "text_only"
+        },
+        "add": {
+          "emoji": "",
+          "style": 2,
+          "labelMode": "text_only"
+        },
+        "remove": {
+          "emoji": "",
+          "style": 2,
+          "labelMode": "text_only"
+        }
+      },
+      "messageId": "1479048657901715547",
+      "messageSentAt": "2026-03-05T09:31:20.068Z"
+    }
+  ],
+  "multiPanels": [
+    {
+      "id": "mp_1772676035285",
+      "createdAt": "2026-03-05T02:00:35.284Z",
+      "updatedAt": "2026-03-05T09:30:47.451Z",
+      "channel": null,
+      "panels": [],
+      "useDropdown": true,
+      "placeholder": "",
+      "bannerImage": "",
+      "accentColor": null,
+      "showRefreshBtn": false,
+      "refreshBtnLabel": null
+    }
+  ]
+}

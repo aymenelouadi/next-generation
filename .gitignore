@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Environment — NEVER commit real secrets
+.env
+
+# Database / runtime data
+database/*.json
+!database/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Build / temp
+dist/
+build/
+tmp/

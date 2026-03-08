@@ -1,0 +1,36 @@
+{
+  "name": "next-generation",
+  "version": "5.0.0",
+  "description": "discord-bot-all-in-one-next-generation",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "dashboard": "node dashboard/server.js"
+  },
+  "author": "Shaad You | Code Nexus",
+  "license": "MIT",
+  "dependencies": {
+    "apexcharts": "^5.10.1",
+    "country-flag-icons": "^1.6.15",
+    "discord-html-transcripts": "^3.2.0",
+    "discord.js": "^14.25.1",
+    "dotenv": "^16.4.5",
+    "ejs": "^4.0.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "fs-extra": "^11.2.0",
+    "geoip-lite": "^1.4.10",
+    "lucide": "^0.576.0",
+    "moment": "^2.30.1",
+    "moment-duration-format": "^2.3.2",
+    "ms": "^2.1.3",
+    "multer": "^2.1.0",
+    "request-ip": "^3.3.0",
+    "socket.io": "^4.8.3",
+    "three.js": "^0.77.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

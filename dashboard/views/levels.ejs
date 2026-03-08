@@ -1,0 +1,2328 @@
+<%#
+  This project was programmed by the Code Nexus team.
+  If you encounter any problems, open an Issue or log into the Discord server:
+  https://discord.gg/UvEYbFd2rj
+%>
+<!DOCTYPE html>
+<html lang="<%= t.lang %>" dir="<%= t.dir %>">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Levels — <%= guildInfo.name %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Tajawal:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #040010; --surface: rgba(255,255,255,.04); --surface-2: rgba(255,255,255,.07);
+      --card: rgba(10,3,30,.78); --purple: #7c3aed; --purple-l: #a78bfa;
+      --cyan: #06b6d4; --cyan-l: #67e8f9; --gold: #d97706; --gold-l: #fcd34d;
+      --green: #22c55e; --red: #ef4444; --orange: #f97316; --yellow: #eab308;
+      --border: rgba(124,58,237,.2); --border-h: rgba(124,58,237,.5);
+      --muted: rgba(203,194,255,.5); --white: #f8fafc;
+      --nav-w: 64px; --mgmt-w: 220px;
+    }
+    html, body { min-height: 100%; }
+    body {
+      background: var(--bg); color: var(--white);
+      font-family: '<%= t.fontBody %>', 'Tajawal', 'Inter', system-ui, sans-serif;
+      line-height: 1.6; overflow-x: hidden;
+    }
+    #c { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .glow { position: fixed; border-radius: 50%; pointer-events: none; z-index: 1; filter: blur(120px); animation: glow-drift 22s ease-in-out infinite alternate; }
+    .glow-a { width: min(600px, 80vw); height: min(600px, 80vw); top: -20%; right: -16%; background: radial-gradient(circle, rgba(124,58,237,.28) 0%, transparent 65%); }
+    .glow-b { width: min(500px, 70vw); height: min(500px, 70vw); bottom: -18%; left: -12%; background: radial-gradient(circle, rgba(6,182,212,.18) 0%, transparent 65%); animation-delay: -11s; }
+    @keyframes glow-drift { from { transform: translate(0,0) scale(1); } to { transform: translate(20px,15px) scale(1.06); } }
+
+    /* Topbar */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 60px;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
+      background: rgba(4, 0, 16, .8); backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, .06); gap: 12px;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
+    .guild-icon-top {
+      width: 36px; height: 36px; border-radius: 10px; object-fit: cover; flex-shrink: 0;
+      filter: drop-shadow(0 4px 18px rgba(124, 58, 237, 0.35));
+    }
+    .guild-icon-top-fallback {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, rgba(124, 58, 237, .35), rgba(6, 182, 212, .2));
+      border: 1px solid rgba(124, 58, 237, .35); display: flex; align-items: center; justify-content: center;
+      font-family: 'Orbitron', monospace; font-size: .85rem; font-weight: 800; color: var(--purple-l); flex-shrink: 0;
+    }
+    .guild-meta { min-width: 0; }
+    .guild-meta-name {
+      font-size: .88rem; font-weight: 700; letter-spacing: -.01em; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis; max-width: 200px;
+    }
+    .guild-meta-id {
+      font-size: .6rem; color: var(--muted); font-family: 'Orbitron', monospace;
+      letter-spacing: .05em; white-space: nowrap;
+    }
+    .topbar-sep { width: 1px; height: 28px; background: rgba(255, 255, 255, .08); flex-shrink: 0; }
+    .topbar-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
+    .topbar-brand img { width: 26px; height: 26px; border-radius: 7px; filter: drop-shadow(0 4px 18px rgba(124, 58, 237, 0.35)); }
+    .topbar-brand span {
+      font-family: 'Orbitron', monospace; font-size: .78rem; font-weight: 800; letter-spacing: .1em;
+      background: linear-gradient(135deg, var(--white), var(--purple-l));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .user-chip {
+      display: flex; align-items: center; gap: 7px; padding: 4px 10px 4px 5px; border-radius: 99px;
+      background: var(--surface); border: 1px solid rgba(255, 255, 255, .08); cursor: pointer;
+    }
+    .user-chip-av { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; display: block; flex-shrink: 0; }
+    .user-chip-av-fallback {
+      width: 26px; height: 26px; border-radius: 50%; background: rgba(124, 58, 237, .25);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .user-chip span { font-size: .78rem; font-weight: 500; }
+    .lang-select {
+      background: var(--surface); border: 1px solid rgba(255, 255, 255, .12); border-radius: 10px;
+      color: var(--white); font-size: .8rem; font-weight: 600; padding: 6px 30px 6px 10px;
+      cursor: pointer; outline: none; -webkit-appearance: none; appearance: none; font-family: inherit;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a78bfa' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 9px center; background-size: 12px;
+      transition: border-color .18s, background-color .18s; min-width: 100px;
+    }
+    .lang-select:hover { border-color: rgba(124, 58, 237, .5); background-color: rgba(124, 58, 237, .08); }
+    .lang-select:focus { border-color: rgba(124, 58, 237, .6); }
+    .lang-select option { background: #0a0022; color: var(--white); }
+    .menu-toggle {
+      display: none; align-items: center; justify-content: center; width: 36px; height: 36px;
+      border-radius: 10px; background: var(--surface); border: 1px solid rgba(255, 255, 255, .08);
+      color: var(--white); cursor: pointer; transition: background .18s; flex-shrink: 0;
+    }
+    .menu-toggle:hover { background: rgba(124, 58, 237, .15); border-color: rgba(124, 58, 237, .4); }
+    .nav-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, .55);
+      z-index: 88; backdrop-filter: blur(2px);
+    }
+    .nav-overlay.open { display: block; }
+
+    /* Nav Sidebar */
+    .nav-sidebar {
+      position: fixed; top: 60px; bottom: 0; left: 0; width: var(--nav-w); z-index: 90;
+      background: rgba(4, 0, 16, .92); border-right: 1px solid rgba(255, 255, 255, .06);
+      backdrop-filter: blur(20px); display: flex; flex-direction: column; align-items: center;
+      padding: 10px 0 16px; gap: 4px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
+      transition: width .28s cubic-bezier(.22, 1, .36, 1);
+    }
+    .nav-sidebar::-webkit-scrollbar { display: none; }
+    .nav-sidebar:hover { width: 220px; align-items: stretch; overflow-x: unset; }
+    [dir="rtl"] .nav-sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid rgba(255, 255, 255, .06); }
+    .nav-back {
+      display: flex; align-items: center; gap: 0; width: 40px; min-height: 40px; color: var(--purple-l);
+      text-decoration: none; transition: width 350ms cubic-bezier(0.4, 0, 0.2, 1), gap 350ms cubic-bezier(0.4, 0, 0.2, 1), padding 350ms cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 0; overflow: visible; padding: 0; justify-content: flex-start; border-radius: 0; background: none; border: none;
+    }
+    .nav-back .nav-icon {
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;
+      background: var(--purple); border-radius: 0.6rem; padding: 7px; box-sizing: border-box;
+      transition: background 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .nav-back:hover .nav-icon { background: #8b5cf6; }
+    .nav-back .nav-label {
+      font-size: .78rem; font-weight: 600; white-space: nowrap; opacity: 0; visibility: hidden;
+      transition: opacity 350ms cubic-bezier(0.4, 0, 0.2, 1), visibility 350ms cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none; color: var(--white);
+    }
+    .nav-sidebar:hover .nav-back { width: 100%; gap: 10px; padding: 0 12px 0 8px; }
+    .nav-sidebar:hover .nav-back .nav-label { opacity: 1; visibility: visible; pointer-events: auto; }
+    [dir="rtl"] .nav-sidebar:hover .nav-back { padding: 0 8px 0 12px; }
+    .nav-divider {
+      width: 32px; height: 1px; background: rgba(255, 255, 255, .08); margin: 4px 0;
+      flex-shrink: 0; transition: width .28s;
+    }
+    .nav-sidebar:hover .nav-divider { width: calc(100% - 24px); }
+    .nav-item {
+      display: flex; align-items: center; gap: 0; width: 40px; min-height: 40px; border-radius: 0;
+      background: none; text-decoration: none; flex-shrink: 0; position: relative; overflow: visible;
+      transition: gap 350ms cubic-bezier(0.4, 0, 0.2, 1), width 350ms cubic-bezier(0.4, 0, 0.2, 1), padding 350ms cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 0; justify-content: flex-start;
+    }
+    .nav-item-icon {
+      width: 40px; height: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; overflow: hidden; position: relative;
+    }
+    .nav-item-icon img { width: 40px; height: 40px; object-fit: cover; display: block; border-radius: 50%; }
+    .nav-item-fallback {
+      width: 40px; height: 40px; background: linear-gradient(135deg, rgba(124, 58, 237, .5), rgba(6, 182, 212, .3));
+      display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', monospace;
+      font-size: .8rem; font-weight: 800; color: var(--white); border-radius: 50%;
+    }
+    .nav-status {
+      position: absolute; bottom: 2px; right: 2px; width: 10px; height: 10px; border-radius: 50%;
+      border: 2px solid rgba(4, 0, 16, .92); flex-shrink: 0; transition: opacity .2s;
+    }
+    .nav-status.on { background: #23a55a; box-shadow: 0 0 5px rgba(35, 165, 90, .7); }
+    .nav-status.off { background: #ef4444; box-shadow: 0 0 5px rgba(239, 68, 68, .6); }
+    .nav-item-label {
+      display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; opacity: 0; visibility: hidden;
+      transition: opacity 350ms cubic-bezier(0.4, 0, 0.2, 1), visibility 350ms cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+    }
+    .nav-item-name {
+      font-size: .78rem; font-weight: 600; white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis; color: var(--white);
+    }
+    .nav-item-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-left: auto;
+    }
+    .nav-item-dot.on { background: #23a55a; box-shadow: 0 0 4px rgba(35, 165, 90, .7); }
+    .nav-item-dot.off { background: #ef4444; box-shadow: 0 0 4px rgba(239, 68, 68, .6); }
+    .nav-sidebar:hover .nav-item {
+      width: 100%; gap: 10px; padding: 0 12px 0 8px; justify-content: flex-start; border-radius: 10px;
+    }
+    [dir="rtl"] .nav-sidebar:hover .nav-item { padding: 0 8px 0 12px; }
+    .nav-sidebar:hover .nav-item-label { opacity: 1; visibility: visible; pointer-events: auto; }
+    .nav-sidebar:hover .nav-status { opacity: 0; }
+    .nav-item:hover .nav-item-icon { box-shadow: 0 0 0 2px rgba(124, 58, 237, .4); }
+    .nav-item.active .nav-item-icon { box-shadow: 0 0 0 2.5px var(--purple-l), 0 0 16px rgba(124, 58, 237, .35); }
+    .nav-item.active::before {
+      content: ''; position: absolute; left: -8px; top: 50%; transform: translateY(-50%);
+      width: 3px; height: 22px; border-radius: 0 3px 3px 0; background: var(--purple-l); flex-shrink: 0;
+    }
+
+    /* Mgmt Sidebar */
+    .mgmt-sidebar {
+      position: fixed; top: 60px; bottom: 0; left: var(--nav-w); width: var(--mgmt-w); z-index: 85;
+      background: rgba(6, 2, 20, .97); border-right: 1px solid rgba(255,255,255,.06);
+      backdrop-filter: blur(20px); display: flex; flex-direction: column; overflow: hidden;
+      transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    [dir="rtl"] .mgmt-sidebar {
+      left: auto; right: var(--nav-w); border-right: none; border-left: 1px solid rgba(255,255,255,.06);
+    }
+    .mgmt-header {
+      display: flex; align-items: center; justify-content: space-between; padding: 14px 12px 10px;
+      flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    .mgmt-header-inner { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .mgmt-header-icon {
+      display: flex; align-items: center; justify-content: center; background: rgba(136,144,161,.12);
+      border-radius: 11px; width: 35px; height: 35px; flex-shrink: 0; color: var(--muted);
+    }
+    .mgmt-header-title {
+      font-size: .78rem; font-weight: 700; color: var(--white); white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    .mgmt-sort-btn {
+      background: none; border: none; color: var(--muted); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; width: 28px; height: 28px;
+      border-radius: 7px; padding: 0; flex-shrink: 0; transition: background .15s, color .15s;
+    }
+    .mgmt-sort-btn:hover { background: rgba(255,255,255,.06); color: var(--white); }
+    .mgmt-body {
+      flex: 1; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin;
+      scrollbar-color: rgba(124,58,237,.25) transparent; padding-bottom: 8px;
+    }
+    .mgmt-body::-webkit-scrollbar { width: 3px; }
+    .mgmt-body::-webkit-scrollbar-track { background: transparent; }
+    .mgmt-body::-webkit-scrollbar-thumb { background: rgba(124,58,237,.3); border-radius: 3px; }
+    .mgmt-nav { padding: 8px 10px 0; }
+    .mgmt-section { margin-bottom: 2px; }
+    .mgmt-section-btn {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 10px; background: none; border: none; border-radius: 10px; cursor: pointer;
+      color: var(--white); font-family: inherit; font-size: .76rem; font-weight: 700;
+      letter-spacing: .02em; transition: background .15s;
+    }
+    .mgmt-section-btn:hover { background: rgba(255,255,255,.04); }
+    .mgmt-sec-chevron {
+      color: var(--muted); flex-shrink: 0; transform: rotate(180deg);
+      transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .mgmt-section-btn.open .mgmt-sec-chevron { transform: rotate(0deg); }
+    .mgmt-sec-body {
+      overflow: hidden; max-height: 0; transition: max-height 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .mgmt-sec-body.open { max-height: 800px; }
+    .mgmt-item {
+      display: flex; align-items: center; gap: 0; padding: 5px 8px 5px 0; border-radius: 8px;
+      text-decoration: none; color: var(--muted); font-size: .78rem; font-weight: 600;
+      position: relative; cursor: pointer; transition: background .15s, color .15s;
+      width: 100%; border: none; background: none; font-family: inherit;
+    }
+    .mgmt-item:hover:not(.disabled) { background: rgba(255,255,255,.04); color: var(--white); }
+    .mgmt-item.active { color: var(--white); }
+    .mgmt-item.disabled { cursor: default; opacity: .6; }
+    .mgmt-item-indicator {
+      width: 3px; height: 0; border-radius: 0 3px 3px 0; background: var(--purple);
+      box-shadow: 0 0 10px rgba(104,31,209,.6); margin-right: 8px; flex-shrink: 0;
+      transition: height 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .mgmt-item.active .mgmt-item-indicator { height: 1.6rem; }
+    [dir="rtl"] .mgmt-item-indicator { border-radius: 3px 0 0 3px; margin-right: 0; margin-left: 8px; }
+    .mgmt-item-icon {
+      display: flex; align-items: center; justify-content: center; width: 28px; height: 28px;
+      flex-shrink: 0; border-radius: 8px; margin-right: 8px; color: inherit;
+    }
+    [dir="rtl"] .mgmt-item-icon { margin-right: 0; margin-left: 8px; }
+    .mgmt-item-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mgmt-badge {
+      font-size: .6rem; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.1); color: var(--muted); background: rgba(255,255,255,.05);
+      flex-shrink: 0; letter-spacing: .03em; margin-left: 4px;
+    }
+    [dir="rtl"] .mgmt-badge { margin-left: 0; margin-right: 4px; }
+    .mgmt-footer {
+      display: flex; align-items: center; justify-content: space-between; padding: 10px 16px;
+      background: var(--purple); border-radius: 16px 16px 0 0; flex-shrink: 0; position: sticky; bottom: 0;
+    }
+    .mgmt-footer-user { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .mgmt-footer-av {
+      width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,.25);
+    }
+    .mgmt-footer-av-fallback {
+      width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.2);
+      display: flex; align-items: center; justify-content: center; font-size: .82rem;
+      font-weight: 700; color: var(--white); flex-shrink: 0;
+    }
+    .mgmt-footer-name {
+      font-size: .78rem; font-weight: 700; color: var(--white); white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis; min-width: 0;
+    }
+    .mgmt-footer-dots {
+      background: none; border: none; color: var(--white); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; padding: 4px;
+      border-radius: 6px; flex-shrink: 0; transition: background .15s;
+    }
+    .mgmt-footer-dots:hover { background: rgba(255,255,255,.18); }
+
+    /* Main content */
+    .main {
+      position: relative; z-index: 10; min-height: calc(100vh - 60px);
+      margin-top: 60px; margin-left: calc(var(--nav-w) + var(--mgmt-w));
+      padding: 36px 32px 60px; max-width: calc(1200px + var(--nav-w) + var(--mgmt-w));
+    }
+    [dir="rtl"] .main { margin-left: 0; margin-right: calc(var(--nav-w) + var(--mgmt-w)); }
+
+    /* Header */
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
+    .page-header-left { display: flex; flex-direction: column; gap: 6px; }
+    .page-header h2 { font-size: 1.6rem; font-weight: 800; letter-spacing: -.02em; }
+    .page-header p { font-size: .88rem; color: var(--muted); }
+    .toggle-switch { position: relative; display: inline-block; width: 48px; height: 26px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,.12); border-radius: 34px; transition: .3s; }
+    .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background: var(--white); border-radius: 50%; transition: .3s; }
+    input:checked + .toggle-slider { background: var(--purple); }
+    input:checked + .toggle-slider:before { transform: translateX(22px); }
+
+    .divider { width: 100%; height: 1px; background: rgba(255,255,255,.08); margin: 20px 0; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 4px; border-bottom: 1px solid rgba(255,255,255,.08); margin-bottom: 24px; overflow-x: auto; }
+    .tab-btn { padding: 10px 20px; background: none; border: none; color: var(--muted); font-size: .88rem; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; white-space: nowrap; }
+    .tab-btn:hover { color: var(--white); background: rgba(255,255,255,.04); }
+    .tab-btn.active { color: var(--purple-l); border-bottom-color: var(--purple); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Card */
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 24px; backdrop-filter: blur(20px); }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .card-header h3 { font-size: 1.1rem; font-weight: 700; }
+    .card-counter { display: flex; align-items: center; gap: 2px; font-family: 'Orbitron', monospace; font-size: .88rem; }
+    .card-counter-current { background: rgba(14,14,21,1); padding: 4px 12px; border-radius: 6px; min-width: 45px; text-align: center; }
+    .card-counter-max { color: var(--muted); }
+
+    /* Alert */
+    .alert { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; font-size: .85rem; }
+    .alert-warning { background: rgba(181,130,254,.1); border: 1px solid rgba(181,130,254,.3); color: #cbb6fe; }
+    .alert-yellow { background: rgba(234,179,8,.1); border: 1px solid rgba(234,179,8,.3); color: #fef08a; }
+    .alert svg { flex-shrink: 0; width: 20px; height: 20px; }
+
+    /* Form */
+    .form-row { margin-bottom: 20px; }
+    .form-label { display: block; font-size: .82rem; font-weight: 600; margin-bottom: 8px; color: var(--white); }
+    .form-label svg { display: inline-block; vertical-align: middle; margin-left: 4px; }
+    .form-input, .form-select { width: 100%; padding: 10px 14px; background: var(--surface); border: 1px solid rgba(255,255,255,.12); border-radius: 10px; color: var(--white); font-size: .88rem; font-family: inherit; transition: border .2s; }
+    .form-input:focus, .form-select:focus { outline: none; border-color: var(--purple); }
+    .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a78bfa' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+    .form-select option { background: #0a0022; color: var(--white); }
+    .form-textarea { width: 100%; padding: 12px 14px; background: var(--surface); border: 1px solid rgba(255,255,255,.12); border-radius: 10px; color: var(--white); font-size: .88rem; font-family: inherit; resize: vertical; min-height: 100px; }
+    .form-help { font-size: .72rem; color: var(--muted); margin-top: 4px; }
+
+    /* Choice box */
+    .choice-box { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,.1); background: var(--surface); margin-bottom: 12px; cursor: pointer; transition: all .2s; }
+    .choice-box:hover { background: rgba(255,255,255,.06); border-color: var(--purple); }
+    .choice-box.selected { background: rgba(124,58,237,.1); border-color: var(--purple); box-shadow: 0 0 0 1px var(--purple) inset; }
+    .choice-icon { flex-shrink: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+    .choice-text h4 { font-size: .88rem; font-weight: 600; margin-bottom: 2px; }
+    .choice-text p { font-size: .75rem; color: var(--muted); }
+    .choice-check { margin-left: auto; color: var(--purple); opacity: 0; transition: opacity .2s; }
+    .choice-box.selected .choice-check { opacity: 1; }
+
+    /* Button */
+    .btn { padding: 10px 20px; border-radius: 10px; font-size: .88rem; font-weight: 600; cursor: pointer; border: none; transition: all .2s; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-primary { background: var(--purple); color: var(--white); }
+    .btn-primary:hover { background: #8b5cf6; }
+    .btn-secondary { background: var(--surface); color: var(--white); border: 1px solid rgba(255,255,255,.12); }
+    .btn-secondary:hover { background: rgba(255,255,255,.08); }
+
+    /* Table */
+    .table-container { overflow-x: auto; margin-bottom: 16px; }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th { text-align: left; padding: 12px; font-size: .78rem; font-weight: 700; color: var(--muted); border-bottom: 1px solid rgba(255,255,255,.08); }
+    .table td { padding: 12px; font-size: .85rem; border-bottom: 1px solid rgba(255,255,255,.05); }
+    .table tbody tr:hover { background: rgba(255,255,255,.02); }
+    .table-empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: .88rem; }
+
+    /* Message preview */
+    .msg-preview { background: rgba(255,255,255,.03); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+    .msg-preview-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .msg-preview-av { width: 32px; height: 32px; border-radius: 50%; }
+    .msg-preview-info { display: flex; align-items: center; gap: 8px; }
+    .msg-preview-name { font-size: .88rem; font-weight: 700; }
+    .msg-preview-badge { display: flex; align-items: center; gap: 4px; font-size: .7rem; color: var(--white); background: var(--purple); padding: 2px 6px; border-radius: 4px; }
+    .msg-preview-time { font-size: .72rem; color: var(--muted); margin-left: auto; }
+    .msg-preview-body { position: relative; }
+    .msg-preview-body textarea { width: 100%; background: var(--surface); border: 1px solid rgba(255,255,255,.1); border-radius: 8px; padding: 10px 50px 10px 12px; color: var(--white); font-size: .85rem; resize: none; min-height: 80px; }
+    .msg-preview-footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+    .msg-preview-counter { font-size: .72rem; color: var(--muted); }
+
+    /* Variables */
+    .variables { background: rgba(255,255,255,.03); border-radius: 10px; padding: 16px; margin-top: 16px; }
+    .variables h5 { font-size: .88rem; font-weight: 700; margin-bottom: 10px; }
+    .var-item { display: flex; gap: 8px; margin-bottom: 6px; font-size: .78rem; }
+    .var-name { font-family: 'Orbitron', monospace; color: var(--purple-l); font-weight: 600; }
+    .var-desc { color: var(--muted); }
+
+    /* Role Picker ─────────────────────────────────────────── */
+    .role-picker { position: relative; user-select: none; margin-top: 4px; }
+    .role-picker-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; background: var(--surface); border: 1.5px solid rgba(255,255,255,.12); border-radius: 12px; cursor: pointer; color: var(--white); font-family: inherit; font-size: .85rem; transition: border-color .18s, box-shadow .18s; text-align: left; }
+    .role-picker-btn:hover { border-color: rgba(124,58,237,.4); }
+    .role-picker-btn.open { border-color: var(--purple); box-shadow: 0 0 0 2px rgba(124,58,237,.18); }
+    .role-picker-chevron { margin-left: auto; transition: transform .2s; flex-shrink: 0; color: var(--muted); }
+    .role-picker-btn.open .role-picker-chevron { transform: rotate(180deg); }
+    .role-picker-dropdown { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: rgba(8,2,22,.98); border: 1px solid rgba(124,58,237,.38); border-radius: 12px; overflow: hidden; z-index: 55; box-shadow: 0 14px 48px rgba(0,0,0,.6); display: flex; flex-direction: column; }
+    .role-picker-search { padding: 10px 12px 6px; background: rgba(8,2,22,.98); }
+    .role-picker-search input { width: 100%; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-radius: 8px; padding: 8px 12px; color: var(--white); font-size: .82rem; outline: none; font-family: inherit; transition: border-color .15s; }
+    .role-picker-search input:focus { border-color: var(--purple); }
+    .role-picker-list { overflow-y: auto; max-height: 200px; scrollbar-width: thin; scrollbar-color: rgba(124,58,237,.3) transparent; }
+    .role-option { display: flex; align-items: center; gap: 10px; padding: 9px 14px; cursor: pointer; transition: background .12s; font-size: .84rem; }
+    .role-option:hover { background: rgba(124,58,237,.12); }
+    .role-option.is-added { opacity: .35; cursor: not-allowed; pointer-events: none; }
+    .role-color-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid rgba(255,255,255,.12); }
+    .role-icon-sm { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+    .role-cell-content { display: flex; align-items: center; gap: 8px; }
+    .role-name-text { font-size: .84rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+    /* Spinner ───────────────────────────────────────────────── */
+    .spinner-cell { display: flex; flex-direction: column; gap: 4px; }
+    .level-spinner { display: flex; align-items: center; }
+    .level-spinner-btn { width: 28px; height: 30px; background: var(--surface); border: 1px solid rgba(255,255,255,.12); color: var(--white); cursor: pointer; font-size: 1.1rem; line-height: 1; display: flex; align-items: center; justify-content: center; transition: background .14s, border-color .14s; flex-shrink: 0; }
+    .level-spinner-btn:first-child { border-radius: 7px 0 0 7px; }
+    .level-spinner-btn:last-child  { border-radius: 0 7px 7px 0; }
+    .level-spinner-btn:hover { background: rgba(124,58,237,.18); border-color: rgba(124,58,237,.5); }
+    .level-spinner-input { width: 60px; height: 30px; background: var(--surface); border: 1px solid rgba(255,255,255,.12); border-left: none; border-right: none; text-align: center; color: var(--white); font-size: .82rem; font-weight: 600; outline: none; -moz-appearance: textfield; appearance: textfield; font-family: inherit; }
+    .level-spinner-input::-webkit-outer-spin-button, .level-spinner-input::-webkit-inner-spin-button { -webkit-appearance: none; appearance: none; }
+    .spinner-hint { font-size: .68rem; color: var(--muted); min-height: 12px; line-height: 1.3; }
+    .spinner-hint-warn { color: #fbbf24; }
+    /* Add role row */
+    .add-role-row { display: flex; gap: 10px; align-items: center; margin-top: 12px; }
+    .btn-add-role { display: flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 10px; background: rgba(124,58,237,.1); border: 1.5px solid rgba(124,58,237,.32); color: var(--purple-l); font-size: .82rem; font-weight: 600; cursor: pointer; transition: background .18s, border-color .18s; font-family: inherit; white-space: nowrap; }
+    .btn-add-role:hover:not(:disabled) { background: rgba(124,58,237,.22); border-color: rgba(124,58,237,.6); }
+    .btn-add-role:disabled { opacity: .35; cursor: not-allowed; }
+    /* Delete role btn */
+    .btn-del-role { background: none; border: none; color: rgba(239,68,68,.55); cursor: pointer; padding: 5px 7px; border-radius: 7px; transition: color .15s, background .15s; display: flex; align-items: center; }
+    .btn-del-role:hover { color: #ef4444; background: rgba(239,68,68,.1); }
+
+    /* ── Custom Picker (cpicker) ───────────────────────────────── */
+    .cpicker { position: relative; }
+    .cpicker-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; background: var(--surface); border: 1.5px solid rgba(255,255,255,.12); border-radius: 12px; cursor: pointer; color: var(--white); font-family: inherit; font-size: .85rem; transition: border-color .18s, box-shadow .18s; text-align: left; min-height: 44px; }
+    .cpicker-btn:hover { border-color: rgba(124,58,237,.4); }
+    .cpicker-btn.open { border-color: var(--purple); box-shadow: 0 0 0 2px rgba(124,58,237,.18); }
+    .cpicker-chevron { margin-left: auto; flex-shrink: 0; color: var(--muted); transition: transform .2s; }
+    .cpicker-btn.open .cpicker-chevron { transform: rotate(180deg); }
+    .cpicker-dropdown { position: fixed; top: calc(100% + 6px); left: 0; right: 0; min-width: 100%; background: rgba(8,2,22,.98); border: 1px solid rgba(124,58,237,.38); border-radius: 12px; z-index: 9999; box-shadow: 0 14px 48px rgba(0,0,0,.6); display: flex; flex-direction: column; }
+    .cpicker-search-wrap { padding: 10px 12px 6px; flex-shrink: 0; }
+    .cpicker-search-wrap input { width: 100%; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-radius: 8px; padding: 8px 12px; color: var(--white); font-size: .82rem; outline: none; font-family: inherit; transition: border-color .15s; box-sizing: border-box; }
+    .cpicker-search-wrap input:focus { border-color: var(--purple); }
+    .cpicker-list { overflow-y: auto; max-height: 220px; scrollbar-width: thin; scrollbar-color: rgba(124,58,237,.3) transparent; }
+    .cpicker-opt { display: flex; align-items: center; gap: 10px; padding: 9px 14px; cursor: pointer; transition: background .12s; font-size: .84rem; user-select: none; }
+    .cpicker-opt:hover { background: rgba(124,58,237,.12); }
+    .cpicker-opt.active { background: rgba(124,58,237,.08); }
+    .cpicker-check { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid rgba(255,255,255,.22); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: background .12s, border-color .12s; }
+    .cpicker-opt.active .cpicker-check { background: var(--purple); border-color: var(--purple); }
+    .cpicker-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cpicker-muted { color: var(--muted); }
+    .cpicker-badge { background: rgba(124,58,237,.25); color: var(--purple-l); font-size: .7rem; font-weight: 700; padding: 1px 7px; border-radius: 20px; white-space: nowrap; }
+    /* ── Sticky save bar ──────────────────────────────────── */
+    .save-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px 28px; background: rgba(8,2,22,.94); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid rgba(255,255,255,.07); display: flex; align-items: center; justify-content: flex-end; gap: 14px; z-index: 90; transform: translateY(100%); transition: transform .28s cubic-bezier(.22,1,.36,1); }
+    .save-bar.visible { transform: translateY(0); }
+    .save-bar-hint { color: var(--muted); font-size: .8rem; margin-right: auto; opacity: 0; transition: opacity .3s; }
+    .save-bar-hint.show { opacity: 1; }
+    .main { padding-bottom: 80px; }
+
+    /* ── Message Config ─────────────────────────────────────────── */
+    .msg-section-title { font-size: .92rem; font-weight: 700; color: var(--white); margin: 28px 0 14px; display: flex; align-items: center; gap: 8px; }
+    .msg-section-title span { font-size: .72rem; font-weight: 600; padding: 2px 9px; border-radius: 20px; background: rgba(124,58,237,.22); color: var(--purple-l); }
+    .msg-textarea-wrap { position: relative; }
+    .msg-textarea { width: 100%; min-height: 90px; resize: vertical; background: var(--surface); border: 1.5px solid rgba(255,255,255,.12); border-radius: 12px; padding: 10px 44px 10px 14px; color: var(--white); font-family: inherit; font-size: .85rem; line-height: 1.5; transition: border-color .18s; box-sizing: border-box; }
+    .msg-textarea:focus { outline: none; border-color: var(--purple); }
+    .msg-emoji-btn { position: absolute; right: 10px; bottom: 10px; background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; border-radius: 6px; transition: color .15s, background .15s; line-height: 0; }
+    .msg-emoji-btn:hover { color: var(--white); background: rgba(255,255,255,.08); }
+    /* Discord Component V2 message preview */
+    .dc-preview-wrap { margin-top: 14px; background: #313338; border-radius: 10px; overflow: hidden; }
+    .dc-preview-label { font-size: .7rem; font-weight: 700; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; padding: 8px 14px; background: #2b2d31; border-bottom: 1px solid rgba(255,255,255,.06); }
+    .dc-preview { padding: 14px 16px 16px; }
+    .dc-msg-row { display: flex; gap: 14px; align-items: flex-start; }
+    .dc-avatar { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; background: var(--surface); object-fit: cover; }
+    .dc-avatar-fallback { display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 1.1rem; }
+    .dc-body { flex: 1; min-width: 0; }
+    .dc-header { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+    .dc-botname { font-size: .88rem; font-weight: 700; color: #fff; line-height: 1; }
+    .dc-app-badge { display: inline-flex; align-items: center; gap: 3px; background: #5865f2; color: #fff; font-size: .62rem; font-weight: 700; padding: 1px 5px; border-radius: 4px; letter-spacing: .03em; line-height: 1.4; }
+    .dc-app-badge svg { width: 9px; height: 9px; display: block; }
+    .dc-time { font-size: .72rem; color: rgba(255,255,255,.35); }
+    /* V2 container — not full message width, lives inside the body column */
+    .dc-v2-container { background: #2b2d31; border-radius: 8px; border-left: 4px solid #7c3aed; overflow: hidden; display: inline-block; width: 100%; box-sizing: border-box; }
+    .dc-v2-text { padding: 12px 16px; color: #dbdee1; font-size: .88rem; line-height: 1.5; white-space: pre-wrap; word-break: break-word; min-height: 2.2rem; }
+    .dc-v2-text strong { color: #fff; font-weight: 700; }
+    .dc-v2-text code { background: rgba(255,255,255,.1); padding: 1px 5px; border-radius: 4px; font-family: monospace; font-size: .83rem; }
+    .dc-v2-text .dc-mention { color: #bdc3f1; background: rgba(88,101,242,.2); padding: 0 2px; border-radius: 3px; }
+    /* Emoji picker */
+    .emoji-picker-wrap { position: absolute; bottom: calc(100% + 8px); right: 0; width: 310px; background: rgba(8,2,22,.98); border: 1px solid rgba(124,58,237,.35); border-radius: 14px; z-index: 200; box-shadow: 0 16px 48px rgba(0,0,0,.6); display: flex; flex-direction: column; max-height: 320px; }
+    .emoji-pick-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,.07); flex-shrink: 0; }
+    .emoji-pick-tab { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 0; background: none; border: none; color: var(--muted); font-size: .78rem; font-weight: 600; cursor: pointer; transition: color .15s; border-bottom: 2px solid transparent; }
+    .emoji-pick-tab svg { width: 15px; height: 15px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .emoji-pick-tab.active { color: var(--purple-l); border-bottom-color: var(--purple); }
+    @media (max-width: 520px) {
+      .emoji-picker-wrap { position: fixed !important; bottom: 72px !important; left: 8px !important; right: 8px !important; width: auto !important; top: auto !important; max-height: 55vh; }
+    }
+    .emoji-pick-search { padding: 8px 10px 4px; flex-shrink: 0; }
+    .emoji-pick-search input { width: 100%; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); border-radius: 8px; padding: 6px 10px; color: #fff; font-size: .8rem; font-family: inherit; outline: none; box-sizing: border-box; }
+    .emoji-pick-grid { display: flex; flex-wrap: wrap; gap: 2px; padding: 6px 8px 10px; overflow-y: auto; flex: 1; scrollbar-width: thin; scrollbar-color: rgba(124,58,237,.3) transparent; }
+    .emoji-pick-btn { background: none; border: none; cursor: pointer; font-size: 1.4rem; padding: 5px; border-radius: 6px; transition: background .12s; line-height: 1; user-select: none; }
+    .emoji-pick-btn:hover { background: rgba(124,58,237,.18); }
+    .emoji-pick-btn.custom-e img { width: 22px; height: 22px; object-fit: contain; vertical-align: middle; }
+    .emoji-pick-empty { color: var(--muted); font-size: .8rem; padding: 20px; text-align: center; width: 100%; }
+    /* Variables reference */
+    .vars-box { background: rgba(124,58,237,.07); border: 1px solid rgba(124,58,237,.18); border-radius: 10px; padding: 12px 16px; margin-top: 14px; }
+    .vars-title { font-size: .75rem; font-weight: 700; color: var(--purple-l); margin-bottom: 8px; }
+    .vars-grid { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+    .var-item { display: flex; align-items: center; gap: 6px; font-size: .78rem; }
+    .var-tag { background: rgba(124,58,237,.22); color: var(--purple-l); padding: 1px 7px; border-radius: 6px; font-family: monospace; font-size: .78rem; cursor: pointer; transition: background .12s; }
+    .var-tag:hover { background: rgba(124,58,237,.4); }
+    .var-desc { color: var(--muted); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .menu-toggle { display: flex !important; }
+      .nav-sidebar {
+        transform: translateX(-100%); width: 220px !important; align-items: stretch;
+        overflow-x: unset; z-index: 95; transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      [dir="rtl"] .nav-sidebar { transform: translateX(100%); }
+      .nav-sidebar.open { transform: translateX(0) !important; }
+      .nav-sidebar.open .nav-back { width: 100%; gap: 10px; padding: 0 12px 0 8px; }
+      .nav-sidebar.open .nav-back .nav-label { opacity: 1; visibility: visible; pointer-events: auto; }
+      .nav-sidebar.open .nav-item { width: 100%; gap: 10px; padding: 0 12px 0 8px; justify-content: flex-start; border-radius: 10px; }
+      .nav-sidebar.open .nav-item-label { opacity: 1; visibility: visible; pointer-events: auto; }
+      .nav-sidebar.open .nav-status { opacity: 0; }
+      .nav-sidebar.open .nav-divider { width: calc(100% - 24px); }
+      .mgmt-sidebar {
+        left: 0 !important; right: auto !important; transform: translateX(-100%); width: 260px !important; z-index: 92;
+      }
+      [dir="rtl"] .mgmt-sidebar { left: auto !important; right: 0 !important; transform: translateX(100%); }
+      .mgmt-sidebar.open { transform: translateX(0) !important; }
+      .main { margin-left: 0 !important; margin-right: 0 !important; padding: 24px 16px 48px; max-width: 100%; }
+      .topbar { padding: 0 12px; gap: 8px; }
+      .topbar-brand span { display: none; }
+      .guild-meta-id { display: none; }
+      .guild-meta-name { max-width: 120px; }
+      .user-chip span { display: none; }
+      .user-chip { padding: 4px 7px; }
+      .topbar-sep { display: none; }
+      .lang-select { min-width: 80px; font-size: .75rem; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+      .tabs { gap: 2px; }
+      .tab-btn { padding: 8px 16px; font-size: .82rem; }
+      .card { padding: 16px; }
+    }
+    @media (max-width: 480px) {
+      .topbar-brand { display: none; }
+      .main { padding: 18px 12px 40px; }
+    }
+
+    /* ── Profile Sidebar ─────────────────────────────── */
+    .profile-backdrop {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0); pointer-events: none; transition: background .28s;
+    }
+    .profile-backdrop.open { background: rgba(0,0,0,.55); pointer-events: all; }
+    .profile-sidebar {
+      position: fixed; top: 0; right: 0; bottom: 0; z-index: 201; width: 300px; max-width: 92vw;
+      background: rgba(8,2,22,.97); border-left: 1px solid rgba(124,58,237,.18);
+      box-shadow: -12px 0 60px rgba(0,0,0,.7); display: flex; flex-direction: column;
+      transform: translateX(110%); transition: transform .32s cubic-bezier(.22,1,.36,1); overflow: hidden;
+    }
+    [dir="rtl"] .profile-sidebar { right:auto; left:0; border-left:none; border-right:1px solid rgba(124,58,237,.18); box-shadow:12px 0 60px rgba(0,0,0,.7); transform:translateX(-110%); }
+    .profile-sidebar.open { transform: translateX(0); }
+    .prof-banner { width:100%; height:100px; flex-shrink:0; position:relative; background:linear-gradient(135deg,#2d0b6b 0%,#0a0020 60%,#06b6d4 100%); }
+    .prof-banner-solid { width:100%; height:100%; }
+    .prof-banner-overlay { position:absolute; inset:0; background:linear-gradient(to bottom,transparent 50%,rgba(8,2,22,.95) 100%); }
+    .prof-close { position:absolute; top:10px; right:10px; width:28px; height:28px; border-radius:50%; background:rgba(0,0,0,.5); border:1px solid rgba(255,255,255,.1); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--muted); transition:background .18s,color .18s; z-index:5; }
+    [dir="rtl"] .prof-close { right:auto; left:10px; }
+    .prof-close:hover { background:rgba(220,38,38,.25); color:#fca5a5; }
+    .prof-avatar-wrap { position:relative; margin:-38px 0 0 20px; width:80px; height:80px; flex-shrink:0; }
+    [dir="rtl"] .prof-avatar-wrap { margin:-38px 20px 0 0; }
+    .prof-avatar { width:80px; height:80px; border-radius:50%; object-fit:cover; display:block; border:3px solid rgba(8,2,22,.97); box-shadow:0 0 0 2px rgba(124,58,237,.5); }
+    .prof-avatar-fallback { width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg,rgba(124,58,237,.4),rgba(6,182,212,.2)); border:3px solid rgba(8,2,22,.97); box-shadow:0 0 0 2px rgba(124,58,237,.5); display:flex; align-items:center; justify-content:center; font-family:'Orbitron',monospace; font-size:1.6rem; font-weight:800; color:var(--purple-l); }
+    .prof-online-dot { position:absolute; bottom:6px; right:6px; width:14px; height:14px; border-radius:50%; background:#23a55a; border:3px solid rgba(8,2,22,.97); box-shadow:0 0 6px rgba(35,165,90,.7); z-index:4; }
+    .prof-body { flex:1; overflow-y:auto; padding:12px 20px 24px; scrollbar-width:thin; scrollbar-color:rgba(124,58,237,.3) transparent; }
+    .prof-names { margin-bottom:14px; }
+    .prof-display-name { font-size:1.15rem; font-weight:700; color:var(--white); letter-spacing:-.01em; line-height:1.2; }
+    .prof-username { font-size:.75rem; color:var(--muted); margin-top:2px; }
+    .prof-block { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:12px 14px; margin-bottom:10px; }
+    .prof-block-label { font-size:.6rem; font-weight:700; letter-spacing:.12em; color:rgba(203,194,255,.5); text-transform:uppercase; margin-bottom:8px; font-family:'Orbitron',monospace; }
+    .prof-id-text { font-size:.75rem; font-family:'Orbitron',monospace; color:var(--muted); letter-spacing:.06em; cursor:pointer; transition:color .15s; }
+    .prof-id-text:hover { color:var(--purple-l); }
+    .prof-badges { display:flex; flex-wrap:wrap; gap:8px; }
+    .prof-badge { display:flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:9px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); position:relative; cursor:default; transition:transform .15s,background .15s,box-shadow .15s; }
+    .prof-badge:hover { transform:translateY(-2px) scale(1.08); background:rgba(255,255,255,.09); box-shadow:0 4px 14px rgba(0,0,0,.4); }
+    .prof-badge img { width:20px; height:20px; object-fit:contain; }
+    .prof-badge-tip { position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); background:rgba(10,3,30,.97); border:1px solid rgba(124,58,237,.3); border-radius:7px; padding:5px 10px; font-size:.65rem; white-space:nowrap; color:var(--white); opacity:0; pointer-events:none; transition:opacity .15s; z-index:10; box-shadow:0 4px 16px rgba(0,0,0,.5); }
+    .prof-badge:hover .prof-badge-tip { opacity:1; }
+    .prof-footer { padding:14px 20px; border-top:1px solid rgba(255,255,255,.06); display:flex; flex-direction:column; gap:8px; }
+    .prof-btn { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; font-size:.82rem; font-weight:600; text-decoration:none; cursor:pointer; border:1px solid transparent; transition:background .18s,border-color .18s,transform .12s; font-family:inherit; }
+    .prof-btn:active { transform:scale(.97); }
+    .prof-btn.help { background:rgba(6,182,212,.08); border-color:rgba(6,182,212,.3); color:var(--cyan-l); }
+    .prof-btn.help:hover { background:rgba(6,182,212,.14); border-color:rgba(6,182,212,.5); }
+    .prof-btn.logout { background:rgba(220,38,38,.07); border-color:rgba(220,38,38,.25); color:#fca5a5; }
+    .prof-btn.logout:hover { background:rgba(220,38,38,.12); border-color:rgba(220,38,38,.45); }
+
+    /* ── Footer ─────────────────────────────────────── */
+    .site-footer {
+      position:relative; z-index:10; text-align:center; padding:20px 20px 90px;
+      border-top:1px solid rgba(255,255,255,.05);
+      margin-left:calc(var(--nav-w) + var(--mgmt-w));
+    }
+    [dir="rtl"] .site-footer { margin-left:0; margin-right:calc(var(--nav-w) + var(--mgmt-w)); }
+    @media (max-width:768px) { .site-footer { margin-left:0 !important; margin-right:0 !important; } }
+    .site-footer .footer-logo { display:inline-flex; align-items:center; gap:8px; margin-bottom:8px; text-decoration:none; }
+    .site-footer .footer-logo img { width:20px; height:20px; border-radius:5px; filter: drop-shadow(0 4px 18px rgba(124, 58, 237, 0.35)); }
+    .site-footer .footer-logo span { font-family:'Orbitron',monospace; font-size:.68rem; font-weight:800; letter-spacing:.12em; background:linear-gradient(135deg,var(--white),var(--purple-l)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .site-footer p { font-size:.68rem; color:rgba(203,194,255,.3); }
+
+    @keyframes pIn { from { opacity:1 } to { opacity:0 } }
+    @keyframes pOut { from { opacity:0 } to { opacity:1 } }
+    #ov.leave { animation:pOut .35s cubic-bezier(.4,0,.2,1) forwards; pointer-events:all; }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div class="glow glow-a"></div>
+  <div class="glow glow-b"></div>
+
+  <!-- Nav overlay (mobile) -->
+  <div class="nav-overlay" id="nav-overlay"></div>
+
+  <!-- Profile Sidebar backdrop -->
+  <div class="profile-backdrop" id="prof-backdrop"></div>
+
+  <!-- Profile Sidebar -->
+  <aside class="profile-sidebar" id="prof-sidebar" aria-hidden="true">
+    <div class="prof-banner">
+      <% if (user.banner) { %>
+        <img src="https://cdn.discordapp.com/banners/<%= user.id %>/<%= user.banner %>.png?size=480" alt="" style="width:100%;height:100%;object-fit:cover;" />
+      <% } else if (user.bannerColor) { %>
+        <div class="prof-banner-solid" data-bg="<%= user.bannerColor %>"></div>
+      <% } %>
+      <div class="prof-banner-overlay"></div>
+      <button class="prof-close" id="close-profile" aria-label="Close">
+        <i data-lucide="x" style="width:14px;height:14px;stroke:currentColor;"></i>
+      </button>
+    </div>
+    <div class="prof-avatar-wrap">
+      <% if (user.avatar) { %>
+        <img class="prof-avatar" src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=160" alt="<%= user.displayName || user.username %>" />
+      <% } else { %>
+        <div class="prof-avatar-fallback"><%= (user.displayName || user.username).charAt(0).toUpperCase() %></div>
+      <% } %>
+      <div class="prof-online-dot"></div>
+    </div>
+    <div class="prof-body">
+      <div class="prof-names">
+        <div class="prof-display-name"><%= user.displayName || user.username %></div>
+        <div class="prof-username">@<%= user.username %></div>
+      </div>
+      <div class="prof-block">
+        <div class="prof-block-label"><%= t.home.profileId %></div>
+        <div class="prof-id-text" id="prof-copy-id"><%= user.id %></div>
+      </div>
+      <% const flags2 = Number(user.publicFlags || 0); const BADGE_CDN = 'https://cdn.discordapp.com/badge-icons/'; const badges2 = [];
+        if (flags2 & 1)      badges2.push({ label: t.home.badgeStaff,      img: 'staff.png' });
+        if (flags2 & 2)      badges2.push({ label: t.home.badgePartner,    img: 'partner.png' });
+        if (flags2 & 4)      badges2.push({ label: t.home.badgeHsEvents,   img: 'hypesquad.png' });
+        if (flags2 & 8)      badges2.push({ label: t.home.badgeBug1,       img: 'bug_hunter_level_1.png' });
+        if (flags2 & 64)     badges2.push({ label: t.home.badgeBravery,    img: 'hypesquad_house_1.png' });
+        if (flags2 & 128)    badges2.push({ label: t.home.badgeBrilliance, img: 'hypesquad_house_2.png' });
+        if (flags2 & 256)    badges2.push({ label: t.home.badgeBalance,    img: 'hypesquad_house_3.png' });
+        if (flags2 & 512)    badges2.push({ label: t.home.badgeEarlySupp,  img: 'early_supporter.png' });
+        if (flags2 & 16384)  badges2.push({ label: t.home.badgeBug2,       img: 'bug_hunter_level_2.png' });
+        if (flags2 & 131072) badges2.push({ label: t.home.badgeVerifDev,   img: 'verified_bot_developer.png' });
+        if (flags2 & 262144) badges2.push({ label: t.home.badgeModAlumni,  img: 'certified_moderator.png' });
+        if (flags2 & 4194304)badges2.push({ label: t.home.badgeActiveDev,  img: 'active_developer.png' }); %>
+      <% if (badges2.length > 0) { %>
+        <div class="prof-block">
+          <div class="prof-block-label"><%= t.home.profileBadges %></div>
+          <div class="prof-badges">
+            <% badges2.forEach(b => { %>
+              <div class="prof-badge">
+                <img src="<%= BADGE_CDN %><%= b.img %>" alt="<%= b.label %>" onerror="this.closest('.prof-badge').style.display='none'" />
+                <span class="prof-badge-tip"><%= b.label %></span>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+    </div>
+    <div class="prof-footer">
+      <% if (isShip) { %>
+      <a href="/settings" class="prof-btn" style="background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);color:var(--purple-l);">
+        <i data-lucide="settings-2" style="width:16px;height:16px;stroke:currentColor;"></i>
+        <%= lang === 'ar' ? 'إعدادات النظام' : 'System Settings' %>
+      </a>
+      <% } %>
+      <a href="https://discord.gg/jfFSmVM5kK" target="_blank" class="prof-btn help">
+        <i data-lucide="help-circle" style="width:16px;height:16px;stroke:currentColor;"></i>
+        <%= t.home.profileHelp %>
+      </a>
+      <a href="/auth/logout" class="prof-btn logout" id="logout-link">
+        <i data-lucide="log-out" style="width:16px;height:16px;stroke:currentColor;"></i>
+        <%= t.home.profileLogout %>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <% if (guildInfo.icon) { %>
+        <img class="guild-icon-top" src="https://cdn.discordapp.com/icons/<%= guildInfo.id %>/<%= guildInfo.icon %>.png?size=64" alt="<%= guildInfo.name %>" />
+      <% } else { %>
+        <div class="guild-icon-top-fallback"><%= guildInfo.name.charAt(0).toUpperCase() %></div>
+      <% } %>
+      <div class="guild-meta">
+        <div class="guild-meta-name" title="<%= guildInfo.name %>"><%= guildInfo.name %></div>
+        <div class="guild-meta-id"><%= guildInfo.id %></div>
+      </div>
+      <div class="topbar-sep"></div>
+      <a href="/dashboard" class="topbar-brand nav-link">
+        <img src="https://res.cloudinary.com/difucqa9h/image/upload/v1770643265/discord_images/yaix1pbnbdv3srvf12gl.png" alt="CODE NEXUS" />
+        <span>CODE NEXUS</span>
+      </a>
+    </div>
+    <div class="topbar-right">
+      <button class="user-chip" id="open-profile" aria-label="Profile">
+        <% if (user.avatar) { %>
+          <img class="user-chip-av" src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=64" alt="<%= user.displayName || user.username %>" />
+        <% } else { %>
+          <div class="user-chip-av-fallback"><i data-lucide="user" style="width:13px;height:13px;stroke:var(--purple-l);"></i></div>
+        <% } %>
+        <span><%= user.displayName || user.username %></span>
+        <i data-lucide="chevron-down" style="width:12px;height:12px;stroke:var(--muted);"></i>
+      </button>
+      <select class="lang-select" id="lang-select" aria-label="Language">
+        <% supported.forEach(code => { %>
+          <option value="<%= code %>" <%= lang === code ? 'selected' : '' %>><%= langFlags[code] %> <%= langLabels[code] %></option>
+        <% }) %>
+      </select>
+      <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation">
+        <i data-lucide="menu" style="width:18px;height:18px;stroke:currentColor;"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Nav sidebar (server icons) -->
+  <aside class="nav-sidebar" aria-label="Server navigation">
+    <a href="/dashboard" class="nav-back nav-link" aria-label="<%= t.guild.backBtn %>">
+      <span class="nav-icon"><i data-lucide="home" style="width:17px;height:17px;stroke:currentColor;"></i></span>
+      <span class="nav-label"><%= t.guild.backBtn %></span>
+    </a>
+    <div class="nav-divider"></div>
+    <% guilds.forEach(g => { %>
+      <a href="/dashboard/<%= g.id %>" class="nav-item <%= g.id === guildId ? 'active' : '' %> nav-link" aria-label="<%= g.name %>">
+        <div class="nav-item-icon">
+          <% if (g.icon) { %>
+            <img src="https://cdn.discordapp.com/icons/<%= g.id %>/<%= g.icon %>.png?size=64" alt="<%= g.name %>" />
+          <% } else { %>
+            <div class="nav-item-fallback"><%= g.name.charAt(0).toUpperCase() %></div>
+          <% } %>
+          <span class="nav-status <%= g.inBot ? 'on' : 'off' %>"></span>
+        </div>
+        <div class="nav-item-label">
+          <span class="nav-item-name"><%= g.name %></span>
+          <span class="nav-item-dot <%= g.inBot ? 'on' : 'off' %>"></span>
+        </div>
+      </a>
+    <% }) %>
+  </aside>
+
+  <!-- Management Sidebar -->
+  <aside class="mgmt-sidebar" id="mgmt-sidebar">
+    <div class="mgmt-header">
+      <div class="mgmt-header-inner">
+        <div class="mgmt-header-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 2C2.00779 2 1 3.00779 1 4.25V5.75C1 6.99221 2.00779 8 3.25 8H14.75C15.9922 8 17 6.99221 17 5.75V4.25C17 3.00779 15.9922 2 14.75 2H3.25ZM3 5C3 5.5522 3.4477 6 4 6C4.5522 6 5 5.5522 5 5C5 4.4478 4.5523 4 4 4C3.4477 4 3 4.4478 3 5ZM6 5C6 5.5522 6.4477 6 7 6C7.5522 6 8 5.5522 8 5C8 4.4478 7.5523 4 7 4C6.4477 4 6 4.4478 6 5Z" fill="currentColor"/>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 10C2.00779 10 1 11.0078 1 12.25V13.75C1 14.9922 2.00779 16 3.25 16H14.75C15.9922 16 17 14.9922 17 13.75V12.25C17 11.0078 15.9922 10 14.75 10H3.25ZM3 13C3 13.5522 3.4477 14 4 14C4.5522 14 5 13.5522 5 13C5 12.4478 4.5523 12 4 12C3.4477 12 3 12.4478 3 13ZM6 13C6 13.5522 6.4477 14 7 14C7.5522 14 8 13.5522 8 13C8 12.4478 7.5523 12 7 12C6.4477 12 6 12.4478 6 13Z" fill="currentColor" fill-opacity="0.4"/>
+          </svg>
+        </div>
+        <span class="mgmt-header-title"><%= lang === 'ar' ? 'إدارة السيرفر' : 'Manage Server' %></span>
+      </div>
+      <button class="mgmt-sort-btn" aria-label="sort">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
+          <path d="M9.53,2.22c-.293-.293-.768-.293-1.061,0l-3.5,3.5c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l2.97-2.97,2.97,2.97c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-3.5-3.5Z" fill="currentColor"/>
+          <path d="M11.97,11.22l-2.97,2.97-2.97-2.97c-.293-.293-.768-.293-1.061,0s-.293,.768,0,1.061l3.5,3.5c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22l3.5-3.5c.293-.293,.293-.768,0-1.061s-.768-.293-1.061,0Z" fill="currentColor" fill-opacity="0.4"/>
+        </svg>
+      </button>
+    </div>
+    <div class="mgmt-body">
+      <div class="mgmt-nav">
+        <!-- ── Section: General ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'عام' : 'General' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18">
+              <path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/>
+            </svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18">
+                  <path opacity="0.4" d="M14.25 2H12.75C11.784 2 11 2.784 11 3.75V6.25C11 7.216 11.784 8 12.75 8H14.25C15.216 8 16 7.216 16 6.25V3.75C16 2.784 15.216 2 14.25 2Z" fill="currentColor"/>
+                  <path opacity="0.4" d="M5.25 10H3.75C2.784 10 2 10.784 2 11.75V14.25C2 15.216 2.784 16 3.75 16H5.25C6.216 16 7 15.216 7 14.25V11.75C7 10.784 6.216 10 5.25 10Z" fill="currentColor"/>
+                  <path d="M7.75 2H3.75C2.784 2 2 2.784 2 3.75V6.25C2 7.216 2.784 8 3.75 8H7.75C8.716 8 9.5 7.216 9.5 6.25V3.75C9.5 2.784 8.716 2 7.75 2Z" fill="currentColor"/>
+                  <path d="M14.25 10H10.25C9.284 10 8.5 10.784 8.5 11.75V14.25C8.5 15.216 9.284 16 10.25 16H14.25C15.216 16 16 15.216 16 14.25V11.75C16 10.784 15.216 10 14.25 10Z" fill="currentColor"/>
+                </svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'نظرة عامة' : 'Overview' %></span>
+            </a>
+            <div class="mgmt-item disabled">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M4.75 9.5C5.094 9.5 5.394 9.734 5.478 10.068L5.968 12.032L7.932 12.522C8.266 12.606 8.5 12.906 8.5 13.25C8.5 13.594 8.266 13.894 7.932 13.978L5.968 14.468L5.478 16.432C5.394 16.766 5.094 17 4.75 17C4.406 17 4.106 16.766 4.022 16.432L3.532 14.468L1.568 13.978C1.234 13.894 1 13.594 1 13.25C1 12.906 1.234 12.606 1.568 12.522L3.532 12.032L4.022 10.068C4.106 9.734 4.406 9.5 4.75 9.5Z" fill="currentColor"/>
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M11.25 1C11.558 1 11.834 1.188 11.947 1.474L13.245 4.755L16.526 6.053C16.812 6.166 17 6.442 17 6.75C17 7.058 16.812 7.334 16.526 7.447L13.245 8.745L11.947 12.026C11.834 12.312 11.558 12.5 11.25 12.5C10.942 12.5 10.666 12.312 10.553 12.026L9.255 8.745L5.974 7.447C5.688 7.334 5.5 7.058 5.5 6.75C5.5 6.442 5.688 6.166 5.974 6.053L9.255 4.755L10.553 1.474C10.666 1.188 10.942 1 11.25 1Z" fill="currentColor" fill-opacity="0.4"/>
+                </svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'إدارة الاشتراكات' : 'Manage Subscriptions' %></span>
+              <span class="mgmt-badge"><%= lang === 'ar' ? 'مجاني' : 'Free' %></span>
+            </div>
+          </div>
+        </div>
+        <!-- ── Section: Levels ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'المستويات' : 'Levels' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18">
+              <path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/>
+            </svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/levels" class="mgmt-item active nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18">
+                  <path d="M9 6C5.962 6 3.5 8.463 3.5 11.5C3.5 14.537 5.962 17 9 17C12.038 17 14.5 14.537 14.5 11.5C14.5 8.463 12.038 6 9 6Z" fill="currentColor" fill-opacity="0.4"/>
+                  <path d="M11.476 10.693C11.417 10.512 11.26 10.381 11.073 10.353L9.951 10.19L9.449 9.173C9.281 8.831 8.72 8.831 8.553 9.173L8.051 10.19L6.929 10.353C6.741 10.38 6.584 10.512 6.526 10.693C6.467 10.874 6.516 11.073 6.653 11.206L7.465 11.998L7.273 13.116C7.241 13.304 7.318 13.493 7.472 13.605C7.626 13.717 7.83 13.731 7.998 13.643L9.002 13.116L10.006 13.643C10.079 13.682 10.158 13.701 10.238 13.701C10.342 13.701 10.445 13.669 10.532 13.605C10.686 13.493 10.763 13.304 10.731 13.116L10.539 11.998L11.351 11.206C11.488 11.073 11.537 10.874 11.478 10.693H11.476Z" fill="currentColor"/>
+                  <path d="M14.283 1C13.842 1 13.437 1.231 13.212 1.606L10.463 6.197C11.932 6.601 13.155 7.6 13.858 8.918L17.44 2.891C17.939 2.058 17.338 1 16.367 1H14.283Z" fill="currentColor"/>
+                  <path d="M1.633 1C0.662 1 0.061 2.059 0.561 2.892L4.151 8.903C4.854 7.592 6.074 6.599 7.537 6.197L4.789 1.608C4.565 1.234 4.153 1 3.717 1H1.633Z" fill="currentColor"/>
+                </svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'إعدادات المستوى' : 'Level Settings' %></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Section: Tickets ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'التذاكر' : 'Tickets' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/tickets" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path opacity="0.4" d="M14.25 2H12.75C11.784 2 11 2.784 11 3.75V6.25C11 7.216 11.784 8 12.75 8H14.25C15.216 8 16 7.216 16 6.25V3.75C16 2.784 15.216 2 14.25 2Z" fill="currentColor"/><path opacity="0.4" d="M5.25 10H3.75C2.784 10 2 10.784 2 11.75V14.25C2 15.216 2.784 16 3.75 16H5.25C6.216 16 7 15.216 7 14.25V11.75C7 10.784 6.216 10 5.25 10Z" fill="currentColor"/><path d="M7.75 2H3.75C2.784 2 2 2.784 2 3.75V6.25C2 7.216 2.784 8 3.75 8H7.75C8.716 8 9.5 7.216 9.5 6.25V3.75C9.5 2.784 8.716 2 7.75 2Z" fill="currentColor"/><path d="M14.25 10H10.25C9.284 10 8.5 10.784 8.5 11.75V14.25C8.5 15.216 9.284 16 10.25 16H14.25C15.216 16 16 15.216 16 14.25V11.75C16 10.784 15.216 10 14.25 10Z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'نظرة عامة' : 'Overview' %></span>
+            </a>
+            <a href="/dashboard/<%= guildId %>/tickets/general" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 11.5C10.3807 11.5 11.5 10.3807 11.5 9C11.5 7.6193 10.3807 6.5 9 6.5C7.6193 6.5 6.5 7.6193 6.5 9C6.5 10.3807 7.6193 11.5 9 11.5Z" fill="currentColor"/><path opacity="0.4" fill-rule="evenodd" clip-rule="evenodd" d="M7.6853 1.5H10.3147C10.7234 1.5 11.0941 1.7443 11.2629 2.1191L11.8071 3.3564C12.3536 3.5819 12.8668 3.8791 13.3352 4.237L14.6429 3.9095C15.0369 3.8108 15.4509 3.9764 15.6553 4.3295L16.9699 6.6705C17.1743 7.0235 17.1014 7.4708 16.7954 7.7392L15.7702 8.636C15.7899 8.757 15.8 8.876 15.8 9C15.8 9.124 15.7899 9.243 15.7702 9.364L16.7954 10.2608C17.1014 10.5292 17.1743 10.9765 16.9699 11.3295L15.6553 13.6705C15.4509 14.0236 15.0369 14.1892 14.6429 14.0905L13.3352 13.763C12.8668 14.1209 12.3536 14.4181 11.8071 14.6436L11.2629 15.8809C11.0941 16.2557 10.7234 16.5 10.3147 16.5H7.6853C7.2766 16.5 6.9059 16.2557 6.7371 15.8809L6.1929 14.6436C5.6464 14.4181 5.1332 14.1209 4.6648 13.763L3.3571 14.0905C2.9631 14.1892 2.5491 14.0236 2.3447 13.6705L1.0301 11.3295C0.8257 10.9765 0.8986 10.5292 1.2046 10.2608L2.2298 9.364C2.2101 9.243 2.2 9.124 2.2 9C2.2 8.876 2.2101 8.757 2.2298 8.636L1.2046 7.7392C0.8986 7.4708 0.8257 7.0235 1.0301 6.6705L2.3447 4.3295C2.5491 3.9764 2.9631 3.8108 3.3571 3.9095L4.6648 4.237C5.1332 3.8791 5.6464 3.5819 6.1929 3.3564L6.7371 2.1191C6.9059 1.7443 7.2766 1.5 7.6853 1.5Z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الإعدادات العامة' : 'General Settings' %></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Section: Utility ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'الأدوات' : 'Utility' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/utility" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M15.573 3.913C15.462 3.642 15.138 3.527 14.881 3.674L12.434 5.076L10.924 3.566L12.326 1.119C12.473 0.862 12.358 0.538 12.087 0.427C10.973 -0.0319999 9.667 0.218 8.808 1.077C7.94 1.945 7.692 3.264 8.169 4.385L1.292 11.262C0.236 12.318 0.236 14.032 1.292 15.088L2.912 16.708C3.968 17.764 5.682 17.764 6.738 16.708L13.615 9.831C14.736 10.308 16.055 10.06 16.923 9.192C17.782 8.333 18.032 7.027 17.573 5.913C17.462 5.642 17.138 5.527 16.881 5.674L14.434 7.076L12.924 5.566L14.326 3.119Z" fill="currentColor" fill-opacity="0.4"/><path fill-rule="evenodd" clip-rule="evenodd" d="M2 13.5C2 12.672 2.672 12 3.5 12C4.328 12 5 12.672 5 13.5C5 14.328 4.328 15 3.5 15C2.672 15 2 14.328 2 13.5Z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الأوامر العامة' : 'General Commands' %></span>
+            </a>
+            <a href="/dashboard/<%= guildId %>/moderation" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 1L2 4.5V9c0 4.418 3.083 8.572 7 9.5 3.917-.928 7-5.082 7-9.5V4.5L9 1z" fill="currentColor" fill-opacity="0.4"/><path fill-rule="evenodd" clip-rule="evenodd" d="M6.5 7.5l2.5 2.5 3.5-3.5 1 1-4.5 4.5-3.5-3.5 1-1z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الأوامر الإدارية' : 'Moderation' %></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Section: Protection ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'الحماية' : 'Protection' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/protection" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 1L2 4.5V9c0 4.418 3.083 8.572 7 9.5 3.917-.928 7-5.082 7-9.5V4.5L9 1z" fill="currentColor" fill-opacity="0.4"/><path fill-rule="evenodd" clip-rule="evenodd" d="M6.5 7.5l2.5 2.5 3.5-3.5 1 1-4.5 4.5-3.5-3.5 1-1z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الأمان' : 'Security' %></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Section: Members ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'الأعضاء' : 'Members' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/auto-roles" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 2a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zm0 9c4 0 6 2 6 3v1H3v-1c0-1 2-3 6-3z" fill="currentColor" fill-opacity="0.4"/><path d="M13.5 8a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm1.5 2c2 0 3 1 3 2v1h-3v-1c0-.6-.2-1.2-.5-1.7.3-.2.7-.3 1-.3l-.5.5z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الرتب التلقائية' : 'Auto Roles' %></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Section: Settings ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'الإعدادات' : 'Settings' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/setting" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 11.5C10.3807 11.5 11.5 10.3807 11.5 9C11.5 7.6193 10.3807 6.5 9 6.5C7.6193 6.5 6.5 7.6193 6.5 9C6.5 10.3807 7.6193 11.5 9 11.5Z" fill="currentColor"/><path opacity="0.4" fill-rule="evenodd" clip-rule="evenodd" d="M7.6853 1.5H10.3147C10.7234 1.5 11.0941 1.7443 11.2629 2.1191L11.8071 3.3564C12.3536 3.5819 12.8668 3.8791 13.3352 4.237L14.6429 3.9095C15.0369 3.8108 15.4509 3.9764 15.6553 4.3295L16.9699 6.6705C17.1743 7.0235 17.1014 7.4708 16.7954 7.7392L15.7702 8.636C15.7899 8.757 15.8 8.876 15.8 9C15.8 9.124 15.7899 9.243 15.7702 9.364L16.7954 10.2608C17.1014 10.5292 17.1743 10.9765 16.9699 11.3295L15.6553 13.6705C15.4509 14.0236 15.0369 14.1892 14.6429 14.0905L13.3352 13.763C12.8668 14.1209 12.3536 14.4181 11.8071 14.6436L11.2629 15.8809C11.0941 16.2557 10.7234 16.5 10.3147 16.5H7.6853C7.2766 16.5 6.9059 16.2557 6.7371 15.8809L6.1929 14.6436C5.6464 14.4181 5.1332 14.1209 4.6648 13.763L3.3571 14.0905C2.9631 14.1892 2.5491 14.0236 2.3447 13.6705L1.0301 11.3295C0.8257 10.9765 0.8986 10.5292 1.2046 10.2608L2.2298 9.364C2.2101 9.243 2.2 9.124 2.2 9C2.2 8.876 2.2101 8.757 2.2298 8.636L1.2046 7.7392C0.8986 7.4708 0.8257 7.0235 1.0301 6.6705L2.3447 4.3295C2.5491 3.9764 2.9631 3.8108 3.3571 3.9095L4.6648 4.237C5.1332 3.8791 5.6464 3.5819 6.1929 3.3564L6.7371 2.1191C6.9059 1.7443 7.2766 1.5 7.6853 1.5Z" fill="currentColor"/></svg></div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الإعدادات' : 'Settings' %></span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="mgmt-footer">
+      <div class="mgmt-footer-user">
+        <% if (user.avatar) { %>
+          <img class="mgmt-footer-av" src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=64" alt="<%= user.displayName || user.username %>" />
+        <% } else { %>
+          <div class="mgmt-footer-av-fallback"><%= (user.displayName || user.username).charAt(0).toUpperCase() %></div>
+        <% } %>
+        <span class="mgmt-footer-name">@<%= user.username %></span>
+      </div>
+      <button class="mgmt-footer-dots open-profile-btn" aria-label="User menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 18 18">
+          <circle cx="9" cy="9" r="1.25" fill="currentColor"/>
+          <circle cx="3.25" cy="9" r="1.25" fill="currentColor"/>
+          <circle cx="14.75" cy="9" r="1.25" fill="currentColor"/>
+        </svg>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- Header -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <h2><%= lang === 'ar' ? 'المستويات' : 'Levels' %></h2>
+        <p><%= lang === 'ar' ? 'يتتبع نشاط المستخدمين ومستوياتهم ويوفر أوامر لإعادة الضبط وعرض الترتيبات.' : 'Tracks user levels and activity, with commands to reset levels, view top rankings, and more.' %></p>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="level-enable" <%= levelSettings.ENABLE ? 'checked' : '' %>>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="settings"><%= lang === 'ar' ? 'الإعدادات' : 'Settings' %></button>
+      <button class="tab-btn" data-tab="commands"><%= lang === 'ar' ? 'الأوامر' : 'Commands' %></button>
+      <button class="tab-btn" data-tab="log"><%= lang === 'ar' ? 'السجل' : 'Log' %></button>
+    </div>
+
+    <!-- Settings Tab -->
+    <div class="tab-content active" id="tab-settings">
+      
+      <!-- Reward Roles -->
+      <div class="card">
+        <div class="card-header">
+          <h3><%= lang === 'ar' ? 'أدوار المكافآت' : 'Reward Roles' %></h3>
+        </div>
+
+        <div class="alert alert-warning">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="currentColor" style="flex-shrink:0;width:20px;height:20px"><path d="M7.81794 3.62417C11.3653 2.87982 14.5 5.57361 14.5 8.99999C14.5 11.139 13.2764 12.9817 11.5 13.8897V15.25H6.49997V13.8897C4.47225 12.8528 3.16639 10.5975 3.57418 8.08475C3.92975 5.89423 5.63841 4.08156 7.81794 3.62417Z" fill-opacity="0.4"/></svg>
+          <div><%= lang === 'ar' ? 'إذا كان أي دور يمتلك صلاحيات إدارية فلن يعمل النظام.' : 'If any of the roles have administrative permissions, the feature will not work.' %></div>
+        </div>
+        <div class="alert alert-yellow">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="currentColor" style="flex-shrink:0;width:20px;height:20px"><path opacity="0.4" d="M13.25 2H4.75C3.231 2 2 3.23 2 4.75V13.25C2 14.77 3.231 16 4.75 16H13.25C14.769 16 16 14.77 16 13.25V4.75C16 3.23 14.769 2 13.25 2Z"/><path d="M9 10.25C8.5859 10.25 8.25 9.9141 8.25 9.5V5.43115C8.25 5.01705 8.5859 4.68115 9 4.68115C9.4141 4.68115 9.75 5.01705 9.75 5.43115V9.5C9.75 9.9141 9.4141 10.25 9 10.25Z"/></svg>
+          <div><%= lang === 'ar' ? 'يجب ترتيب الأدوار من أدنى مستوى مطلوب إلى أعلاه.' : 'Roles must be ordered from lowest to highest required level.' %></div>
+        </div>
+
+        <!-- Roles table -->
+        <div class="table-container">
+          <table class="table" id="roles-table">
+            <thead>
+              <tr>
+                <th style="min-width:160px">Role Name</th>
+                <th style="min-width:140px">Text Level
+                  <span style="font-size:.65rem;color:var(--muted);font-weight:400;display:block;margin-top:1px">0 = not required</span>
+                </th>
+                <th style="min-width:140px">Voice Level
+                  <span style="font-size:.65rem;color:var(--muted);font-weight:400;display:block;margin-top:1px">0 = not required</span>
+                </th>
+                <th style="min-width:100px">
+                  <span style="display:inline-flex;align-items:center;gap:5px">
+                    Either Level
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 18 18" fill="currentColor" title="When ON: give role if text OR voice level is met. When OFF: both required (unless one is 0)."><path opacity="0.4" d="M9 17C13.4183 17 17 13.4183 17 9C17 4.58172 13.4183 1 9 1C4.58172 1 1 4.58172 1 9C1 13.4183 4.58172 17 9 17Z"/><path d="M8.82819 10.75C8.50579 10.75 8.2002 10.5078 8.14258 10.1797C7.95508 9.12158 8.64258 8.64258 9.14453 8.29297C9.67188 7.92578 9.85449 7.77148 9.85449 7.24414C9.85449 6.40723 9.15625 6.18555 8.78711 6.18555C8.37305 6.18555 7.63 6.31543 7.31055 7.18555C7.16797 7.57422 6.73535 7.77441 6.34863 7.63086C5.95898 7.48828 5.75977 7.05762 5.90234 6.66797C6.35742 5.42676 7.43652 4.68555 8.78711 4.68555C10.0312 4.68555 11.3545 5.58203 11.3545 7.24414C11.3545 8.58154 10.5723 9.12598 10.002 9.52393C9.54492 9.8418 9.32227 10.0137 9.24707 10.4375C9.18359 10.8018 8.86719 11.0576 8.50977 11.0576L8.46582 11.0547C8.4668 11.0547 8.46777 11.0557 8.46875 11.0557L8.50977 11.0576L8.82819 10.75Z"/><path d="M8.79102 13.5664C8.23926 13.5664 7.79102 13.1182 7.79102 12.5664C7.79102 12.0146 8.23926 11.5664 8.79102 11.5664C9.34277 11.5664 9.79102 12.0146 9.79102 12.5664C9.79102 13.1182 9.34277 13.5664 8.79102 13.5664Z"/></svg>
+                  </span>
+                </th>
+                <th style="min-width:60px">Del</th>
+              </tr>
+            </thead>
+            <tbody id="roles-tbody">
+              <%
+                const existingRoles = levelSettings.REWARD_ROLES || [];
+              %>
+              <% if (!existingRoles.length) { %>
+              <tr id="empty-row">
+                <td colspan="5" class="table-empty">No reward roles configured</td>
+              </tr>
+              <% } %>
+              <% existingRoles.forEach(function(rr) {
+                const role = guildRoles.find(r => r.id === rr.ROLE_ID);
+                if (!role) return;
+              %>
+              <tr data-role-id="<%= rr.ROLE_ID %>">
+                <td>
+                  <div class="role-cell-content">
+                    <% if (role.icon) { %>
+                      <img class="role-icon-sm" src="<%= role.icon %>" alt="" onerror="this.style.display='none'" />
+                    <% } else { %>
+                      <span class="role-color-dot" data-color="<%= role.color || '#5865f2' %>"></span>
+                    <% } %>
+                    <span class="role-name-text"><%= role.name %></span>
+                  </div>
+                </td>
+                <td>
+                  <div class="spinner-cell">
+                    <div class="level-spinner">
+                      <button class="level-spinner-btn" type="button" onclick="spinChange(this,-1)">−</button>
+                      <input type="number" class="level-spinner-input text-level-input" min="0" max="999" value="<%= rr.TEXT_LEVEL || 0 %>" onchange="updateHints(this.closest('tr'))" />
+                      <button class="level-spinner-btn" type="button" onclick="spinChange(this,1)">+</button>
+                    </div>
+                    <div class="spinner-hint text-hint"></div>
+                  </div>
+                </td>
+                <td>
+                  <div class="spinner-cell">
+                    <div class="level-spinner">
+                      <button class="level-spinner-btn" type="button" onclick="spinChange(this,-1)">−</button>
+                      <input type="number" class="level-spinner-input voice-level-input" min="0" max="999" value="<%= rr.VOICE_LEVEL || 0 %>" onchange="updateHints(this.closest('tr'))" />
+                      <button class="level-spinner-btn" type="button" onclick="spinChange(this,1)">+</button>
+                    </div>
+                    <div class="spinner-hint voice-hint"></div>
+                  </div>
+                </td>
+                <td>
+                  <label class="toggle-switch">
+                    <input type="checkbox" class="either-level-toggle" <%= rr.EITHER_LEVEL ? 'checked' : '' %>>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </td>
+                <td>
+                  <button class="btn-del-role" type="button" onclick="deleteRoleRow(this)" title="Remove">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><path opacity="0.4" d="M3.408 5L3.903 14.389C3.979 15.853 5.185 17 6.649 17H11.353C12.817 17 14.023 15.853 14.099 14.39L14.594 5H3.408Z"/><path d="M7.374 14C6.98 14 6.649 13.69 6.626 13.29L6.376 8.79C6.354 8.38 6.67 8.02 7.083 8C7.489 7.98 7.851 8.29 7.874 8.71L8.124 13.21C8.147 13.62 7.83 13.98 7.417 14H7.374Z"/><path d="M10.626 14H10.583C10.17 13.98 9.854 13.62 9.876 13.21L10.126 8.71C10.149 8.29 10.498 7.98 10.917 8C11.33 8.02 11.647 8.38 11.624 8.79L11.374 13.29C11.352 13.69 11.021 14 10.626 14Z"/><path d="M15.25 4H12V2.75C12 1.785 11.215 1 10.25 1H7.75C6.785 1 6 1.785 6 2.75V4H2.75C2.336 4 2 4.336 2 4.75C2 5.164 2.336 5.5 2.75 5.5H15.25C15.664 5.5 16 5.164 16 4.75C16 4.336 15.664 4 15.25 4ZM7.5 2.75C7.5 2.614 7.614 2.5 7.75 2.5H10.25C10.386 2.5 10.5 2.614 10.5 2.75V4H7.5V2.75Z"/></svg>
+                  </button>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Role picker + add button -->
+        <%# embed guildRoles as JSON for the JS picker %>
+        <script id="guild-roles-data" type="application/json"><%- JSON.stringify(guildRoles) %></script>
+        <div class="role-picker" id="role-picker-wrap">
+          <button class="role-picker-btn" id="role-picker-btn" type="button">
+            <span class="role-color-dot" id="picker-dot" style="background:#5865f2;display:none"></span>
+            <span id="picker-label" style="color:var(--muted)">Select a role to add...</span>
+            <svg class="role-picker-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="role-picker-dropdown" id="role-picker-dropdown" style="display:none">
+            <div class="role-picker-search">
+              <input type="text" id="role-search-input" placeholder="Search roles..." autocomplete="off" />
+            </div>
+            <div class="role-picker-list" id="role-picker-list"></div>
+          </div>
+        </div>
+        <div class="add-role-row">
+          <button class="btn-add-role" id="add-role-btn" type="button" disabled>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            Add Role
+          </button>
+        </div>
+
+        <h4 style="font-size:.95rem;margin:28px 0 12px;color:var(--white)"><%= lang === 'ar' ? 'إعدادات أدوار المكافآت' : 'Reward Roles Settings' %></h4>
+
+        <div class="form-row">
+          <label class="form-label"><%= lang === 'ar' ? 'نوع أدوار المكافآت' : 'Reward Roles Type' %></label>
+          <div class="cpicker" id="cpicker-reward-type">
+            <button class="cpicker-btn" type="button">
+              <span class="cpicker-label"><%= levelSettings.REWARD_SETTINGS.REMOVE_PREVIOUS_ROLES ? (lang === 'ar' ? 'إزالة الدور السابق' : 'Remove Previous Reward Roles') : (lang === 'ar' ? 'تراكم جميع الأدوار' : 'Stack All Reward Roles') %></span>
+              <svg class="cpicker-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="cpicker-dropdown" style="display:none">
+              <div class="cpicker-list">
+                <div class="cpicker-opt <%= levelSettings.REWARD_SETTINGS.REMOVE_PREVIOUS_ROLES ? 'active' : '' %>" data-value="REMOVE_PREVIOUS"><%= lang === 'ar' ? 'إزالة الدور السابق' : 'Remove Previous Reward Roles' %></div>
+                <div class="cpicker-opt <%= !levelSettings.REWARD_SETTINGS.REMOVE_PREVIOUS_ROLES ? 'active' : '' %>" data-value="STACK"><%= lang === 'ar' ? 'تراكم جميع الأدوار' : 'Stack All Reward Roles' %></div>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="reward-type" value="<%= levelSettings.REWARD_SETTINGS.REMOVE_PREVIOUS_ROLES ? 'REMOVE_PREVIOUS' : 'STACK' %>">
+        </div>
+        <div class="form-row">
+          <label class="form-label"><%= lang === 'ar' ? 'تعطيل أدوار المكافآت' : 'Disable Rewards Roles' %></label>
+          <div class="cpicker" id="cpicker-disable-rewards">
+            <button class="cpicker-btn" type="button">
+              <span class="cpicker-label"><%= levelSettings.REWARD_SETTINGS.DISABLE_REWARDS ? (lang === 'ar' ? 'معطل' : 'Disabled') : (lang === 'ar' ? 'مفعّل' : 'Enabled') %></span>
+              <svg class="cpicker-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="cpicker-dropdown" style="display:none">
+              <div class="cpicker-list">
+                <div class="cpicker-opt <%= !levelSettings.REWARD_SETTINGS.DISABLE_REWARDS ? 'active' : '' %>" data-value="false"><%= lang === 'ar' ? 'مفعّل' : 'Enabled' %></div>
+                <div class="cpicker-opt <%= levelSettings.REWARD_SETTINGS.DISABLE_REWARDS ? 'active' : '' %>" data-value="true"><%= lang === 'ar' ? 'معطل' : 'Disabled' %></div>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="disable-rewards" value="<%= levelSettings.REWARD_SETTINGS.DISABLE_REWARDS ? 'true' : 'false' %>">
+        </div>
+        <div class="form-row">
+          <label class="form-label">Remove Reward Roles on Reset</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="remove-on-reset" <%= levelSettings.REWARD_SETTINGS.REMOVE_ON_RESET ? 'checked' : '' %>>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Give Highest Reward on Setting XP</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="highest-only" <%= levelSettings.REWARD_SETTINGS.GIVE_HIGHEST_ROLE_ONLY ? 'checked' : '' %>>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Settings</h3>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Text Activity Tracking Mode</label>
+          <div class="choice-box <%= levelSettings.TEXT_ACTIVITY.TRACK_MODE === 'XP' ? 'selected' : '' %>" data-choice="text-xp">
+            <div class="choice-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 18 18" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M11.25 1C11.5577 1 11.8343 1.188 11.9474 1.47418L13.245 4.75506L16.5258 6.05256C16.812 6.16574 17 6.44225 17 6.75C17 7.05775 16.812 7.33426 16.5258 7.44744L13.245 8.74494L11.9474 12.0258C11.8343 12.312 11.5577 12.5 11.25 12.5C10.9423 12.5 10.6657 12.312 10.5526 12.0258L9.25505 8.74494L5.97418 7.44744C5.688 7.33426 5.5 7.05775 5.5 6.75C5.5 6.44225 5.688 6.16574 5.97418 6.05256L9.25505 4.75506L10.5526 1.47418C10.6657 1.188 10.9423 1 11.25 1Z" fill-opacity="0.4"/></svg>
+            </div>
+            <div class="choice-text">
+              <h4>XP System</h4>
+              <p>Earn XP, level up, and track your progress with both XP and level stats.</p>
+            </div>
+            <svg class="choice-check" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 18 18" fill="currentColor"><path opacity="0.4" d="M9.00012 17C13.4184 17 17.0001 13.4183 17.0001 9C17.0001 4.58172 13.4184 1 9.00012 1C4.58184 1 1.00012 4.58172 1.00012 9C1.00012 13.4183 4.58184 17 9.00012 17Z"/><path d="M8.00012 12.5C7.78822 12.5 7.58512 12.4102 7.44252 12.252L5.19252 9.752C4.91522 9.4439 4.94051 8.9698 5.24821 8.6924C5.55581 8.4155 6.02851 8.44 6.30781 8.7481L7.95622 10.5801L11.6564 5.79151C11.9103 5.46341 12.381 5.40329 12.7091 5.65669C13.0362 5.90959 13.0968 6.3808 12.8439 6.7085L8.59391 12.2085C8.45721 12.3848 8.25012 12.4912 8.02852 12.4995C8.01872 12.5 8.00982 12.5 8.00012 12.5Z"/></svg>
+          </div>
+          <div class="choice-box <%= levelSettings.TEXT_ACTIVITY.TRACK_MODE === 'MESSAGES' ? 'selected' : '' %>" data-choice="text-messages">
+            <div class="choice-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 18 18" fill="currentColor"><path d="M9.00002 1C4.58181 1 1.00002 4.58179 1.00002 9C1.00002 10.4506 1.39246 11.8068 2.06488 12.977C2.09295 13.0343 2.13116 13.1672 2.13177 13.3972C2.13238 13.6268 2.09518 13.9039 2.01741 14.1997C1.85824 14.8052 1.55932 15.3797 1.2194 15.72C1.01031 15.9293 0.943812 16.242 1.04964 16.5183C1.15547 16.7946 1.41385 16.9828 1.70928 16.9989C2.44913 17.0391 3.26319 16.8932 3.96902 16.6876C4.4872 16.5366 4.98601 16.3421 5.39182 16.1345C5.91986 16.4026 6.63844 16.6947 7.52247 16.8619C8.00127 16.9526 8.49599 17 9.00002 17C13.4182 17 17 13.4182 17 9C17 4.58179 13.4182 1 9.00002 1Z" fill-opacity="0.4"/></svg>
+            </div>
+            <div class="choice-text">
+              <h4>Message Count</h4>
+              <p>Simple counter that shows the total number of messages.</p>
+            </div>
+            <svg class="choice-check" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 18 18" fill="currentColor"><path opacity="0.4" d="M9.00012 17C13.4184 17 17.0001 13.4183 17.0001 9C17.0001 4.58172 13.4184 1 9.00012 1C4.58184 1 1.00012 4.58172 1.00012 9C1.00012 13.4183 4.58184 17 9.00012 17Z"/><path d="M8.00012 12.5C7.78822 12.5 7.58512 12.4102 7.44252 12.252L5.19252 9.752C4.91522 9.4439 4.94051 8.9698 5.24821 8.6924C5.55581 8.4155 6.02851 8.44 6.30781 8.7481L7.95622 10.5801L11.6564 5.79151C11.9103 5.46341 12.381 5.40329 12.7091 5.65669C13.0362 5.90959 13.0968 6.3808 12.8439 6.7085L8.59391 12.2085C8.45721 12.3848 8.25012 12.4912 8.02852 12.4995C8.01872 12.5 8.00982 12.5 8.00012 12.5Z"/></svg>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Voice Activity Tracking Mode</label>
+          <div class="choice-box <%= levelSettings.VOICE_ACTIVITY.TRACK_MODE === 'XP' ? 'selected' : '' %>" data-choice="voice-xp">
+            <div class="choice-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 18 18" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M11.25 1C11.5577 1 11.8343 1.188 11.9474 1.47418L13.245 4.75506L16.5258 6.05256C16.812 6.16574 17 6.44225 17 6.75C17 7.05775 16.812 7.33426 16.5258 7.44744L13.245 8.74494L11.9474 12.0258C11.8343 12.312 11.5577 12.5 11.25 12.5C10.9423 12.5 10.6657 12.312 10.5526 12.0258L9.25505 8.74494L5.97418 7.44744C5.688 7.33426 5.5 7.05775 5.5 6.75C5.5 6.44225 5.688 6.16574 5.97418 6.05256L9.25505 4.75506L10.5526 1.47418C10.6657 1.188 10.9423 1 11.25 1Z" fill-opacity="0.4"/></svg>
+            </div>
+            <div class="choice-text">
+              <h4>XP System</h4>
+              <p>Earn XP, level up, and track your progress with both XP and level stats.</p>
+            </div>
+            <svg class="choice-check" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 18 18" fill="currentColor"><path opacity="0.4" d="M9.00012 17C13.4184 17 17.0001 13.4183 17.0001 9C17.0001 4.58172 13.4184 1 9.00012 1C4.58184 1 1.00012 4.58172 1.00012 9C1.00012 13.4183 4.58184 17 9.00012 17Z"/><path d="M8.00012 12.5C7.78822 12.5 7.58512 12.4102 7.44252 12.252L5.19252 9.752C4.91522 9.4439 4.94051 8.9698 5.24821 8.6924C5.55581 8.4155 6.02851 8.44 6.30781 8.7481L7.95622 10.5801L11.6564 5.79151C11.9103 5.46341 12.381 5.40329 12.7091 5.65669C13.0362 5.90959 13.0968 6.3808 12.8439 6.7085L8.59391 12.2085C8.45721 12.3848 8.25012 12.4912 8.02852 12.4995C8.01872 12.5 8.00982 12.5 8.00012 12.5Z"/></svg>
+          </div>
+          <div class="choice-box <%= levelSettings.VOICE_ACTIVITY.TRACK_MODE === 'MINUTES' ? 'selected' : '' %>" data-choice="voice-minutes">
+            <div class="choice-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 18 18" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.50142 4.63488C5.50142 2.62818 7.0677 1.00136 8.99999 1.00136C10.9323 1.00136 12.4986 2.62818 12.4986 4.63488V7.8626C12.4986 9.8693 10.9323 11.4961 8.99999 11.4961C7.0677 11.4961 5.50142 9.8693 5.50142 7.8626V4.63488Z" fill-opacity="0.4"/></svg>
+            </div>
+            <div class="choice-text">
+              <h4>Voice Time</h4>
+              <p>Track the amount of time users spend in voice channels.</p>
+            </div>
+            <svg class="choice-check" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 18 18" fill="currentColor"><path opacity="0.4" d="M9.00012 17C13.4184 17 17.0001 13.4183 17.0001 9C17.0001 4.58172 13.4184 1 9.00012 1C4.58184 1 1.00012 4.58172 1.00012 9C1.00012 13.4183 4.58184 17 9.00012 17Z"/><path d="M8.00012 12.5C7.78822 12.5 7.58512 12.4102 7.44252 12.252L5.19252 9.752C4.91522 9.4439 4.94051 8.9698 5.24821 8.6924C5.55581 8.4155 6.02851 8.44 6.30781 8.7481L7.95622 10.5801L11.6564 5.79151C11.9103 5.46341 12.381 5.40329 12.7091 5.65669C13.0362 5.90959 13.0968 6.3808 12.8439 6.7085L8.59391 12.2085C8.45721 12.3848 8.25012 12.4912 8.02852 12.4995C8.01872 12.5 8.00982 12.5 8.00012 12.5Z"/></svg>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Ignore Deafened Users</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ignore-deafened" <%= levelSettings.VOICE_ACTIVITY.IGNORE_DEAFENED ? 'checked' : '' %>>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Ignore Muted Users</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="ignore-muted" <%= levelSettings.VOICE_ACTIVITY.IGNORE_MUTED ? 'checked' : '' %>>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label"><%= lang === 'ar' ? 'تجاهل قنوات XP' : 'Ignore XP Channels' %></label>
+          <div class="cpicker" id="cpicker-ignore-channels">
+            <button class="cpicker-btn" type="button">
+              <span class="cpicker-label cpicker-muted" data-placeholder="<%= lang === 'ar' ? 'لا يوجد تجاهل' : 'No channels ignored' %>"><%= lang === 'ar' ? 'لا يوجد تجاهل' : 'No channels ignored' %></span>
+              <span class="cpicker-badge" style="display:none"></span>
+              <svg class="cpicker-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="cpicker-dropdown" style="display:none">
+              <div class="cpicker-search-wrap"><input type="text" placeholder="<%= lang === 'ar' ? 'بحث...' : 'Search channels...' %>" /></div>
+              <div class="cpicker-list">
+                <% guildChannels.forEach(ch => { %>
+                  <div class="cpicker-opt <%= (levelSettings.TEXT_ACTIVITY.IGNORE_CHANNELS || []).includes(ch.id) ? 'active' : '' %>" data-value="<%= ch.id %>">
+                    <div class="cpicker-check"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5L4 7.5 8.5 2.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                    <svg width="14" height="14" viewBox="0 0 18 18" fill="currentColor" style="opacity:.5;flex-shrink:0"><path d="M7.61 1.46a.75.75 0 0 0-1.47.28L6.5 3.5H3.75a.75.75 0 0 0 0 1.5H6.7l-.5 3H3.25a.75.75 0 0 0 0 1.5H5.9l-.4 2.76a.75.75 0 0 0 1.47.28L7.4 9.5h3l-.4 2.76a.75.75 0 0 0 1.47.28l.43-3.04h2.35a.75.75 0 0 0 0-1.5H11.7l.5-3h2.55a.75.75 0 0 0 0-1.5H12.5l.39-2.76a.75.75 0 0 0-1.47-.28L11.1 3.5H8.1l.39-2.76zm.28 4.54l-.5 3h3l.5-3h-3z"/></svg>
+                    <%= ch.name %>
+                  </div>
+                <% }) %>
+              </div>
+            </div>
+          </div>
+          <select id="ignore-channels" multiple style="display:none">
+            <% guildChannels.forEach(ch => { %>
+              <option value="<%= ch.id %>" <%= (levelSettings.TEXT_ACTIVITY.IGNORE_CHANNELS || []).includes(ch.id) ? 'selected' : '' %>><%= ch.name %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label"><%= lang === 'ar' ? 'تجاهل أدوار XP' : 'Ignore XP Roles' %></label>
+          <div class="cpicker" id="cpicker-ignore-roles">
+            <button class="cpicker-btn" type="button">
+              <span class="cpicker-label cpicker-muted" data-placeholder="<%= lang === 'ar' ? 'لا يوجد تجاهل' : 'No roles ignored' %>"><%= lang === 'ar' ? 'لا يوجد تجاهل' : 'No roles ignored' %></span>
+              <span class="cpicker-badge" style="display:none"></span>
+              <svg class="cpicker-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="cpicker-dropdown" style="display:none">
+              <div class="cpicker-search-wrap"><input type="text" placeholder="<%= lang === 'ar' ? 'بحث...' : 'Search roles...' %>" /></div>
+              <div class="cpicker-list">
+                <% guildRoles.forEach(role => { %>
+                  <div class="cpicker-opt <%= (levelSettings.TEXT_ACTIVITY.IGNORE_ROLES || []).includes(role.id) ? 'active' : '' %>" data-value="<%= role.id %>">
+                    <div class="cpicker-check"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5L4 7.5 8.5 2.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                    <% if (role.icon) { %>
+                      <img class="role-icon-sm" src="<%= role.icon %>" alt="" style="flex-shrink:0" onerror="this.style.display='none'" />
+                    <% } else { %>
+                      <span class="role-color-dot" data-color="<%= role.color || '#5865f2' %>"></span>
+                    <% } %>
+                    <%= role.name %>
+                  </div>
+                <% }) %>
+              </div>
+            </div>
+          </div>
+          <select id="ignore-roles" multiple style="display:none">
+            <% guildRoles.forEach(role => { %>
+              <option value="<%= role.id %>" <%= (levelSettings.TEXT_ACTIVITY.IGNORE_ROLES || []).includes(role.id) ? 'selected' : '' %>><%= role.name %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label"><%= lang === 'ar' ? 'قناة رسائل اللفل' : 'Level-up Message Channel' %></label>
+          <div class="cpicker" id="cpicker-levelup-channel">
+            <button class="cpicker-btn" type="button">
+              <% const _lch = guildChannels.find(c => c.id === levelSettings.LEVELUP_CHANNEL); %>
+              <span class="cpicker-label <%= !_lch ? 'cpicker-muted' : '' %>"><%= _lch ? '#' + _lch.name : (lang === 'ar' ? 'معطل' : 'Disabled') %></span>
+              <svg class="cpicker-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="cpicker-dropdown" style="display:none">
+              <div class="cpicker-search-wrap"><input type="text" placeholder="<%= lang === 'ar' ? 'بحث...' : 'Search channels...' %>" /></div>
+              <div class="cpicker-list">
+                <div class="cpicker-opt <%= !levelSettings.LEVELUP_CHANNEL ? 'active' : '' %>" data-value=""><%= lang === 'ar' ? 'معطل' : 'Disabled' %></div>
+                <% guildChannels.forEach(ch => { %>
+                  <div class="cpicker-opt <%= levelSettings.LEVELUP_CHANNEL === ch.id ? 'active' : '' %>" data-value="<%= ch.id %>">
+                    <svg width="14" height="14" viewBox="0 0 18 18" fill="currentColor" style="opacity:.5;flex-shrink:0"><path d="M7.61 1.46a.75.75 0 0 0-1.47.28L6.5 3.5H3.75a.75.75 0 0 0 0 1.5H6.7l-.5 3H3.25a.75.75 0 0 0 0 1.5H5.9l-.4 2.76a.75.75 0 0 0 1.47.28L7.4 9.5h3l-.4 2.76a.75.75 0 0 0 1.47.28l.43-3.04h2.35a.75.75 0 0 0 0-1.5H11.7l.5-3h2.55a.75.75 0 0 0 0-1.5H12.5l.39-2.76a.75.75 0 0 0-1.47-.28L11.1 3.5H8.1l.39-2.76zm.28 4.54l-.5 3h3l.5-3h-3z"/></svg>
+                    #<%= ch.name %>
+                  </div>
+                <% }) %>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="levelup-channel" value="<%= levelSettings.LEVELUP_CHANNEL || '' %>">
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Level-up Message Enabled</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="levelup-enabled" <%= levelSettings.LEVELUP_MESSAGE_ENABLED ? 'checked' : '' %>>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+      </div>
+
+      <!-- Message Configuration Cards -->
+
+      <!-- Reward Role Message -->
+      <div class="card">
+        <div class="card-header">
+          <h3><%= lang === 'ar' ? 'رسالة دور المكافأة' : 'Reward Role Message' %></h3>
+        </div>
+        <div class="form-row">
+          <label class="form-label"><%= lang === 'ar' ? 'القناة (اتركها فارغة = قناة المستخدم الحالية)' : 'Channel (empty = current channel)' %></label>
+          <div class="cpicker" id="cpicker-reward-msg-channel">
+            <button class="cpicker-btn" type="button">
+              <% const _rmc = guildChannels.find(c => c.id === (levelSettings.MESSAGES && levelSettings.MESSAGES.REWARD_ROLE && levelSettings.MESSAGES.REWARD_ROLE.CHANNEL)); %>
+              <span class="cpicker-label <%= !_rmc ? 'cpicker-muted' : '' %>"><%= _rmc ? '#'+_rmc.name : (lang==='ar' ? 'قناة الأحداث (الافتراضية)' : 'Event channel (default)') %></span>
+              <svg class="cpicker-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="cpicker-dropdown" style="display:none">
+              <div class="cpicker-search-wrap"><input type="text" placeholder="<%= lang==='ar' ? 'بحث...' : 'Search channels...' %>" /></div>
+              <div class="cpicker-list">
+                <div class="cpicker-opt <%= !_rmc ? 'active' : '' %>" data-value=""><%= lang==='ar' ? 'قناة الأحداث (الافتراضية)' : 'Event channel (default)' %></div>
+                <% guildChannels.forEach(ch => { %>
+                  <div class="cpicker-opt <%= (levelSettings.MESSAGES && levelSettings.MESSAGES.REWARD_ROLE && levelSettings.MESSAGES.REWARD_ROLE.CHANNEL === ch.id) ? 'active' : '' %>" data-value="<%= ch.id %>">#<%= ch.name %></div>
+                <% }) %>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="reward-msg-channel" value="<%= (levelSettings.MESSAGES && levelSettings.MESSAGES.REWARD_ROLE && levelSettings.MESSAGES.REWARD_ROLE.CHANNEL) || '' %>">
+        </div>
+        <div class="form-row">
+          <label class="form-label"><%= lang === 'ar' ? 'نص الرسالة' : 'Message Text' %></label>
+          <div class="msg-textarea-wrap" style="position:relative">
+            <textarea class="msg-textarea" id="reward-msg-text" maxlength="1000" data-preview="reward-preview"><%= (levelSettings.MESSAGES && levelSettings.MESSAGES.REWARD_ROLE && levelSettings.MESSAGES.REWARD_ROLE.TEXT) || "**🎉 Congrats, [user]!** You've leveled up from `[oldLevel]` to `[newLevel]` and earned the **[roleName]** role! 🚀" %></textarea>
+            <button class="msg-emoji-btn" type="button" data-target="reward-msg-text" title="<%= lang==='ar' ? 'إدراج إيموجي' : 'Insert emoji' %>">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 18 18" fill="currentColor"><path opacity=".4" d="M9 17C4.589 17 1 13.411 1 9S4.589 1 9 1s8 3.589 8 8-3.589 8-8 8Z"/><circle cx="6" cy="8" r="1"/><circle cx="12" cy="8" r="1"/><path d="M11.897 10.758c-.154-.155-.366-.22-.583-.188-1.532.239-3.112.238-4.638-.001-.214-.031-.421.036-.573.186-.154.153-.227.376-.191.598.23 1.511 1.558 2.651 3.089 2.651 1.531 0 2.86-1.14 3.089-2.648.033-.216-.039-.437-.193-.598Z"/></svg>
+            </button>
+          </div>
+          <!-- Discord-style preview -->
+          <div class="dc-preview-wrap">
+            <div class="dc-preview-label"><%= lang==='ar' ? 'معاينة الرسالة' : 'Message Preview' %></div>
+            <div class="dc-preview">
+              <div class="dc-msg-row">
+                <% if (botUser.avatar) { %>
+                  <img class="dc-avatar" src="<%= botUser.avatar %>" alt="bot" />
+                <% } else { %>
+                  <div class="dc-avatar dc-avatar-fallback" style="background:var(--purple)"><%= botUser.name.charAt(0) %></div>
+                <% } %>
+                <div class="dc-body">
+                  <div class="dc-header">
+                    <span class="dc-botname"><%= botUser.name %></span>
+                    <span class="dc-app-badge"><% if (botUser.isVerified) { %><svg viewBox="0 0 16 16" fill="currentColor"><path d="M7.4 1.93 6 3H4a1 1 0 0 0-1 1v2L1.93 7.4a1 1 0 0 0 0 1.2L3 10v2a1 1 0 0 0 1 1h2l1.4 1.07a1 1 0 0 0 1.2 0L10 13h2a1 1 0 0 0 1-1v-2l1.07-1.4a1 1 0 0 0 0-1.2L13 6V4a1 1 0 0 0-1-1h-2L8.6 1.93a1 1 0 0 1-1.2 0ZM11 6.5 7.5 10 5 7.5l1-1 1.5 1.5 3.5-3.5 1 1Z"/></svg><% } %>APP</span>
+                    <span class="dc-time" id="reward-preview-time"></span>
+                  </div>
+                  <div class="dc-v2-container">
+                    <div class="dc-v2-text" id="reward-preview"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Variables -->
+          <div class="vars-box">
+            <div class="vars-title"><%= lang==='ar' ? 'المتغيرات المتاحة (اضغط للنسخ)' : 'Available Variables (click to insert)' %></div>
+            <div class="vars-grid" data-target="reward-msg-text">
+              <div class="var-item"><span class="var-tag" data-var="[user]">[user]</span><span class="var-desc"><%= lang==='ar' ? 'ذكر المستخدم' : 'User mention' %></span></div>
+              <div class="var-item"><span class="var-tag" data-var="[userName]">[userName]</span><span class="var-desc"><%= lang==='ar' ? 'اسم المستخدم' : 'Username' %></span></div>
+              <div class="var-item"><span class="var-tag" data-var="[roleName]">[roleName]</span><span class="var-desc"><%= lang==='ar' ? 'اسم الدور' : 'Role name' %></span></div>
+              <div class="var-item"><span class="var-tag" data-var="[oldLevel]">[oldLevel]</span><span class="var-desc"><%= lang==='ar' ? 'المستوى السابق' : 'Previous level' %></span></div>
+              <div class="var-item"><span class="var-tag" data-var="[newLevel]">[newLevel]</span><span class="var-desc"><%= lang==='ar' ? 'المستوى الجديد' : 'New level' %></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label"><%= lang==='ar' ? 'إرسال كرسالة خاصة للعضو' : 'DM Member' %></label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="reward-msg-dm" <%= (levelSettings.MESSAGES && levelSettings.MESSAGES.REWARD_ROLE && levelSettings.MESSAGES.REWARD_ROLE.DM) ? 'checked' : '' %>>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Text Level Up Message -->
+      <div class="card">
+        <div class="card-header">
+          <h3><%= lang === 'ar' ? 'رسالة الارتقاء بالنص' : 'Text Level Up Message' %></h3>
+        </div>
+        <div class="form-row">
+          <label class="form-label"><%= lang === 'ar' ? 'القناة' : 'Channel' %></label>
+          <div class="cpicker" id="cpicker-text-msg-channel">
+            <button class="cpicker-btn" type="button">
+              <% const _tmc = guildChannels.find(c => c.id === (levelSettings.MESSAGES && levelSettings.MESSAGES.TEXT_LEVELUP && levelSettings.MESSAGES.TEXT_LEVELUP.CHANNEL)); %>
+              <span class="cpicker-label <%= !_tmc ? 'cpicker-muted' : '' %>"><%= _tmc ? '#'+_tmc.name : (lang==='ar' ? 'قناة الأحداث (الافتراضية)' : 'Event channel (default)') %></span>
+              <svg class="cpicker-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="cpicker-dropdown" style="display:none">
+              <div class="cpicker-search-wrap"><input type="text" placeholder="<%= lang==='ar' ? 'بحث...' : 'Search channels...' %>" /></div>
+              <div class="cpicker-list">
+                <div class="cpicker-opt <%= !_tmc ? 'active' : '' %>" data-value=""><%= lang==='ar' ? 'قناة الأحداث (الافتراضية)' : 'Event channel (default)' %></div>
+                <% guildChannels.forEach(ch => { %>
+                  <div class="cpicker-opt <%= (levelSettings.MESSAGES && levelSettings.MESSAGES.TEXT_LEVELUP && levelSettings.MESSAGES.TEXT_LEVELUP.CHANNEL === ch.id) ? 'active' : '' %>" data-value="<%= ch.id %>">#<%= ch.name %></div>
+                <% }) %>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="text-msg-channel" value="<%= (levelSettings.MESSAGES && levelSettings.MESSAGES.TEXT_LEVELUP && levelSettings.MESSAGES.TEXT_LEVELUP.CHANNEL) || '' %>">
+        </div>
+        <div class="form-row">
+          <label class="form-label"><%= lang === 'ar' ? 'نص الرسالة' : 'Message Text' %></label>
+          <div class="msg-textarea-wrap" style="position:relative">
+            <textarea class="msg-textarea" id="text-msg-text" maxlength="1000" data-preview="text-preview"><%= (levelSettings.MESSAGES && levelSettings.MESSAGES.TEXT_LEVELUP && levelSettings.MESSAGES.TEXT_LEVELUP.TEXT) || "**💬 Congrats, [user]!** You've leveled up in text from `[oldLevel]` to `[newLevel]`!" %></textarea>
+            <button class="msg-emoji-btn" type="button" data-target="text-msg-text" title="<%= lang==='ar' ? 'إدراج إيموجي' : 'Insert emoji' %>">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 18 18" fill="currentColor"><path opacity=".4" d="M9 17C4.589 17 1 13.411 1 9S4.589 1 9 1s8 3.589 8 8-3.589 8-8 8Z"/><circle cx="6" cy="8" r="1"/><circle cx="12" cy="8" r="1"/><path d="M11.897 10.758c-.154-.155-.366-.22-.583-.188-1.532.239-3.112.238-4.638-.001-.214-.031-.421.036-.573.186-.154.153-.227.376-.191.598.23 1.511 1.558 2.651 3.089 2.651 1.531 0 2.86-1.14 3.089-2.648.033-.216-.039-.437-.193-.598Z"/></svg>
+            </button>
+          </div>
+          <div class="dc-preview-wrap">
+            <div class="dc-preview-label"><%= lang==='ar' ? 'معاينة الرسالة' : 'Message Preview' %></div>
+            <div class="dc-preview">
+              <div class="dc-msg-row">
+                <% if (botUser.avatar) { %>
+                  <img class="dc-avatar" src="<%= botUser.avatar %>" alt="bot" />
+                <% } else { %>
+                  <div class="dc-avatar dc-avatar-fallback" style="background:var(--purple)"><%= botUser.name.charAt(0) %></div>
+                <% } %>
+                <div class="dc-body">
+                  <div class="dc-header">
+                    <span class="dc-botname"><%= botUser.name %></span>
+                    <span class="dc-app-badge"><% if (botUser.isVerified) { %><svg viewBox="0 0 16 16" fill="currentColor"><path d="M7.4 1.93 6 3H4a1 1 0 0 0-1 1v2L1.93 7.4a1 1 0 0 0 0 1.2L3 10v2a1 1 0 0 0 1 1h2l1.4 1.07a1 1 0 0 0 1.2 0L10 13h2a1 1 0 0 0 1-1v-2l1.07-1.4a1 1 0 0 0 0-1.2L13 6V4a1 1 0 0 0-1-1h-2L8.6 1.93a1 1 0 0 1-1.2 0ZM11 6.5 7.5 10 5 7.5l1-1 1.5 1.5 3.5-3.5 1 1Z"/></svg><% } %>APP</span>
+                    <span class="dc-time" id="text-preview-time"></span>
+                  </div>
+                  <div class="dc-v2-container">
+                    <div class="dc-v2-text" id="text-preview"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vars-box">
+            <div class="vars-title"><%= lang==='ar' ? 'المتغيرات المتاحة (اضغط للإدراج)' : 'Available Variables (click to insert)' %></div>
+            <div class="vars-grid" data-target="text-msg-text">
+              <div class="var-item"><span class="var-tag" data-var="[user]">[user]</span><span class="var-desc"><%= lang==='ar' ? 'ذكر المستخدم' : 'User mention' %></span></div>
+              <div class="var-item"><span class="var-tag" data-var="[userName]">[userName]</span><span class="var-desc"><%= lang==='ar' ? 'اسم المستخدم' : 'Username' %></span></div>
+              <div class="var-item"><span class="var-tag" data-var="[oldLevel]">[oldLevel]</span><span class="var-desc"><%= lang==='ar' ? 'المستوى السابق' : 'Previous level' %></span></div>
+              <div class="var-item"><span class="var-tag" data-var="[newLevel]">[newLevel]</span><span class="var-desc"><%= lang==='ar' ? 'المستوى الجديد' : 'New level' %></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Voice Level Up Message -->
+      <div class="card">
+        <div class="card-header">
+          <h3><%= lang === 'ar' ? 'رسالة الارتقاء بالصوت' : 'Voice Level Up Message' %></h3>
+        </div>
+        <div class="form-row">
+          <label class="form-label"><%= lang === 'ar' ? 'القناة' : 'Channel' %></label>
+          <div class="cpicker" id="cpicker-voice-msg-channel">
+            <button class="cpicker-btn" type="button">
+              <% const _vmc = guildChannels.find(c => c.id === (levelSettings.MESSAGES && levelSettings.MESSAGES.VOICE_LEVELUP && levelSettings.MESSAGES.VOICE_LEVELUP.CHANNEL)); %>
+              <span class="cpicker-label <%= !_vmc ? 'cpicker-muted' : '' %>"><%= _vmc ? '#'+_vmc.name : (lang==='ar' ? 'قناة الأحداث (الافتراضية)' : 'Event channel (default)') %></span>
+              <svg class="cpicker-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="cpicker-dropdown" style="display:none">
+              <div class="cpicker-search-wrap"><input type="text" placeholder="<%= lang==='ar' ? 'بحث...' : 'Search channels...' %>" /></div>
+              <div class="cpicker-list">
+                <div class="cpicker-opt <%= !_vmc ? 'active' : '' %>" data-value=""><%= lang==='ar' ? 'قناة الأحداث (الافتراضية)' : 'Event channel (default)' %></div>
+                <% guildChannels.forEach(ch => { %>
+                  <div class="cpicker-opt <%= (levelSettings.MESSAGES && levelSettings.MESSAGES.VOICE_LEVELUP && levelSettings.MESSAGES.VOICE_LEVELUP.CHANNEL === ch.id) ? 'active' : '' %>" data-value="<%= ch.id %>">#<%= ch.name %></div>
+                <% }) %>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="voice-msg-channel" value="<%= (levelSettings.MESSAGES && levelSettings.MESSAGES.VOICE_LEVELUP && levelSettings.MESSAGES.VOICE_LEVELUP.CHANNEL) || '' %>">
+        </div>
+        <div class="form-row">
+          <label class="form-label"><%= lang === 'ar' ? 'نص الرسالة' : 'Message Text' %></label>
+          <div class="msg-textarea-wrap" style="position:relative">
+            <textarea class="msg-textarea" id="voice-msg-text" maxlength="1000" data-preview="voice-preview"><%= (levelSettings.MESSAGES && levelSettings.MESSAGES.VOICE_LEVELUP && levelSettings.MESSAGES.VOICE_LEVELUP.TEXT) || "**🎙️ Congrats, [user]!** You've leveled up in voice from `[oldLevel]` to `[newLevel]`!" %></textarea>
+            <button class="msg-emoji-btn" type="button" data-target="voice-msg-text" title="<%= lang==='ar' ? 'إدراج إيموجي' : 'Insert emoji' %>">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 18 18" fill="currentColor"><path opacity=".4" d="M9 17C4.589 17 1 13.411 1 9S4.589 1 9 1s8 3.589 8 8-3.589 8-8 8Z"/><circle cx="6" cy="8" r="1"/><circle cx="12" cy="8" r="1"/><path d="M11.897 10.758c-.154-.155-.366-.22-.583-.188-1.532.239-3.112.238-4.638-.001-.214-.031-.421.036-.573.186-.154.153-.227.376-.191.598.23 1.511 1.558 2.651 3.089 2.651 1.531 0 2.86-1.14 3.089-2.648.033-.216-.039-.437-.193-.598Z"/></svg>
+            </button>
+          </div>
+          <div class="dc-preview-wrap">
+            <div class="dc-preview-label"><%= lang==='ar' ? 'معاينة الرسالة' : 'Message Preview' %></div>
+            <div class="dc-preview">
+              <div class="dc-msg-row">
+                <% if (botUser.avatar) { %>
+                  <img class="dc-avatar" src="<%= botUser.avatar %>" alt="bot" />
+                <% } else { %>
+                  <div class="dc-avatar dc-avatar-fallback" style="background:var(--purple)"><%= botUser.name.charAt(0) %></div>
+                <% } %>
+                <div class="dc-body">
+                  <div class="dc-header">
+                    <span class="dc-botname"><%= botUser.name %></span>
+                    <span class="dc-app-badge"><% if (botUser.isVerified) { %><svg viewBox="0 0 16 16" fill="currentColor"><path d="M7.4 1.93 6 3H4a1 1 0 0 0-1 1v2L1.93 7.4a1 1 0 0 0 0 1.2L3 10v2a1 1 0 0 0 1 1h2l1.4 1.07a1 1 0 0 0 1.2 0L10 13h2a1 1 0 0 0 1-1v-2l1.07-1.4a1 1 0 0 0 0-1.2L13 6V4a1 1 0 0 0-1-1h-2L8.6 1.93a1 1 0 0 1-1.2 0ZM11 6.5 7.5 10 5 7.5l1-1 1.5 1.5 3.5-3.5 1 1Z"/></svg><% } %>APP</span>
+                    <span class="dc-time" id="voice-preview-time"></span>
+                  </div>
+                  <div class="dc-v2-container">
+                    <div class="dc-v2-text" id="voice-preview"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vars-box">
+            <div class="vars-title"><%= lang==='ar' ? 'المتغيرات المتاحة (اضغط للإدراج)' : 'Available Variables (click to insert)' %></div>
+            <div class="vars-grid" data-target="voice-msg-text">
+              <div class="var-item"><span class="var-tag" data-var="[user]">[user]</span><span class="var-desc"><%= lang==='ar' ? 'ذكر المستخدم' : 'User mention' %></span></div>
+              <div class="var-item"><span class="var-tag" data-var="[userName]">[userName]</span><span class="var-desc"><%= lang==='ar' ? 'اسم المستخدم' : 'Username' %></span></div>
+              <div class="var-item"><span class="var-tag" data-var="[oldLevel]">[oldLevel]</span><span class="var-desc"><%= lang==='ar' ? 'المستوى السابق' : 'Previous level' %></span></div>
+              <div class="var-item"><span class="var-tag" data-var="[newLevel]">[newLevel]</span><span class="var-desc"><%= lang==='ar' ? 'المستوى الجديد' : 'New level' %></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- hidden guild emojis data -->
+      <script id="guild-emojis-data" type="application/json"><%- JSON.stringify(guildEmojis) %></script>
+
+    </div>
+
+  <!-- Sticky Save Bar -->
+  <div class="save-bar" id="save-bar">
+    <span class="save-bar-hint" id="save-hint"></span>
+    <button class="btn btn-primary" id="save-btn"
+      data-save-text="<%= lang === 'ar' ? 'حفظ الإعدادات' : 'Save Settings' %>"
+      data-saving-text="<%= lang === 'ar' ? 'جاري الحفظ...' : 'Saving...' %>"
+      data-saved-text="<%= lang === 'ar' ? '✓ تم الحفظ!' : '✓ Saved!' %>">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 10v4a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-4M12 7l-3-3-3 3M9 4v9"/></svg>
+      <span id="save-label"><%= lang === 'ar' ? 'حفظ الإعدادات' : 'Save Settings' %></span>
+    </button>
+  </div>
+
+    <!-- Commands Tab -->
+    <div class="tab-content" id="tab-commands">
+      <div class="card">
+        <div class="card-header">
+          <h3>Available Commands</h3>
+        </div>
+        <p style="color: var(--muted); font-size: .88rem;">Commands documentation coming soon...</p>
+      </div>
+    </div>
+
+    <!-- Log Tab -->
+    <div class="tab-content" id="tab-log">
+      <div class="card">
+        <div class="card-header">
+          <h3>Activity Log</h3>
+        </div>
+        <p style="color: var(--muted); font-size: .88rem;">No activity logs yet.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <a class="footer-logo" href="https://discord.gg/jfFSmVM5kK" target="_blank">
+      <img src="https://res.cloudinary.com/difucqa9h/image/upload/v1770643265/discord_images/yaix1pbnbdv3srvf12gl.png" alt="CODE NEXUS" />
+      <span>CODE NEXUS</span>
+    </a>
+    <p><%= t.home.footerRights %></p>
+  </footer>
+
+  <!-- Lucide -->
+  <script src="/js/lucide.min.js"></script>
+  <script>lucide.createIcons();</script>
+
+  <!-- Stars -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script>
+    (function () {
+      const canvas = document.getElementById('c');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+      renderer.setPixelRatio(1); renderer.setSize(innerWidth, innerHeight);
+      renderer.setClearColor(0x040010, 1);
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 500);
+      camera.position.z = 1;
+      const N = 2800, pos = new Float32Array(N * 3);
+      for (let i = 0; i < N * 3; i++) pos[i] = (Math.random() - .5) * 240;
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const mat = new THREE.PointsMaterial({ color: 0xb8b0ff, size: 0.24, transparent: true, opacity: 0.45, depthWrite: false });
+      scene.add(new THREE.Points(geo, mat));
+      let mx = 0, t = 0;
+      document.addEventListener('mousemove', e => { mx = (e.clientX / innerWidth - .5) * .25; });
+      window.addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+      const stars = scene.children[0];
+      (function render() { requestAnimationFrame(render); t += 0.00022; stars.rotation.y = t + mx * .15; renderer.render(scene, camera); })();
+    })();
+  </script>
+
+  <script>
+    /* ── XP & level helpers (mirrored from systems/levels.js) ── */
+    function xpForLevel(n) { return 5*n*n + 50*n + 100; }
+    function totalXpToLevel(n) { let t=0; for(let i=0;i<n;i++) t+=xpForLevel(i); return t; }
+    const MSGS_PER_LVL = 50, MINS_PER_LVL = 30;
+
+    function textHint(lvl) {
+      const mode = document.querySelector('.choice-box[data-choice^="text-"].selected')?.dataset.choice;
+      if (!lvl || lvl === 0) return 'Not required';
+      if (mode === 'text-xp') {
+        const msgs = Math.round(totalXpToLevel(lvl) / 20);
+        return `Level ${lvl} · ~${msgs.toLocaleString()} messages`;
+      } else {
+        return `${(lvl * MSGS_PER_LVL).toLocaleString()} messages`;
+      }
+    }
+    function voiceHint(lvl) {
+      const mode = document.querySelector('.choice-box[data-choice^="voice-"].selected')?.dataset.choice;
+      if (!lvl || lvl === 0) return 'Not required';
+      if (mode === 'voice-xp') {
+        const totalMins = Math.round(totalXpToLevel(lvl) / 10);
+        const h = Math.floor(totalMins/60), m = totalMins % 60;
+        return `Level ${lvl} · ${h>0?h+'h ':''}${m}min`;
+      } else {
+        const totalMins = lvl * MINS_PER_LVL;
+        const h = Math.floor(totalMins/60), m = totalMins % 60;
+        return `${h>0?h+'h ':''}${m} minutes`;
+      }
+    }
+
+    function updateHints(row) {
+      if (!row) return;
+      const tIn  = row.querySelector('.text-level-input');
+      const vIn  = row.querySelector('.voice-level-input');
+      const tH   = row.querySelector('.text-hint');
+      const vH   = row.querySelector('.voice-hint');
+      if (tH && tIn) tH.textContent = textHint(parseInt(tIn.value)||0);
+      if (vH && vIn) vH.textContent = voiceHint(parseInt(vIn.value)||0);
+    }
+
+    function spinChange(btn, dir) {
+      const input = btn.parentElement.querySelector('.level-spinner-input');
+      const val   = Math.max(0, (parseInt(input.value)||0) + dir);
+      input.value = val;
+      updateHints(btn.closest('tr'));
+    }
+
+    function deleteRoleRow(btn) {
+      const row = btn.closest('tr');
+      row.remove();
+      updateCounter();
+      if (!document.querySelector('#roles-tbody tr[data-role-id]')) {
+        const empty = document.createElement('tr');
+        empty.id = 'empty-row';
+        empty.innerHTML = '<td colspan="5" class="table-empty">No reward roles configured</td>';
+        document.getElementById('roles-tbody').appendChild(empty);
+      }
+      // Re-enable the role in the picker
+      const roleId = row.dataset.roleId;
+      const opt = document.querySelector(`.role-option[data-id="${roleId}"]`);
+      if (opt) opt.classList.remove('is-added');
+    }
+
+    function updateCounter() { /* counter display removed */ }
+
+    /* ── Role Picker ── */
+    const GUILD_ROLES = JSON.parse(document.getElementById('guild-roles-data').textContent);
+    let selectedRoleId = null;
+
+    function buildPickerList(filter='') {
+      const list = document.getElementById('role-picker-list');
+      const addedIds = new Set(
+        [...document.querySelectorAll('#roles-tbody tr[data-role-id]')].map(r=>r.dataset.roleId)
+      );
+      list.innerHTML = '';
+      const fil = filter.toLowerCase();
+      GUILD_ROLES
+        .filter(r => !fil || r.name.toLowerCase().includes(fil))
+        .forEach(role => {
+          const el = document.createElement('div');
+          el.className = 'role-option' + (addedIds.has(role.id) ? ' is-added' : '');
+          el.dataset.id = role.id;
+          const color = role.color || '#5865f2';
+          const iconEl = role.icon
+            ? `<img class="role-icon-sm" src="${role.icon}" alt="" onerror="this.style.display='none'" />`
+            : `<span class="role-color-dot" style="background:${color}"></span>`;
+          el.innerHTML = `${iconEl}<span class="role-name-text" style="color:${color !== '#000000' ? color : 'var(--white)'}">${role.name}</span>`;
+          el.addEventListener('click', () => {
+            if (el.classList.contains('is-added')) return;
+            selectedRoleId = role.id;
+            // Update picker button
+            const dot  = document.getElementById('picker-dot');
+            const lbl  = document.getElementById('picker-label');
+            dot.style.background  = color !== '#000000' ? color : '#5865f2';
+            dot.style.display     = role.icon ? 'none' : '';
+            if (role.icon) {
+              // show small icon in button
+              let imgEl = document.getElementById('picker-icon-img');
+              if (!imgEl) { imgEl = document.createElement('img'); imgEl.id='picker-icon-img'; imgEl.className='role-icon-sm'; lbl.before(imgEl); }
+              imgEl.src = role.icon;
+            }
+            lbl.textContent = role.name;
+            lbl.style.color = color !== '#000000' ? color : 'var(--white)';
+            document.getElementById('add-role-btn').disabled = false;
+            closePicker();
+          });
+          list.appendChild(el);
+        });
+      if (!list.children.length) {
+        list.innerHTML = '<div style="padding:12px 14px;color:var(--muted);font-size:.82rem">No roles found</div>';
+      }
+    }
+
+    function openPicker() {
+      const dd = document.getElementById('role-picker-dropdown');
+      const btn = document.getElementById('role-picker-btn');
+      dd.style.display = 'flex';
+      btn.classList.add('open');
+      buildPickerList('');
+      document.getElementById('role-search-input').value = '';
+      document.getElementById('role-search-input').focus();
+    }
+    function closePicker() {
+      document.getElementById('role-picker-dropdown').style.display = 'none';
+      document.getElementById('role-picker-btn').classList.remove('open');
+    }
+
+    document.getElementById('role-picker-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = document.getElementById('role-picker-dropdown').style.display !== 'none';
+      open ? closePicker() : openPicker();
+    });
+    document.getElementById('role-search-input').addEventListener('input', e => buildPickerList(e.target.value));
+    document.addEventListener('click', e => {
+      if (!document.getElementById('role-picker-wrap')?.contains(e.target)) closePicker();
+      document.querySelectorAll('.cpicker-dropdown').forEach(dd => {
+        if (dd.style.display !== 'none' && !dd.closest('.cpicker')?.contains(e.target)) {
+          dd.style.display = 'none';
+          dd.style.top = ''; dd.style.bottom = ''; dd.style.left = ''; dd.style.right = ''; dd.style.width = ''; dd.style.minWidth = '';
+          dd.closest('.cpicker')?.querySelector('.cpicker-btn')?.classList.remove('open');
+        }
+      });
+    });
+
+    /* ── Add Role button ── */
+    document.getElementById('add-role-btn').addEventListener('click', () => {
+      if (!selectedRoleId) return;
+      const alreadyAdded = document.querySelector(`#roles-tbody tr[data-role-id="${selectedRoleId}"]`);
+      if (alreadyAdded) return;
+      const count = document.querySelectorAll('#roles-tbody tr[data-role-id]').length;
+
+      const role = GUILD_ROLES.find(r => r.id === selectedRoleId);
+      if (!role) return;
+
+      document.getElementById('empty-row')?.remove();
+
+      const color = role.color || '#5865f2';
+      const iconHtml = role.icon
+        ? `<img class="role-icon-sm" src="${role.icon}" alt="" onerror="this.style.display='none'" />`
+        : `<span class="role-color-dot" style="background:${color}"></span>`;
+
+      const tr = document.createElement('tr');
+      tr.dataset.roleId = role.id;
+      tr.innerHTML = `
+        <td><div class="role-cell-content">${iconHtml}<span class="role-name-text">${role.name}</span></div></td>
+        <td><div class="spinner-cell">
+          <div class="level-spinner">
+            <button class="level-spinner-btn" type="button" onclick="spinChange(this,-1)">−</button>
+            <input type="number" class="level-spinner-input text-level-input" min="0" max="999" value="1" onchange="updateHints(this.closest('tr'))" />
+            <button class="level-spinner-btn" type="button" onclick="spinChange(this,1)">+</button>
+          </div>
+          <div class="spinner-hint text-hint"></div>
+        </div></td>
+        <td><div class="spinner-cell">
+          <div class="level-spinner">
+            <button class="level-spinner-btn" type="button" onclick="spinChange(this,-1)">−</button>
+            <input type="number" class="level-spinner-input voice-level-input" min="0" max="999" value="0" onchange="updateHints(this.closest('tr'))" />
+            <button class="level-spinner-btn" type="button" onclick="spinChange(this,1)">+</button>
+          </div>
+          <div class="spinner-hint voice-hint"></div>
+        </div></td>
+        <td><label class="toggle-switch"><input type="checkbox" class="either-level-toggle"><span class="toggle-slider"></span></label></td>
+        <td><button class="btn-del-role" type="button" onclick="deleteRoleRow(this)" title="Remove">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><path opacity="0.4" d="M3.408 5L3.903 14.389C3.979 15.853 5.185 17 6.649 17H11.353C12.817 17 14.023 15.853 14.099 14.39L14.594 5H3.408Z"/><path d="M7.374 14C6.98 14 6.649 13.69 6.626 13.29L6.376 8.79C6.354 8.38 6.67 8.02 7.083 8C7.489 7.98 7.851 8.29 7.874 8.71L8.124 13.21C8.147 13.62 7.83 13.98 7.417 14H7.374Z"/><path d="M10.626 14H10.583C10.17 13.98 9.854 13.62 9.876 13.21L10.126 8.71C10.149 8.29 10.498 7.98 10.917 8C11.33 8.02 11.647 8.38 11.624 8.79L11.374 13.29C11.352 13.69 11.021 14 10.626 14Z"/><path d="M15.25 4H12V2.75C12 1.785 11.215 1 10.25 1H7.75C6.785 1 6 1.785 6 2.75V4H2.75C2.336 4 2 4.336 2 4.75C2 5.164 2.336 5.5 2.75 5.5H15.25C15.664 5.5 16 5.164 16 4.75C16 4.336 15.664 4 15.25 4ZM7.5 2.75C7.5 2.614 7.614 2.5 7.75 2.5H10.25C10.386 2.5 10.5 2.614 10.5 2.75V4H7.5V2.75Z"/></svg>
+        </button></td>`;
+      document.getElementById('roles-tbody').appendChild(tr);
+      updateHints(tr);
+      updateCounter();
+
+      // Mark in picker list
+      const opt = document.querySelector(`.role-option[data-id="${role.id}"]`);
+      if (opt) opt.classList.add('is-added');
+
+      // Reset picker
+      selectedRoleId = null;
+      document.getElementById('picker-label').textContent = 'Select a role to add...';
+      document.getElementById('picker-label').style.color = 'var(--muted)';
+      document.getElementById('picker-dot').style.display = 'none';
+      const img = document.getElementById('picker-icon-img');
+      if (img) img.remove();
+      document.getElementById('add-role-btn').disabled = true;
+    });
+
+    /* ── Update hints on all rows at load & when mode changes ── */
+    function refreshAllHints() {
+      document.querySelectorAll('#roles-tbody tr[data-role-id]').forEach(updateHints);
+    }
+    document.querySelectorAll('.choice-box').forEach(box => {
+      box.addEventListener('click', () => setTimeout(refreshAllHints, 10));
+    });
+    refreshAllHints();
+
+    // ── Custom Picker (cpicker) factory ──────────────────────────
+    function makeCPicker(wrapperId, hiddenId) {
+      const wrap = document.getElementById(wrapperId);
+      if (!wrap) return;
+      const btn     = wrap.querySelector('.cpicker-btn');
+      const dd      = wrap.querySelector('.cpicker-dropdown');
+      const lbl     = btn.querySelector('.cpicker-label');
+      const badge   = btn.querySelector('.cpicker-badge');
+      const hidden  = document.getElementById(hiddenId);
+      const isMulti = !!badge;
+      const srch    = wrap.querySelector('.cpicker-search-wrap input');
+
+      function getActive() { return [...wrap.querySelectorAll('.cpicker-opt.active')]; }
+      function syncHidden() {
+        if (!hidden) return;
+        if (isMulti) {
+          const av = new Set(getActive().map(o => o.dataset.value));
+          [...hidden.options].forEach(o => { o.selected = av.has(o.value); });
+        } else {
+          const a = wrap.querySelector('.cpicker-opt.active');
+          hidden.value = a ? a.dataset.value : '';
+        }
+      }
+      function updateBadge() {
+        if (!isMulti || !badge) return;
+        const active = getActive();
+        const ph = lbl.dataset.placeholder || 'None';
+        if (!active.length) {
+          lbl.textContent = ph; lbl.classList.add('cpicker-muted'); badge.style.display = 'none';
+        } else {
+          const names = active.map(o => o.textContent.trim().replace(/\s+/g,' ')).filter(Boolean);
+          lbl.textContent = names.slice(0,2).join(', ') + (names.length > 2 ? ' +' + (names.length-2) : '');
+          lbl.classList.remove('cpicker-muted');
+          badge.textContent = active.length; badge.style.display = '';
+        }
+      }
+      function positionDd() {
+        const rect = btn.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom - 6;
+        const spaceAbove = rect.top - 6;
+        const ddHeight = Math.min(300, dd.scrollHeight || 300);
+        const showAbove = spaceBelow < ddHeight && spaceAbove > spaceBelow;
+        dd.style.left = rect.left + 'px';
+        dd.style.width = rect.width + 'px';
+        dd.style.right = 'auto';
+        dd.style.minWidth = rect.width + 'px';
+        if (showAbove) {
+          dd.style.top = 'auto';
+          dd.style.bottom = (window.innerHeight - rect.top + 6) + 'px';
+        } else {
+          dd.style.top = (rect.bottom + 6) + 'px';
+          dd.style.bottom = 'auto';
+        }
+      }
+      function openDd() {
+        // close all first
+        document.querySelectorAll('.cpicker-dropdown').forEach(d => {
+          d.style.display = 'none';
+          d.closest('.cpicker')?.querySelector('.cpicker-btn')?.classList.remove('open');
+        });
+        closePicker();
+        dd.style.display = 'flex'; dd.style.flexDirection = 'column';
+        positionDd();
+        btn.classList.add('open');
+        if (srch) { srch.value = ''; filterList(''); srch.focus(); }
+      }
+      function closeDd() {
+        dd.style.display = 'none';
+        dd.style.top = ''; dd.style.bottom = ''; dd.style.left = ''; dd.style.right = ''; dd.style.width = ''; dd.style.minWidth = '';
+        btn.classList.remove('open');
+      }
+      function filterList(q) {
+        const ql = q.toLowerCase();
+        wrap.querySelectorAll('.cpicker-opt').forEach(o => {
+          const t = o.textContent.toLowerCase();
+          o.style.display = (!ql || t.includes(ql)) ? '' : 'none';
+        });
+      }
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        dd.style.display !== 'none' ? closeDd() : openDd();
+      });
+      function onScrollResize() { if (dd.style.display !== 'none') positionDd(); }
+      window.addEventListener('scroll', onScrollResize, true);
+      window.addEventListener('resize', onScrollResize);
+      if (srch) srch.addEventListener('input', e => filterList(e.target.value));
+      wrap.querySelectorAll('.cpicker-opt').forEach(opt => {
+        opt.addEventListener('click', e => {
+          e.stopPropagation();
+          if (isMulti) {
+            opt.classList.toggle('active');
+            syncHidden(); updateBadge();
+          } else {
+            wrap.querySelectorAll('.cpicker-opt').forEach(o => o.classList.remove('active'));
+            opt.classList.add('active');
+            lbl.textContent = opt.textContent.trim().replace(/\s+/g,' ');
+            lbl.classList.remove('cpicker-muted');
+            syncHidden(); closeDd();
+          }
+          if (typeof markDirty === 'function') markDirty();
+        });
+      });
+      // init
+      if (!isMulti) {
+        const a = wrap.querySelector('.cpicker-opt.active');
+        if (a) { lbl.textContent = a.textContent.trim().replace(/\s+/g,' '); lbl.classList.remove('cpicker-muted'); }
+      } else { updateBadge(); }
+      syncHidden();
+    }
+    makeCPicker('cpicker-reward-type', 'reward-type');
+    makeCPicker('cpicker-disable-rewards', 'disable-rewards');
+    makeCPicker('cpicker-levelup-channel', 'levelup-channel');
+    makeCPicker('cpicker-ignore-channels', 'ignore-channels');
+    makeCPicker('cpicker-ignore-roles', 'ignore-roles');
+    makeCPicker('cpicker-reward-msg-channel', 'reward-msg-channel');
+    makeCPicker('cpicker-text-msg-channel',   'text-msg-channel');
+    makeCPicker('cpicker-voice-msg-channel',  'voice-msg-channel');
+
+    // ── Discord message preview ───────────────────────────────
+    function dcParseMarkdown(text) {
+      let html = text
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g,    '<em>$1</em>')
+        .replace(/`([^`]+)`/g,    '<code>$1</code>')
+        .replace(/\[user\]/g,     '<span class="dc-mention">@User</span>')
+        .replace(/\[userName\]/g, '<span class="dc-mention">Username</span>')
+        .replace(/\[roleName\]/g, '<span class="dc-mention">@RoleName</span>')
+        .replace(/\[oldLevel\]/g, '<strong>1</strong>')
+        .replace(/\[newLevel\]/g, '<strong>2</strong>');
+      return html;
+    }
+    function dcTimeNow() {
+      const now = new Date();
+      let h = now.getHours(), m = now.getMinutes();
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      return 'Today at ' + h + ':' + String(m).padStart(2,'0') + ' ' + ampm;
+    }
+    function initPreview(textareaId, previewId, timeId) {
+      const ta = document.getElementById(textareaId);
+      const pv = document.getElementById(previewId);
+      const tm = timeId ? document.getElementById(timeId) : null;
+      if (!ta || !pv) return;
+      if (tm) tm.textContent = dcTimeNow();
+      function update() { pv.innerHTML = dcParseMarkdown(ta.value); }
+      ta.addEventListener('input', update);
+      update();
+    }
+    initPreview('reward-msg-text', 'reward-preview', 'reward-preview-time');
+    initPreview('text-msg-text',   'text-preview',   'text-preview-time');
+    initPreview('voice-msg-text',  'voice-preview',  'voice-preview-time');
+
+    // ── Variable tag click to insert ────────────────────────────
+    document.querySelectorAll('.var-tag').forEach(tag => {
+      tag.addEventListener('click', () => {
+        const targetId = tag.closest('.vars-grid')?.dataset?.target;
+        const ta = targetId ? document.getElementById(targetId) : null;
+        if (!ta) return;
+        const v = tag.dataset.var;
+        const s = ta.selectionStart, e = ta.selectionEnd;
+        ta.value = ta.value.slice(0, s) + v + ta.value.slice(e);
+        ta.selectionStart = ta.selectionEnd = s + v.length;
+        ta.focus();
+        ta.dispatchEvent(new Event('input'));
+      });
+    });
+
+    // ── Emoji Picker ────────────────────────────────────────
+    const UNICODE_EMOJI_GROUPS = [
+      { name: '😀 Smileys', emojis: ['😀','😁','😂','😃','😄','😅','😆','🤣','😇','😈','😉','😊','😋','😌','😍','🥰','😎','🤓','🤗','🤔','🤬','🤮','🤧','🤒','😑','😜','🤫','😞','😟','😢','😭','😔','😕','🤥','😖','😪','😫','🤤','😝','😤','😡','🤬','😠','😮','😯','😲','🤯','😳','🤰','😵','🤮','😶','😷','🤢','🤕','🤑','🤩','🥳','🥰','🤪','🤨'] },
+      { name: '👍 Hands', emojis: ['👍','👎','👌','🤌','✌️','🤏','🤞','🤘','👈','👉','👆','👇','☝️','👏','🖐️','🖖','🫱','🫲','💪','🦵','🤎','🤟','🙏','🫰','👐','🤲','🤎','✍️','🤝'] },
+      { name: '❤️ Hearts', emojis: ['❤️','🧡','💛','💚','💙','💜','🤎','💞','🖤','💔','❣️','💕','💖','💗','💘','💝','💟','♥️'] },
+      { name: '🎉 Party', emojis: ['🎉','🎊','🎈','🎆','🎇','🥳','🎂','🎁','💝','🏆','🧨','🍾','🎶','🔥','✨','🟥','🟧','🟨','🟩','🟦','🟣','🟤'] },
+      { name: '🔥 Symbols', emojis: ['✨','⭐','🔥','⚡','💫','✅','❌','❗','❓','💯','🔝','🔞','🔄','♻️','✔️','💠','💎','🔮','🌈','⚪','🟡','🟢','🔵','🟞'] },
+      { name: '🌱 Nature', emojis: ['🌱','🌲','🌳','🌴','🌵','🌶️','🌷','🌸','🌹','🌺','🌻','🌼','🌿','☘️','🍀','🍁','🍂','🍃','🍄','🐢','🐣','🐱','🐶','🐼','🦋'] },
+      { name: '👨‍💻 People', emojis: ['👨‍💻','👩','🧑','👴','👵','👶','🧒','👸','🤸','👻','💂','🕵️','👱','🦰','🦱','🦲','🦳','👷','👳','👨‍⚕️','👩‍⚕️'] },
+    ];
+    const CUSTOM_EMOJIS = JSON.parse(document.getElementById('guild-emojis-data')?.textContent || '[]');
+
+    let _emojiPickerOpen = null; // current target textarea id
+
+    function buildEmojiPicker(targetId) {
+      const existing = document.getElementById('emoji-picker-global');
+      if (existing) existing.remove();
+      const ta = document.getElementById(targetId);
+      if (!ta) return;
+      const wrap = ta.closest('.msg-textarea-wrap');
+      if (!wrap) return;
+      wrap.style.position = 'relative';
+
+      const picker = document.createElement('div');
+      picker.id = 'emoji-picker-global';
+      picker.className = 'emoji-picker-wrap';
+      picker.innerHTML = `
+        <div class="emoji-pick-tabs">
+          <button class="emoji-pick-tab active" data-epanel="unicode">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            Standard
+          </button>
+          <button class="emoji-pick-tab" data-epanel="custom">
+            <svg viewBox="0 0 24 24"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+            Server
+          </button>
+        </div>
+        <div class="emoji-pick-search"><input type="text" placeholder="Search emoji..." id="emoji-pick-q" /></div>
+        <div class="emoji-pick-grid" id="ep-grid"></div>
+      `;
+      wrap.appendChild(picker);
+
+      let activePanel = 'unicode';
+      function renderGrid(q) {
+        const grid = picker.querySelector('#ep-grid');
+        grid.innerHTML = '';
+        q = (q || '').toLowerCase();
+        if (activePanel === 'unicode') {
+          UNICODE_EMOJI_GROUPS.forEach(g => {
+            g.emojis.filter(e => !q || g.name.toLowerCase().includes(q)).forEach(em => {
+              const b = document.createElement('button');
+              b.type = 'button'; b.className = 'emoji-pick-btn'; b.textContent = em;
+              b.addEventListener('click', () => insertEmoji(em, targetId, picker));
+              grid.appendChild(b);
+            });
+          });
+          if (!grid.children.length) grid.innerHTML = '<span class="emoji-pick-empty">No emojis found</span>';
+        } else {
+          const list = CUSTOM_EMOJIS.filter(e => !q || e.name.toLowerCase().includes(q));
+          if (!list.length) { grid.innerHTML = '<span class="emoji-pick-empty">No custom emojis</span>'; return; }
+          list.forEach(e => {
+            const b = document.createElement('button');
+            b.type = 'button'; b.className = 'emoji-pick-btn custom-e'; b.title = e.name;
+            b.innerHTML = `<img src="${e.url}" alt=":${e.name}:" />`;
+            b.addEventListener('click', () => insertEmoji(':'+e.name+':', targetId, picker));
+            grid.appendChild(b);
+          });
+        }
+      }
+      picker.querySelectorAll('.emoji-pick-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          picker.querySelectorAll('.emoji-pick-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          activePanel = tab.dataset.epanel;
+          picker.querySelector('#emoji-pick-q').value = '';
+          renderGrid('');
+        });
+      });
+      picker.querySelector('#emoji-pick-q').addEventListener('input', e => renderGrid(e.target.value));
+      picker.addEventListener('click', e => e.stopPropagation());
+      renderGrid('');
+    }
+    function insertEmoji(emoji, targetId, picker) {
+      const ta = document.getElementById(targetId);
+      if (!ta) return;
+      const s = ta.selectionStart, e2 = ta.selectionEnd;
+      ta.value = ta.value.slice(0, s) + emoji + ta.value.slice(e2);
+      ta.selectionStart = ta.selectionEnd = s + emoji.length;
+      ta.focus(); ta.dispatchEvent(new Event('input'));
+      picker.remove(); _emojiPickerOpen = null;
+    }
+    document.querySelectorAll('.msg-emoji-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const targetId = btn.dataset.target;
+        const existing = document.getElementById('emoji-picker-global');
+        if (existing && _emojiPickerOpen === targetId) { existing.remove(); _emojiPickerOpen = null; return; }
+        if (existing) existing.remove();
+        _emojiPickerOpen = targetId;
+        buildEmojiPicker(targetId);
+      });
+    });
+    document.addEventListener('click', () => {
+      const ep = document.getElementById('emoji-picker-global');
+      if (ep) { ep.remove(); _emojiPickerOpen = null; }
+    });
+
+    // Apply role-color-dot background from data attribute
+    document.querySelectorAll('.role-color-dot[data-color]').forEach(el => {
+      el.style.background = el.dataset.color;
+    });
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Choice boxes
+    document.querySelectorAll('.choice-box').forEach(box => {
+      box.addEventListener('click', () => {
+        const group = box.dataset.choice.split('-')[0];
+        document.querySelectorAll(`.choice-box[data-choice^="${group}-"]`).forEach(b => b.classList.remove('selected'));
+        box.classList.add('selected');
+        markDirty();
+      });
+    });
+
+    // ── Dirty tracking ────────────────────────────────────────────────────────
+    const _saveBar = document.getElementById('save-bar');
+    function markDirty() { _saveBar?.classList.add('visible'); }
+    function markClean() { _saveBar?.classList.remove('visible'); }
+    document.addEventListener('change', e => {
+      if (!e.target.closest('#emoji-picker-global')) markDirty();
+    });
+    document.addEventListener('input', e => {
+      if (e.target.matches('textarea, input[type="text"], input[type="number"]') &&
+          !e.target.closest('#emoji-picker-global')) markDirty();
+    });
+
+    // Save settings
+    document.getElementById('save-btn')?.addEventListener('click', async () => {
+      // Collect reward roles
+      const rewardRoles = [];
+      document.querySelectorAll('#roles-tbody tr[data-role-id]').forEach(row => {
+        rewardRoles.push({
+          ROLE_ID:      row.dataset.roleId,
+          TEXT_LEVEL:   parseInt(row.querySelector('.text-level-input')?.value)  || 0,
+          VOICE_LEVEL:  parseInt(row.querySelector('.voice-level-input')?.value) || 0,
+          EITHER_LEVEL: row.querySelector('.either-level-toggle')?.checked || false
+        });
+      });
+
+      const data = {
+        ENABLE: document.getElementById('level-enable').checked,
+        TEXT_ACTIVITY: {
+          ENABLE: true,
+          TRACK_MODE:          document.querySelector('.choice-box[data-choice^="text-"].selected')?.dataset.choice === 'text-xp' ? 'XP' : 'MESSAGES',
+          XP_PER_MESSAGE_MIN:  15,
+          XP_PER_MESSAGE_MAX:  25,
+          COOLDOWN_SECONDS:    60,
+          IGNORE_ROLES:        Array.from(document.getElementById('ignore-roles')?.selectedOptions || []).map(o => o.value),
+          IGNORE_CHANNELS:     Array.from(document.getElementById('ignore-channels')?.selectedOptions || []).map(o => o.value)
+        },
+        VOICE_ACTIVITY: {
+          ENABLE: true,
+          TRACK_MODE:      document.querySelector('.choice-box[data-choice^="voice-"].selected')?.dataset.choice === 'voice-xp' ? 'XP' : 'MINUTES',
+          XP_PER_MINUTE:   10,
+          IGNORE_MUTED:    document.getElementById('ignore-muted')?.checked,
+          IGNORE_DEAFENED: document.getElementById('ignore-deafened')?.checked
+        },
+        REWARD_ROLES: rewardRoles,
+        REWARD_SETTINGS: {
+          REMOVE_PREVIOUS_ROLES: document.getElementById('reward-type')?.value === 'REMOVE_PREVIOUS',
+          DISABLE_REWARDS:       document.getElementById('disable-rewards')?.value === 'true',
+          REMOVE_ON_RESET:       document.getElementById('remove-on-reset')?.checked,
+          GIVE_HIGHEST_ROLE_ONLY:document.getElementById('highest-only')?.checked
+        },
+        LEVELUP_CHANNEL:         document.getElementById('levelup-channel')?.value || '',
+        LEVELUP_MESSAGE_ENABLED: document.getElementById('levelup-enabled')?.checked ?? true,
+        MESSAGES: {
+          REWARD_ROLE: {
+            CHANNEL: document.getElementById('reward-msg-channel')?.value || '',
+            TEXT:    document.getElementById('reward-msg-text')?.value || '',
+            DM:      document.getElementById('reward-msg-dm')?.checked || false
+          },
+          TEXT_LEVELUP: {
+            CHANNEL: document.getElementById('text-msg-channel')?.value || '',
+            TEXT:    document.getElementById('text-msg-text')?.value || ''
+          },
+          VOICE_LEVELUP: {
+            CHANNEL: document.getElementById('voice-msg-channel')?.value || '',
+            TEXT:    document.getElementById('voice-msg-text')?.value || ''
+          }
+        }
+      };
+
+      const btn = document.getElementById('save-btn');
+      const lbl = document.getElementById('save-label');
+      const hint = document.getElementById('save-hint');
+      btn.disabled = true;
+      lbl.textContent = btn.dataset.savingText || 'Saving...';
+      try {
+        const res = await fetch(window.location.pathname + '/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (res.ok) {
+          lbl.textContent = btn.dataset.savedText || '✓ Saved!';
+          btn.style.background = 'var(--green)';
+          hint.textContent = new Date().toLocaleTimeString();
+          hint.classList.add('show');
+          markClean();
+          setTimeout(() => {
+            lbl.textContent = btn.dataset.saveText || 'Save Settings';
+            btn.style.background = ''; btn.disabled = false;
+            setTimeout(() => hint.classList.remove('show'), 3000);
+          }, 2000);
+        } else {
+          lbl.textContent = btn.dataset.saveText || 'Save Settings';
+          btn.disabled = false;
+          hint.textContent = 'Failed to save'; hint.classList.add('show');
+        }
+      } catch (err) {
+        console.error(err);
+        lbl.textContent = btn.dataset.saveText || 'Save Settings';
+        btn.disabled = false;
+        hint.textContent = 'Network error'; hint.classList.add('show');
+      }
+    });
+  </script>
+
+  <!-- Page in overlay -->
+  <div id="ov" style="position:fixed;inset:0;z-index:9999;background:#040010;animation:pIn .45s cubic-bezier(.4,0,.2,1) forwards;pointer-events:none;"></div>
+
+  <script>
+    /* ── Banner solid color ── */
+    const bannerSolid = document.querySelector('.prof-banner-solid');
+    if (bannerSolid && bannerSolid.dataset.bg) bannerSolid.style.background = bannerSolid.dataset.bg;
+
+    /* ── Profile sidebar ── */
+    const profSidebar = document.getElementById('prof-sidebar');
+    const profBackdrop = document.getElementById('prof-backdrop');
+    const openBtn = document.getElementById('open-profile');
+    const closeBtn = document.getElementById('close-profile');
+    const copyId = document.getElementById('prof-copy-id');
+
+    function openProfile() { profSidebar.classList.add('open'); profBackdrop.classList.add('open'); profSidebar.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+    function closeProfile() { profSidebar.classList.remove('open'); profBackdrop.classList.remove('open'); profSidebar.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+
+    openBtn.addEventListener('click', openProfile);
+    document.querySelectorAll('.open-profile-btn').forEach(b => b.addEventListener('click', openProfile));
+    if (closeBtn) closeBtn.addEventListener('click', closeProfile);
+    profBackdrop.addEventListener('click', closeProfile);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProfile(); });
+
+    if (copyId) {
+      copyId.addEventListener('click', () => {
+        navigator.clipboard.writeText(copyId.textContent.trim()).then(() => {
+          const orig = copyId.textContent;
+          copyId.textContent = '✓ Copied!';
+          copyId.style.color = 'var(--cyan-l)';
+          setTimeout(() => { copyId.textContent = orig; copyId.style.color = ''; }, 1500);
+        });
+      });
+    }
+
+    /* ── Language select ── */
+    const langSelectEl = document.getElementById('lang-select');
+    if (langSelectEl) {
+      langSelectEl.addEventListener('change', function () {
+        const u = new URL(window.location.href);
+        u.searchParams.set('lang', this.value);
+        window.location.href = u.toString();
+      });
+    }
+
+    /* ── Mobile nav toggle ── */
+    const menuToggle  = document.getElementById('menu-toggle');
+    const mgmtSidebar = document.getElementById('mgmt-sidebar');
+    const navSidebar  = document.querySelector('.nav-sidebar');
+    const navOverlay  = document.getElementById('nav-overlay');
+
+    function openMgmt()  { mgmtSidebar.classList.add('open'); navOverlay.classList.add('open'); document.body.style.overflow='hidden'; }
+    function closeMgmt() { mgmtSidebar.classList.remove('open'); navOverlay.classList.remove('open'); document.body.style.overflow=''; }
+    function openNav()   { if (navSidebar) { navSidebar.classList.add('open'); navOverlay.classList.add('open'); document.body.style.overflow='hidden'; } }
+    function closeNav()  { if (navSidebar) { navSidebar.classList.remove('open'); navOverlay.classList.remove('open'); document.body.style.overflow=''; } }
+
+    if (menuToggle) menuToggle.addEventListener('click', () => mgmtSidebar.classList.contains('open') ? closeMgmt() : openMgmt());
+    if (navOverlay) navOverlay.addEventListener('click', () => { closeMgmt(); closeNav(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMgmt(); closeNav(); closeProfile(); } });
+
+    const sortBtn = document.querySelector('.mgmt-sort-btn');
+    if (sortBtn) {
+      sortBtn.addEventListener('click', function () {
+        if (navSidebar && navSidebar.classList.contains('open')) { closeNav(); } else { closeMgmt(); openNav(); }
+      });
+    }
+
+    /* ── Mgmt section collapse ── */
+    document.querySelectorAll('.mgmt-section-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const body = this.nextElementSibling;
+        const isOpen = body.classList.contains('open');
+        body.classList.toggle('open', !isOpen);
+        this.classList.toggle('open', !isOpen);
+      });
+    });
+
+    /* ── Page transitions ── */
+    function fadeOut(href) {
+      const ov = document.getElementById('ov');
+      ov.classList.add('leave');
+      setTimeout(() => { window.location.href = href; }, 360);
+    }
+    document.querySelectorAll('a.nav-link, a#logout-link').forEach(a => {
+      a.addEventListener('click', function (e) {
+        if (this.target === '_blank') return;
+        e.preventDefault(); fadeOut(this.href);
+      });
+    });
+  </script>
+</body>
+</html>
+
+<%#
+  This project was programmed by the Code Nexus team.
+  If you encounter any problems, open an Issue or log into the Discord server:
+  https://discord.gg/UvEYbFd2rj
+%>

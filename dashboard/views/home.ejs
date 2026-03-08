@@ -1,0 +1,1480 @@
+<%#
+  This project was programmed by the Code Nexus team.
+  If you encounter any problems, open an Issue or log into the Discord server:
+  https://discord.gg/UvEYbFd2rj
+%>
+<!DOCTYPE html>
+<html lang="<%= t.lang %>" dir="<%= t.dir %>">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    <%= t.home.pageTitle %>
+  </title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Tajawal:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #040010;
+      --surface: rgba(255, 255, 255, 0.04);
+      --surface-2: rgba(255, 255, 255, 0.07);
+      --card: rgba(10, 3, 30, 0.75);
+      --purple: #7c3aed;
+      --purple-l: #a78bfa;
+      --cyan: #06b6d4;
+      --cyan-l: #67e8f9;
+      --gold: #d97706;
+      --gold-l: #fcd34d;
+      --green: #22c55e;
+      --border: rgba(124, 58, 237, .2);
+      --border-h: rgba(124, 58, 237, .5);
+      --muted: rgba(203, 194, 255, .5);
+      --white: #f8fafc;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: '<%= t.fontBody %>', 'Tajawal', 'Inter', system-ui, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    #c {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .glow {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+      filter: blur(120px);
+      animation: glow-drift 22s ease-in-out infinite alternate;
+    }
+
+    .glow-a {
+      width: min(600px, 80vw);
+      height: min(600px, 80vw);
+      top: -20%;
+      right: -16%;
+      background: radial-gradient(circle, rgba(124, 58, 237, .28) 0%, transparent 65%);
+    }
+
+    .glow-b {
+      width: min(500px, 70vw);
+      height: min(500px, 70vw);
+      bottom: -18%;
+      left: -12%;
+      background: radial-gradient(circle, rgba(6, 182, 212, .18) 0%, transparent 65%);
+      animation-delay: -11s;
+    }
+
+    @keyframes glow-drift {
+      from {
+        transform: translate(0, 0) scale(1);
+      }
+
+      to {
+        transform: translate(20px, 15px) scale(1.06);
+      }
+    }
+
+    /* ── Topbar ────────────────────────────────────────── */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      background: rgba(4, 0, 16, .75);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255, 255, 255, .06);
+    }
+
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+    }
+
+    .topbar-brand .brand-logo {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      object-fit: cover;
+      flex-shrink: 0;
+      filter: drop-shadow(0 4px 18px rgba(124, 58, 237, 0.35));
+    }
+
+    .topbar-brand .brand-text {
+      font-family: 'Orbitron', monospace;
+      font-size: .9rem;
+      font-weight: 800;
+      letter-spacing: .1em;
+      background: linear-gradient(135deg, var(--white), var(--purple-l));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* User chip */
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px 5px 6px;
+      border-radius: 99px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      background: var(--surface);
+    }
+
+    .user-chip-avatar {
+      position: relative;
+      width: 26px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+
+    .user-chip-avatar img.chip-av {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .user-chip-fallback {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(124, 58, 237, .25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .user-chip span {
+      font-size: .8rem;
+      font-weight: 500;
+      color: var(--white);
+    }
+
+    /* Allow decoration to overflow the avatar container */
+    .user-chip {
+      overflow: visible !important;
+    }
+
+    /* Lang select */
+    .lang-select {
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 10px;
+      color: var(--white);
+      font-size: .8rem; font-weight: 600;
+      padding: 6px 30px 6px 10px;
+      cursor: pointer;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      font-family: inherit;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a78bfa' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 9px center;
+      background-size: 12px;
+      transition: border-color .18s, background-color .18s;
+      min-width: 100px;
+    }
+    .lang-select:hover { border-color: rgba(124,58,237,.5); background-color: rgba(124,58,237,.08); }
+    .lang-select:focus { border-color: rgba(124,58,237,.6); }
+    .lang-select option { background: #0a0022; color: var(--white); }
+
+    /* Logout */
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 99px;
+      font-size: .75rem;
+      font-weight: 500;
+      text-decoration: none;
+      color: var(--muted);
+      border: 1px solid rgba(255, 255, 255, .07);
+      background: var(--surface);
+      transition: all .2s;
+    }
+
+    .logout-btn:hover {
+      color: #fca5a5;
+      border-color: rgba(220, 38, 38, .35);
+    }
+
+    /* ── Page layout ──────────────────────────────────── */
+    .page {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      padding: 96px 28px 48px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .page-header {
+      margin-bottom: 40px;
+    }
+
+    .page-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 4px 14px;
+      border-radius: 99px;
+      border: 1px solid rgba(124, 58, 237, .28);
+      background: rgba(124, 58, 237, .07);
+      font-size: .65rem;
+      letter-spacing: .14em;
+      color: var(--purple-l);
+      font-family: 'Orbitron', monospace;
+      margin-bottom: 16px;
+    }
+
+    .tag-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--purple);
+      box-shadow: 0 0 6px var(--purple);
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 6px var(--purple);
+      }
+
+      50% {
+        box-shadow: 0 0 14px var(--purple);
+      }
+    }
+
+    .page-title {
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      font-weight: 700;
+      letter-spacing: -.02em;
+      margin-bottom: 6px;
+    }
+
+    .page-title span.name {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      background: linear-gradient(135deg, var(--purple-l), var(--cyan-l));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-sub {
+      font-size: .85rem;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    /* Section heading */
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .section-heading h2 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .section-heading .hint {
+      font-size: .73rem;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    .count-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 99px;
+      background: rgba(124, 58, 237, .2);
+      border: 1px solid rgba(124, 58, 237, .3);
+      font-size: .67rem;
+      font-weight: 700;
+      color: var(--purple-l);
+      font-family: 'Orbitron', monospace;
+    }
+
+    /* ── Guild grid ───────────────────────────────────── */
+    .guild-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 18px;
+    }
+
+    /* Guild card */
+    .guild-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px 20px 18px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .22s, box-shadow .22s, transform .18s;
+      animation: card-enter .45s cubic-bezier(.22, 1, .36, 1) both;
+    }
+
+    .guild-card:nth-child(1) {
+      animation-delay: .05s;
+    }
+
+    .guild-card:nth-child(2) {
+      animation-delay: .1s;
+    }
+
+    .guild-card:nth-child(3) {
+      animation-delay: .15s;
+    }
+
+    .guild-card:nth-child(4) {
+      animation-delay: .2s;
+    }
+
+    .guild-card:nth-child(5) {
+      animation-delay: .25s;
+    }
+
+    .guild-card:nth-child(6) {
+      animation-delay: .3s;
+    }
+
+    .guild-card:nth-child(7) {
+      animation-delay: .35s;
+    }
+
+    .guild-card:nth-child(8) {
+      animation-delay: .4s;
+    }
+
+    @keyframes card-enter {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .guild-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-h), transparent);
+      opacity: 0;
+      transition: opacity .22s;
+    }
+
+    .guild-card:hover {
+      border-color: var(--border-h);
+      box-shadow: 0 0 40px -8px rgba(124, 58, 237, .22), 0 16px 40px rgba(0, 0, 0, .5);
+      transform: translateY(-3px);
+    }
+
+    .guild-card:hover::before {
+      opacity: 1;
+    }
+
+    /* No-bot card variant */
+    .guild-card.no-bot {
+      opacity: .55;
+      border-style: dashed;
+    }
+
+    .guild-card.no-bot:hover {
+      opacity: .8;
+      transform: translateY(-1px);
+    }
+
+    /* Card top */
+    .card-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .guild-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, .08);
+    }
+
+    .guild-icon-fallback {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, rgba(124, 58, 237, .25), rgba(6, 182, 212, .15));
+      border: 1px solid rgba(255, 255, 255, .08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', monospace;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--purple-l);
+    }
+
+    .guild-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .guild-name {
+      font-size: .95rem;
+      font-weight: 600;
+      letter-spacing: -.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .guild-id {
+      font-size: .67rem;
+      color: var(--muted);
+      font-family: 'Orbitron', monospace;
+      letter-spacing: .04em;
+      margin-top: 2px;
+    }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: .65rem;
+      font-weight: 600;
+      letter-spacing: .05em;
+      white-space: nowrap;
+    }
+
+    .status-badge.active {
+      background: rgba(34, 197, 94, .1);
+      border: 1px solid rgba(34, 197, 94, .3);
+      color: #86efac;
+    }
+
+    .status-badge.inactive {
+      background: rgba(100, 116, 139, .1);
+      border: 1px solid rgba(100, 116, 139, .25);
+      color: #94a3b8;
+    }
+
+    .sbdot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .sbdot.green {
+      background: var(--green);
+      box-shadow: 0 0 5px var(--green);
+      animation: pulse 2s infinite;
+    }
+
+    .sbdot.gray {
+      background: #64748b;
+    }
+
+    /* Manage button */
+    .manage-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 10px 16px;
+      border-radius: 11px;
+      border: 1px solid var(--border-h);
+      background: rgba(124, 58, 237, .1);
+      color: var(--purple-l);
+      font-size: .82rem;
+      font-weight: 600;
+      text-decoration: none;
+      font-family: inherit;
+      transition: background .2s, box-shadow .2s, transform .15s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .manage-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(124, 58, 237, .2), rgba(6, 182, 212, .08));
+      opacity: 0;
+      transition: opacity .2s;
+    }
+
+    .manage-btn:hover {
+      background: rgba(124, 58, 237, .14);
+      box-shadow: 0 0 20px rgba(124, 58, 237, .22);
+      transform: translateY(-1px);
+    }
+
+    .manage-btn:hover::before {
+      opacity: 1;
+    }
+
+    .manage-btn:active {
+      transform: scale(.97);
+    }
+
+    .manage-btn span,
+    .manage-btn svg,
+    .manage-btn i {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Add-bot button */
+    .add-bot-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 10px 16px;
+      border-radius: 11px;
+      border: 1px solid rgba(6, 182, 212, .4);
+      background: rgba(6, 182, 212, .07);
+      color: var(--cyan-l);
+      font-size: .82rem;
+      font-weight: 600;
+      text-decoration: none;
+      font-family: inherit;
+      transition: background .2s, box-shadow .2s, transform .15s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .add-bot-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(6, 182, 212, .18), rgba(124, 58, 237, .08));
+      opacity: 0;
+      transition: opacity .2s;
+    }
+
+    .add-bot-btn:hover {
+      background: rgba(6, 182, 212, .12);
+      box-shadow: 0 0 20px rgba(6, 182, 212, .2);
+      transform: translateY(-1px);
+    }
+
+    .add-bot-btn:hover::before {
+      opacity: 1;
+    }
+
+    .add-bot-btn:active {
+      transform: scale(.97);
+    }
+
+    .add-bot-btn span,
+    .add-bot-btn i {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Empty state */
+    .empty-state {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 60px 20px;
+      border: 1px dashed rgba(255, 255, 255, .1);
+      border-radius: 18px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .empty-state svg {
+      opacity: .35;
+    }
+
+    .empty-state p {
+      font-size: .9rem;
+    }
+
+    /* Footer */
+    .site-footer {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 28px 20px 36px;
+      border-top: 1px solid rgba(255, 255, 255, .05);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .site-footer .footer-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      text-decoration: none;
+    }
+
+    .site-footer .footer-logo img {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      box-shadow: 0 2px 10px rgba(124, 58, 237, .3);
+    }
+
+    .site-footer .footer-logo span {
+      font-family: 'Orbitron', monospace;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      background: linear-gradient(135deg, var(--white), var(--purple-l));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .site-footer p {
+      font-size: .72rem;
+      color: rgba(203, 194, 255, .3);
+    }
+
+    @media (max-width: 768px) {
+      .profile-sidebar {
+        width: 280px;
+      }
+
+      .topbar-right {
+        gap: 8px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .page {
+        padding: 80px 16px 24px;
+      }
+
+      .topbar {
+        padding: 0 14px;
+      }
+
+      .topbar-brand .brand-text {
+        font-size: .78rem;
+      }
+
+      .guild-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .guild-card {
+        padding: 16px 14px 14px;
+      }
+
+      .guild-name {
+        font-size: .85rem;
+      }
+
+      .profile-sidebar {
+        width: 88vw;
+      }
+
+      .user-chip span {
+        display: none;
+      }
+
+      .user-chip {
+        padding: 5px 8px;
+      }
+
+      .lang-select {
+        min-width: 80px;
+        font-size: .72rem;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .guild-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .page-title {
+        font-size: 1.3rem;
+      }
+
+      .section-heading h2 {
+        font-size: .9rem;
+      }
+    }
+
+    /* ── Profile Sidebar ─────────────────────────────── */
+    .profile-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(0, 0, 0, 0);
+      pointer-events: none;
+      transition: background .28s;
+    }
+
+    .profile-backdrop.open {
+      background: rgba(0, 0, 0, .55);
+      pointer-events: all;
+    }
+
+    .profile-sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 201;
+      width: 300px;
+      max-width: 92vw;
+      background: rgba(8, 2, 22, .97);
+      border-left: 1px solid rgba(124, 58, 237, .18);
+      box-shadow: -12px 0 60px rgba(0, 0, 0, .7);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(110%);
+      transition: transform .32s cubic-bezier(.22, 1, .36, 1);
+      overflow: hidden;
+    }
+
+    [dir="rtl"] .profile-sidebar {
+      right: auto;
+      left: 0;
+      border-left: none;
+      border-right: 1px solid rgba(124, 58, 237, .18);
+      box-shadow: 12px 0 60px rgba(0, 0, 0, .7);
+      transform: translateX(-110%);
+    }
+
+    .profile-sidebar.open {
+      transform: translateX(0);
+    }
+
+    /* Banner */
+    .prof-banner {
+      width: 100%;
+      height: 100px;
+      flex-shrink: 0;
+      position: relative;
+      background: linear-gradient(135deg, #2d0b6b 0%, #0a0020 60%, #06b6d4 100%);
+    }
+
+    /* Banner solid color */
+    .prof-banner-solid {
+      width: 100%;
+      height: 100%;
+    }
+
+    .prof-banner-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, rgba(8, 2, 22, .95) 100%);
+    }
+
+    /* Close button */
+    .prof-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, .5);
+      border: 1px solid rgba(255, 255, 255, .1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--muted);
+      transition: background .18s, color .18s;
+      z-index: 5;
+    }
+
+    [dir="rtl"] .prof-close {
+      right: auto;
+      left: 10px;
+    }
+
+    .prof-close:hover {
+      background: rgba(220, 38, 38, .25);
+      color: #fca5a5;
+    }
+
+    /* Avatar area */
+    .prof-avatar-wrap {
+      position: relative;
+      margin: -38px 0 0 20px;
+      width: 80px;
+      height: 80px;
+      flex-shrink: 0;
+    }
+
+    [dir="rtl"] .prof-avatar-wrap {
+      margin: -38px 20px 0 0;
+    }
+
+    .prof-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      border: 3px solid rgba(8, 2, 22, .97);
+      box-shadow: 0 0 0 2px rgba(124, 58, 237, .5);
+    }
+
+    .prof-avatar-fallback {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(124, 58, 237, .4), rgba(6, 182, 212, .2));
+      border: 3px solid rgba(8, 2, 22, .97);
+      box-shadow: 0 0 0 2px rgba(124, 58, 237, .5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', monospace;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--purple-l);
+    }
+
+    .prof-online-dot {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #23a55a;
+      border: 3px solid rgba(8, 2, 22, .97);
+      box-shadow: 0 0 6px rgba(35, 165, 90, .7);
+      z-index: 4;
+    }
+
+    /* Body */
+    .prof-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 20px 24px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(124, 58, 237, .3) transparent;
+    }
+
+    .prof-names {
+      margin-bottom: 14px;
+    }
+
+    .prof-display-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: -.01em;
+      line-height: 1.2;
+    }
+
+    .prof-username {
+      font-size: .75rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* Info block */
+    .prof-block {
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .06);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+
+    .prof-block-label {
+      font-size: .6rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      color: rgba(203, 194, 255, .5);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      font-family: 'Orbitron', monospace;
+    }
+
+    .prof-id-text {
+      font-size: .75rem;
+      font-family: 'Orbitron', monospace;
+      color: var(--muted);
+      letter-spacing: .06em;
+      cursor: pointer;
+      transition: color .15s;
+    }
+
+    .prof-id-text:hover {
+      color: var(--purple-l);
+    }
+
+    /* Badges */
+    .prof-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .prof-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid rgba(255, 255, 255, .08);
+      position: relative;
+      cursor: default;
+      transition: transform .15s, background .15s, box-shadow .15s;
+    }
+
+    .prof-badge:hover {
+      transform: translateY(-2px) scale(1.08);
+      background: rgba(255, 255, 255, .09);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, .4);
+    }
+
+    .prof-badge img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+
+    .prof-badge-tip {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 3, 30, .97);
+      border: 1px solid rgba(124, 58, 237, .3);
+      border-radius: 7px;
+      padding: 5px 10px;
+      font-size: .65rem;
+      white-space: nowrap;
+      color: var(--white);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .15s;
+      z-index: 10;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, .5);
+    }
+
+    .prof-badge:hover .prof-badge-tip {
+      opacity: 1;
+    }
+
+    /* Footer buttons */
+    .prof-footer {
+      padding: 14px 20px;
+      border-top: 1px solid rgba(255, 255, 255, .06);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .prof-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: .82rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background .18s, border-color .18s, transform .12s;
+      font-family: inherit;
+    }
+
+    .prof-btn:active {
+      transform: scale(.97);
+    }
+
+    .prof-btn.help {
+      background: rgba(6, 182, 212, .08);
+      border-color: rgba(6, 182, 212, .3);
+      color: var(--cyan-l);
+    }
+
+    .prof-btn.help:hover {
+      background: rgba(6, 182, 212, .14);
+      border-color: rgba(6, 182, 212, .5);
+    }
+
+    .prof-btn.logout {
+      background: rgba(220, 38, 38, .07);
+      border-color: rgba(220, 38, 38, .25);
+      color: #fca5a5;
+    }
+
+    .prof-btn.logout:hover {
+      background: rgba(220, 38, 38, .12);
+      border-color: rgba(220, 38, 38, .45);
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="c"></canvas>
+  <div class="glow glow-a"></div>
+  <div class="glow glow-b"></div>
+
+  <!-- Profile sidebar backdrop -->
+  <div class="profile-backdrop" id="prof-backdrop"></div>
+
+  <!-- Profile sidebar -->
+  <aside class="profile-sidebar" id="prof-sidebar" aria-hidden="true">
+    <!-- Banner -->
+    <div class="prof-banner">
+      <% if (user.banner) { %>
+        <img src="https://cdn.discordapp.com/banners/<%= user.id %>/<%= user.banner %>.png?size=480" alt="" />
+        <% } else if (user.bannerColor) { %>
+          <div class="prof-banner-solid" data-bg="<%= user.bannerColor %>"></div>
+          <% } %>
+            <div class="prof-banner-overlay"></div>
+            <!-- Close button -->
+            <button class="prof-close" id="close-profile" aria-label="Close">
+              <i data-lucide="x" style="width:14px;height:14px;stroke:currentColor;"></i>
+            </button>
+    </div>
+
+    <!-- Avatar -->
+    <div class="prof-avatar-wrap">
+      <% if (user.avatar) { %>
+        <img class="prof-avatar" src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=160"
+          alt="<%= user.displayName || user.username %>" />
+        <% } else { %>
+          <div class="prof-avatar-fallback">
+            <%= (user.displayName || user.username).charAt(0).toUpperCase() %>
+          </div>
+          <% } %>
+            <div class="prof-online-dot"></div>
+    </div>
+
+    <!-- Body -->
+    <div class="prof-body">
+      <div class="prof-names">
+        <div class="prof-display-name">
+          <%= user.displayName || user.username %>
+        </div>
+        <div class="prof-username">@<%= user.username %>
+        </div>
+      </div>
+
+      <!-- User ID -->
+      <div class="prof-block">
+        <div class="prof-block-label">
+          <%= t.home.profileId %>
+        </div>
+        <div class="prof-id-text" id="prof-copy-id" title="Click to copy">
+          <%= user.id %>
+        </div>
+      </div>
+
+      <!-- Badges -->
+      <% const flags=Number(user.publicFlags || 0); const BADGE_CDN='https://cdn.discordapp.com/badge-icons/' ; const
+        badges=[]; if (flags & 1) badges.push({ label: t.home.badgeStaff, img: 'staff.png' }); if (flags & 2)
+        badges.push({ label: t.home.badgePartner, img: 'partner.png' }); if (flags & 4) badges.push({ label:
+        t.home.badgeHsEvents, img: 'hypesquad.png' }); if (flags & 8) badges.push({ label: t.home.badgeBug1,
+        img: 'bug_hunter_level_1.png' }); if (flags & 64) badges.push({ label: t.home.badgeBravery,
+        img: 'hypesquad_house_1.png' }); if (flags & 128) badges.push({ label: t.home.badgeBrilliance,
+        img: 'hypesquad_house_2.png' }); if (flags & 256) badges.push({ label: t.home.badgeBalance,
+        img: 'hypesquad_house_3.png' }); if (flags & 512) badges.push({ label: t.home.badgeEarlySupp,
+        img: 'early_supporter.png' }); if (flags & 16384) badges.push({ label: t.home.badgeBug2,
+        img: 'bug_hunter_level_2.png' }); if (flags & 131072) badges.push({ label: t.home.badgeVerifDev,
+        img: 'verified_bot_developer.png' }); if (flags & 262144) badges.push({ label: t.home.badgeModAlumni,
+        img: 'certified_moderator.png' }); if (flags & 4194304) badges.push({ label: t.home.badgeActiveDev,
+        img: 'active_developer.png' }); %>
+        <% if (badges.length> 0) { %>
+          <div class="prof-block">
+            <div class="prof-block-label">
+              <%= t.home.profileBadges %>
+            </div>
+            <div class="prof-badges">
+              <% badges.forEach(b=> { %>
+                <div class="prof-badge">
+                  <img src="<%= BADGE_CDN %><%= b.img %>" alt="<%= b.label %>"
+                    onerror="this.closest('.prof-badge').style.display='none'" />
+                  <span class="prof-badge-tip">
+                    <%= b.label %>
+                  </span>
+                </div>
+                <% }) %>
+            </div>
+          </div>
+          <% } %>
+    </div>
+
+    <!-- Footer -->
+    <div class="prof-footer">
+      <% if (isShip) { %>
+      <a href="/settings" class="prof-btn" style="background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);color:var(--purple-l);">
+        <i data-lucide="settings-2" style="width:16px;height:16px;stroke:currentColor;"></i>
+        <%= lang === 'ar' ? 'إعدادات النظام' : 'System Settings' %>
+      </a>
+      <% } %>
+      <a href="https://discord.gg/jfFSmVM5kK" target="_blank" class="prof-btn help">
+        <i data-lucide="help-circle" style="width:16px;height:16px;stroke:currentColor;"></i>
+        <%= t.home.profileHelp %>
+      </a>
+      <a href="/auth/logout" class="prof-btn logout" id="logout-link">
+        <i data-lucide="log-out" style="width:16px;height:16px;stroke:currentColor;"></i>
+        <%= t.home.profileLogout %>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <a href="/dashboard" class="topbar-brand">
+      <img class="brand-logo"
+        src="https://res.cloudinary.com/difucqa9h/image/upload/v1770643265/discord_images/yaix1pbnbdv3srvf12gl.png"
+        alt="CODE NEXUS" />
+      <span class="brand-text">CODE NEXUS</span>
+    </a>
+    <div class="topbar-right">
+      <!-- Lang select -->
+      <select class="lang-select" id="lang-select-home" aria-label="Language">
+        <option value="ar" <%= lang === 'ar' ? 'selected' : '' %>>🇸🇦 عربي</option>
+        <option value="en" <%= lang === 'en' ? 'selected' : '' %>>🇺🇸 English</option>
+      </select>
+      <!-- User chip → opens profile sidebar -->
+      <button class="user-chip" id="open-profile" aria-label="Profile"
+        style="background:var(--surface);cursor:pointer;border:1px solid rgba(255,255,255,.08);">
+        <div class="user-chip-avatar">
+          <% if (user.avatar) { %>
+            <img class="chip-av" src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=64"
+              alt="<%= user.displayName || user.username %>" />
+            <% } else { %>
+              <div class="user-chip-fallback"><i data-lucide="user"
+                  style="width:14px;height:14px;stroke:var(--purple-l);"></i></div>
+              <% } %>
+        </div>
+        <span>
+          <%= user.displayName || user.username %>
+        </span>
+        <i data-lucide="chevron-right" style="width:13px;height:13px;stroke:var(--muted);margin-left:2px;"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="page">
+    <!-- Header -->
+    <div class="page-header">
+      <div class="page-tag"><span class="tag-dot"></span>
+        <%= t.home.tag %>
+      </div>
+      <div class="page-title">
+        <%= t.home.welcome %> <span class="name">
+            <%= user.displayName || user.username %>
+          </span>
+      </div>
+      <div class="page-sub">
+        <%= t.home.adminOnly %>
+      </div>
+    </div>
+
+    <!-- Section -->
+    <div class="section-heading">
+      <h2>
+        <%= t.home.allServers %>
+      </h2>
+      <span class="count-badge">
+        <%= guilds.length %>
+      </span>
+      <span class="hint">
+        <%= t.home.desc %>
+      </span>
+    </div>
+
+    <!-- Grid -->
+    <div class="guild-grid">
+      <% if (guilds.length===0) { %>
+        <div class="empty-state">
+          <i data-lucide="server-off" style="width:48px;height:48px;stroke:var(--muted);"></i>
+          <p>
+            <%= t.home.noServers %>
+          </p>
+        </div>
+        <% } else { %>
+          <% guilds.forEach(guild=> { %>
+            <div class="guild-card <%= guild.inBot ? '' : 'no-bot' %>">
+              <div class="card-top">
+                <% if (guild.icon) { %>
+                  <img class="guild-icon"
+                    src="https://cdn.discordapp.com/icons/<%= guild.id %>/<%= guild.icon %>.png?size=128"
+                    alt="<%= guild.name %>" />
+                  <% } else { %>
+                    <div class="guild-icon-fallback">
+                      <%= guild.name.charAt(0).toUpperCase() %>
+                    </div>
+                    <% } %>
+                      <div class="guild-info">
+                        <div class="guild-name" title="<%= guild.name %>">
+                          <%= guild.name %>
+                        </div>
+                        <div class="guild-id">
+                          <%= guild.id %>
+                        </div>
+                      </div>
+              </div>
+
+              <div>
+                <% if (guild.inBot) { %>
+                  <span class="status-badge active">
+                    <span class="sbdot green"></span>
+                    <%= t.home.botBadge %>
+                  </span>
+                  <% } else { %>
+                    <span class="status-badge inactive">
+                      <span class="sbdot gray"></span>
+                      <%= t.home.noBotBadge %>
+                    </span>
+                    <% } %>
+              </div>
+
+              <% if (guild.inBot) { %>
+                <a href="/dashboard/<%= guild.id %>" class="manage-btn nav-link">
+                  <i data-lucide="settings-2" style="width:15px;height:15px;stroke:currentColor;"></i>
+                  <span>
+                    <%= t.home.manageBtn %>
+                  </span>
+                </a>
+                <% } else { %>
+                  <a href="https://discord.com/api/oauth2/authorize?client_id=<%= clientId %>&permissions=8&scope=bot%20applications.commands&guild_id=<%= guild.id %>"
+                    target="_blank" class="add-bot-btn">
+                    <i data-lucide="plus-circle" style="width:15px;height:15px;stroke:currentColor;"></i>
+                    <span>
+                      <%= t.home.addBotBtn %>
+                    </span>
+                  </a>
+                  <% } %>
+            </div>
+            <% }) %>
+              <% } %>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <a class="footer-logo" href="https://discord.gg/jfFSmVM5kK" target="_blank">
+      <img src="https://res.cloudinary.com/difucqa9h/image/upload/v1770643265/discord_images/yaix1pbnbdv3srvf12gl.png"
+        alt="CODE NEXUS" />
+      <span>CODE NEXUS</span>
+    </a>
+    <p>
+      <%= t.home.footerRights %>
+    </p>
+  </footer>
+
+  <!-- Lucide -->
+  <script src="/js/lucide.min.js"></script>
+  <script>lucide.createIcons();</script>
+
+  <!-- Stars -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script>
+    (function () {
+      const canvas = document.getElementById('c');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+      renderer.setPixelRatio(1); renderer.setSize(innerWidth, innerHeight);
+      renderer.setClearColor(0x040010, 1);
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 500);
+      camera.position.z = 1;
+      const N = 2800, pos = new Float32Array(N * 3);
+      for (let i = 0; i < N * 3; i++) pos[i] = (Math.random() - .5) * 240;
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const mat = new THREE.PointsMaterial({ color: 0xb8b0ff, size: 0.24, transparent: true, opacity: 0.55, depthWrite: false });
+      scene.add(new THREE.Points(geo, mat));
+      let mx = 0, t = 0;
+      document.addEventListener('mousemove', e => { mx = (e.clientX / innerWidth - .5) * .25; });
+      window.addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+      const stars = scene.children[0];
+      (function render() { requestAnimationFrame(render); t += 0.00022; stars.rotation.y = t + mx * .15; renderer.render(scene, camera); })();
+    })();
+  </script>
+
+  <!-- Page transitions -->
+  <div id="ov"
+    style="position:fixed;inset:0;z-index:9999;background:#040010;animation:pIn .45s cubic-bezier(.4,0,.2,1) forwards;pointer-events:none;">
+  </div>
+  <style>
+    @keyframes pIn {
+      from {
+        opacity: 1
+      }
+
+      to {
+        opacity: 0
+      }
+    }
+
+    @keyframes pOut {
+      from {
+        opacity: 0
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    #ov.leave {
+      animation: pOut .35s cubic-bezier(.4, 0, .2, 1) forwards;
+      pointer-events: all;
+    }
+  </style>
+  <script>
+    /* ── Profile sidebar ── */
+    const bannerSolid = document.querySelector('.prof-banner-solid');
+    if (bannerSolid && bannerSolid.dataset.bg) bannerSolid.style.background = bannerSolid.dataset.bg;
+
+    const profSidebar = document.getElementById('prof-sidebar');
+    const profBackdrop = document.getElementById('prof-backdrop');
+    const openBtn = document.getElementById('open-profile');
+    const closeBtn = document.getElementById('close-profile');
+    const copyId = document.getElementById('prof-copy-id');
+
+    function openProfile() {
+      profSidebar.classList.add('open');
+      profBackdrop.classList.add('open');
+      profSidebar.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeProfile() {
+      profSidebar.classList.remove('open');
+      profBackdrop.classList.remove('open');
+      profSidebar.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    openBtn.addEventListener('click', openProfile);
+    if (closeBtn) closeBtn.addEventListener('click', closeProfile);
+    profBackdrop.addEventListener('click', closeProfile);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProfile(); });
+
+    if (copyId) {
+      copyId.addEventListener('click', () => {
+        navigator.clipboard.writeText(copyId.textContent.trim()).then(() => {
+          const orig = copyId.textContent;
+          copyId.textContent = '✓ Copied!';
+          copyId.style.color = 'var(--cyan-l)';
+          setTimeout(() => { copyId.textContent = orig; copyId.style.color = ''; }, 1500);
+        });
+      });
+    }
+
+    /* ── Language select ── */
+    const langSelectHome = document.getElementById('lang-select-home');
+    if (langSelectHome) {
+      langSelectHome.addEventListener('change', function () {
+        const u = new URL(window.location.href);
+        u.searchParams.set('lang', this.value);
+        window.location.href = u.toString();
+      });
+    }
+
+    /* ── Page transitions ── */
+    function fadeOut(href) {
+      const ov = document.getElementById('ov');
+      ov.classList.add('leave');
+      setTimeout(() => { window.location.href = href; }, 360);
+    }
+    document.querySelectorAll('a.nav-link, a.manage-btn, a#logout-link').forEach(a => {
+      a.addEventListener('click', function (e) {
+        e.preventDefault(); fadeOut(this.href);
+      });
+    });
+  </script>
+</body>
+
+</html>
+<%#
+  This project was programmed by the Code Nexus team.
+  If you encounter any problems, open an Issue or log into the Discord server:
+  https://discord.gg/UvEYbFd2rj
+%>

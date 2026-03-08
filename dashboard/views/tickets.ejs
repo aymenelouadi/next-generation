@@ -1,0 +1,1480 @@
+<%#
+  This project was programmed by the Code Nexus team.
+  If you encounter any problems, open an Issue or log into the Discord server:
+  https://discord.gg/UvEYbFd2rj
+%>
+<!DOCTYPE html>
+<html lang="<%= t.lang %>" dir="<%= t.dir %>">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= t.tickets.pageTitle %> — <%= guildInfo.name %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Tajawal:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #040010; --surface: rgba(255,255,255,.04); --surface-2: rgba(255,255,255,.07);
+      --card: rgba(10,3,30,.78); --purple: #7c3aed; --purple-l: #a78bfa;
+      --cyan: #06b6d4; --cyan-l: #67e8f9; --gold: #d97706; --gold-l: #fcd34d;
+      --green: #22c55e; --red: #ef4444; --orange: #f97316;
+      --border: rgba(124,58,237,.2); --border-h: rgba(124,58,237,.5);
+      --muted: rgba(203,194,255,.5); --white: #f8fafc;
+      --nav-w: 64px; --mgmt-w: 220px;
+    }
+    html, body { min-height: 100%; }
+    body { background: var(--bg); color: var(--white); font-family: '<%= t.fontBody %>', 'Tajawal', 'Inter', system-ui, sans-serif; line-height: 1.6; overflow-x: hidden; }
+    #c { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .glow { position: fixed; border-radius: 50%; pointer-events: none; z-index: 1; filter: blur(120px); animation: glow-drift 22s ease-in-out infinite alternate; }
+    .glow-a { width: min(600px,80vw); height: min(600px,80vw); top: -20%; right: -16%; background: radial-gradient(circle,rgba(124,58,237,.28) 0%,transparent 65%); }
+    .glow-b { width: min(500px,70vw); height: min(500px,70vw); bottom: -18%; left: -12%; background: radial-gradient(circle,rgba(6,182,212,.18) 0%,transparent 65%); animation-delay: -11s; }
+    @keyframes glow-drift { from { transform: translate(0,0) scale(1); } to { transform: translate(20px,15px) scale(1.06); } }
+
+    /* Topbar */
+    .topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: rgba(4,0,16,.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,.06); gap: 12px; }
+    .topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
+    .guild-icon-top { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; flex-shrink: 0; filter: drop-shadow(0 4px 18px rgba(124, 58, 237, 0.35)); }
+    .guild-icon-top-fallback { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg,rgba(124,58,237,.35),rgba(6,182,212,.2)); border: 1px solid rgba(124,58,237,.35); display: flex; align-items: center; justify-content: center; font-family: 'Orbitron',monospace; font-size: .85rem; font-weight: 800; color: var(--purple-l); flex-shrink: 0; }
+    .guild-meta { min-width: 0; }
+    .guild-meta-name { font-size: .88rem; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+    .guild-meta-id { font-size: .6rem; color: var(--muted); font-family: 'Orbitron',monospace; letter-spacing: .05em; white-space: nowrap; }
+    .topbar-sep { width: 1px; height: 28px; background: rgba(255,255,255,.08); flex-shrink: 0; }
+    .topbar-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
+    .topbar-brand img { width: 26px; height: 26px; border-radius: 7px; filter: drop-shadow(0 4px 18px rgba(124, 58, 237, 0.35)); }
+    .topbar-brand span { font-family: 'Orbitron',monospace; font-size: .78rem; font-weight: 800; letter-spacing: .1em; background: linear-gradient(135deg,var(--white),var(--purple-l)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .user-chip { display: flex; align-items: center; gap: 7px; padding: 4px 10px 4px 5px; border-radius: 99px; background: var(--surface); border: 1px solid rgba(255,255,255,.08); cursor: pointer; }
+    .user-chip-av { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; display: block; flex-shrink: 0; }
+    .user-chip-av-fallback { width: 26px; height: 26px; border-radius: 50%; background: rgba(124,58,237,.25); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .user-chip span { font-size: .78rem; font-weight: 500; }
+    .lang-select { background: var(--surface); border: 1px solid rgba(255,255,255,.12); border-radius: 10px; color: var(--white); font-size: .8rem; font-weight: 600; padding: 6px 30px 6px 10px; cursor: pointer; outline: none; -webkit-appearance: none; appearance: none; font-family: inherit; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a78bfa' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; background-size: 12px; transition: border-color .18s; min-width: 100px; }
+    .lang-select:hover { border-color: rgba(124,58,237,.5); }
+    .lang-select option { background: #0a0022; color: var(--white); }
+    .menu-toggle { display: none; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: var(--surface); border: 1px solid rgba(255,255,255,.08); color: var(--white); cursor: pointer; transition: background .18s; flex-shrink: 0; }
+    .nav-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 83; backdrop-filter: blur(2px); }
+    .nav-overlay.open { display: block; }
+
+    /* Nav Sidebar */
+    .nav-sidebar { position: fixed; top: 60px; bottom: 0; left: 0; width: var(--nav-w); z-index: 90; background: rgba(4,0,16,.92); border-right: 1px solid rgba(255,255,255,.06); backdrop-filter: blur(20px); display: flex; flex-direction: column; align-items: center; padding: 10px 0 16px; gap: 4px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; transition: width .28s cubic-bezier(.22,1,.36,1); }
+    .nav-sidebar::-webkit-scrollbar { display: none; }
+    .nav-sidebar:hover { width: 220px; align-items: stretch; overflow-x: unset; }
+    [dir="rtl"] .nav-sidebar { left: auto; right: 0; border-right: none; border-left: 1px solid rgba(255,255,255,.06); }
+    .nav-back { display: flex; align-items: center; gap: 0; width: 40px; min-height: 40px; color: var(--purple-l); text-decoration: none; transition: width 350ms cubic-bezier(0.4,0,0.2,1), gap 350ms cubic-bezier(0.4,0,0.2,1), padding 350ms cubic-bezier(0.4,0,0.2,1); flex-shrink: 0; padding: 0; justify-content: flex-start; border-radius: 0; background: none; border: none; }
+    .nav-back .nav-icon { flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: var(--purple); border-radius: .6rem; padding: 7px; box-sizing: border-box; transition: background 350ms; }
+    .nav-back:hover .nav-icon { background: #8b5cf6; }
+    .nav-back .nav-label { font-size: .78rem; font-weight: 600; white-space: nowrap; opacity: 0; visibility: hidden; transition: opacity 350ms, visibility 350ms; pointer-events: none; color: var(--white); }
+    .nav-sidebar:hover .nav-back { width: 100%; gap: 10px; padding: 0 12px 0 8px; }
+    .nav-sidebar:hover .nav-back .nav-label { opacity: 1; visibility: visible; pointer-events: auto; }
+    [dir="rtl"] .nav-sidebar:hover .nav-back { padding: 0 8px 0 12px; }
+    .nav-divider { width: 32px; height: 1px; background: rgba(255,255,255,.08); margin: 4px 0; flex-shrink: 0; transition: width .28s; }
+    .nav-sidebar:hover .nav-divider { width: calc(100% - 24px); }
+    .nav-item { display: flex; align-items: center; gap: 0; width: 40px; min-height: 40px; border-radius: 0; background: none; text-decoration: none; flex-shrink: 0; position: relative; padding: 0; justify-content: flex-start; transition: gap 350ms cubic-bezier(0.4,0,0.2,1), width 350ms cubic-bezier(0.4,0,0.2,1), padding 350ms cubic-bezier(0.4,0,0.2,1); }
+    .nav-item-icon { width: 40px; height: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; overflow: hidden; position: relative; }
+    .nav-item-icon img { width: 40px; height: 40px; object-fit: cover; display: block; border-radius: 50%; }
+    .nav-item-fallback { width: 40px; height: 40px; background: linear-gradient(135deg,rgba(124,58,237,.5),rgba(6,182,212,.3)); display: flex; align-items: center; justify-content: center; font-family: 'Orbitron',monospace; font-size: .8rem; font-weight: 800; color: var(--white); border-radius: 50%; }
+    .nav-status { position: absolute; bottom: 2px; right: 2px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid rgba(4,0,16,.92); flex-shrink: 0; transition: opacity .2s; }
+    .nav-status.on { background: #23a55a; box-shadow: 0 0 5px rgba(35,165,90,.7); }
+    .nav-status.off { background: #ef4444; box-shadow: 0 0 5px rgba(239,68,68,.6); }
+    .nav-item-label { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; opacity: 0; visibility: hidden; transition: opacity 350ms, visibility 350ms; pointer-events: none; }
+    .nav-item-name { font-size: .78rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--white); }
+    .nav-item-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-left: auto; }
+    .nav-item-dot.on { background: #23a55a; box-shadow: 0 0 4px rgba(35,165,90,.7); }
+    .nav-item-dot.off { background: #ef4444; box-shadow: 0 0 4px rgba(239,68,68,.6); }
+    .nav-sidebar:hover .nav-item { width: 100%; gap: 10px; padding: 0 12px 0 8px; justify-content: flex-start; border-radius: 10px; }
+    [dir="rtl"] .nav-sidebar:hover .nav-item { padding: 0 8px 0 12px; }
+    .nav-sidebar:hover .nav-item-label { opacity: 1; visibility: visible; pointer-events: auto; }
+    .nav-sidebar:hover .nav-status { opacity: 0; }
+    .nav-item:hover .nav-item-icon { box-shadow: 0 0 0 2px rgba(124,58,237,.4); }
+    .nav-item.active .nav-item-icon { box-shadow: 0 0 0 2.5px var(--purple-l), 0 0 16px rgba(124,58,237,.35); }
+    .nav-item.active::before { content: ''; position: absolute; left: -8px; top: 50%; transform: translateY(-50%); width: 3px; height: 22px; border-radius: 0 3px 3px 0; background: var(--purple-l); }
+
+    /* Mgmt Sidebar */
+    .mgmt-sidebar { position: fixed; top: 60px; bottom: 0; left: var(--nav-w); width: var(--mgmt-w); z-index: 85; background: rgba(6,2,20,.97); border-right: 1px solid rgba(255,255,255,.06); backdrop-filter: blur(20px); display: flex; flex-direction: column; overflow: hidden; transition: transform 350ms cubic-bezier(0.4,0,0.2,1); }
+    [dir="rtl"] .mgmt-sidebar { left: auto; right: var(--nav-w); border-right: none; border-left: 1px solid rgba(255,255,255,.06); }
+    .mgmt-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 12px 10px; flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+    .mgmt-header-inner { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .mgmt-header-icon { display: flex; align-items: center; justify-content: center; background: rgba(136,144,161,.12); border-radius: 11px; width: 35px; height: 35px; flex-shrink: 0; color: var(--muted); }
+    .mgmt-header-title { font-size: .78rem; font-weight: 700; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mgmt-sort-btn { background: none; border: none; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 7px; padding: 0; flex-shrink: 0; transition: background .15s, color .15s; }
+    .mgmt-sort-btn:hover { background: rgba(255,255,255,.06); color: var(--white); }
+    .mgmt-body { flex: 1; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: rgba(124,58,237,.25) transparent; padding-bottom: 8px; }
+    .mgmt-body::-webkit-scrollbar { width: 3px; }
+    .mgmt-body::-webkit-scrollbar-thumb { background: rgba(124,58,237,.3); border-radius: 3px; }
+    .mgmt-nav { padding: 8px 10px 0; }
+    .mgmt-section { margin-bottom: 2px; }
+    .mgmt-section-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: none; border: none; border-radius: 10px; cursor: pointer; color: var(--white); font-family: inherit; font-size: .76rem; font-weight: 700; letter-spacing: .02em; transition: background .15s; }
+    .mgmt-section-btn:hover { background: rgba(255,255,255,.04); }
+    .mgmt-sec-chevron { color: var(--muted); flex-shrink: 0; transform: rotate(180deg); transition: transform 300ms cubic-bezier(0.4,0,0.2,1); }
+    .mgmt-section-btn.open .mgmt-sec-chevron { transform: rotate(0deg); }
+    .mgmt-sec-body { overflow: hidden; max-height: 0; transition: max-height 350ms cubic-bezier(0.4,0,0.2,1); }
+    .mgmt-sec-body.open { max-height: 800px; }
+    .mgmt-item { display: flex; align-items: center; gap: 0; padding: 5px 8px 5px 0; border-radius: 8px; text-decoration: none; color: var(--muted); font-size: .78rem; font-weight: 600; position: relative; cursor: pointer; transition: background .15s, color .15s; width: 100%; border: none; background: none; font-family: inherit; }
+    .mgmt-item:hover:not(.disabled) { background: rgba(255,255,255,.04); color: var(--white); }
+    .mgmt-item.active { color: var(--white); }
+    .mgmt-item.disabled { cursor: default; opacity: .6; }
+    .mgmt-item-indicator { width: 3px; height: 0; border-radius: 0 3px 3px 0; background: var(--purple); box-shadow: 0 0 10px rgba(104,31,209,.6); margin-right: 8px; flex-shrink: 0; transition: height 300ms cubic-bezier(0.4,0,0.2,1); }
+    .mgmt-item.active .mgmt-item-indicator { height: 1.6rem; }
+    [dir="rtl"] .mgmt-item-indicator { border-radius: 3px 0 0 3px; margin-right: 0; margin-left: 8px; }
+    .mgmt-item-icon { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; flex-shrink: 0; border-radius: 8px; margin-right: 8px; color: inherit; }
+    [dir="rtl"] .mgmt-item-icon { margin-right: 0; margin-left: 8px; }
+    .mgmt-item-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mgmt-badge { font-size: .6rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; border: 1px solid rgba(255,255,255,.1); color: var(--muted); background: rgba(255,255,255,.05); flex-shrink: 0; letter-spacing: .03em; margin-left: 4px; }
+    [dir="rtl"] .mgmt-badge { margin-left: 0; margin-right: 4px; }
+    .mgmt-footer { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--purple); border-radius: 16px 16px 0 0; flex-shrink: 0; position: sticky; bottom: 0; position: relative; }
+    .mgmt-footer-user { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    /* Footer user popup */
+    .footer-popup { position: absolute; bottom: calc(100% + 8px); right: 10px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 6px; min-width: 192px; z-index: 300; opacity: 0; pointer-events: none; transform: translateY(6px); transition: opacity .15s, transform .15s; box-shadow: 0 8px 32px rgba(0,0,0,.5); }
+    .footer-popup.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .footer-popup-info { padding: 10px 12px 8px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+    .footer-popup-info-tag { font-size: .7rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 3px; }
+    .footer-popup-info-name { font-size: .85rem; font-weight: 700; color: var(--white); }
+    .footer-popup-item { display: flex; align-items: center; gap: 9px; padding: 9px 12px; border-radius: 8px; font-size: .82rem; font-weight: 600; color: var(--muted); text-decoration: none; cursor: pointer; transition: background .15s, color .15s; white-space: nowrap; background: none; border: none; width: 100%; text-align: start; }
+    .footer-popup-item:hover { background: rgba(255,255,255,.07); color: var(--white); }
+    .footer-popup-item.danger { color: #f87171; }
+    .footer-popup-item.danger:hover { background: rgba(248,113,113,.12); color: #f87171; }
+    /* Sort btn active state */
+    .mgmt-sort-btn.sorted { color: var(--purple-l); }
+    .mgmt-footer-av { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid rgba(255,255,255,.25); }
+    .mgmt-footer-av-fallback { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; font-size: .82rem; font-weight: 700; color: var(--white); flex-shrink: 0; }
+    .mgmt-footer-name { font-size: .78rem; font-weight: 700; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .mgmt-footer-dots { background: none; border: none; color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 6px; flex-shrink: 0; transition: background .15s; }
+    .mgmt-footer-dots:hover { background: rgba(255,255,255,.18); }
+
+    /* Main */
+    .main { position: relative; z-index: 10; min-height: calc(100vh - 60px); margin-top: 60px; margin-left: calc(var(--nav-w) + var(--mgmt-w)); padding: 36px 32px 60px; max-width: calc(1200px + var(--nav-w) + var(--mgmt-w)); }
+    [dir="rtl"] .main { margin-left: 0; margin-right: calc(var(--nav-w) + var(--mgmt-w)); }
+
+    /* Page Header */
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; gap: 16px; flex-wrap: wrap; }
+    .page-header-left { display: flex; flex-direction: column; gap: 6px; }
+    .page-header h2 { font-size: 1.6rem; font-weight: 800; letter-spacing: -.02em; }
+    .page-header p { font-size: .88rem; color: var(--muted); }
+    .toggle-switch { position: relative; display: inline-block; width: 48px; height: 26px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,.12); border-radius: 34px; transition: .3s; }
+    .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background: var(--white); border-radius: 50%; transition: .3s; }
+    input:checked + .toggle-slider { background: var(--purple); }
+    input:checked + .toggle-slider:before { transform: translateX(22px); }
+    .divider { width: 100%; height: 1px; background: rgba(255,255,255,.08); margin: 24px 0; }
+
+    /* Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px; }
+    @media (max-width: 1400px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 900px)  { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px)  { .stats-grid { grid-template-columns: 1fr; } }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 20px 18px; backdrop-filter: blur(20px); display: flex; align-items: center; gap: 14px; transition: border-color .2s, transform .2s; }
+    .stat-card:hover { border-color: var(--border-h); transform: translateY(-2px); }
+    .stat-info { flex: 1; min-width: 0; }
+    .stat-label { font-size: .72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+    .stat-value { font-size: 1.9rem; font-weight: 800; font-family: 'Orbitron', monospace; line-height: 1; }
+    .stat-value.muted-val { font-size: 1.4rem; color: var(--muted); }
+    .stat-value.small-val { font-size: 1.4rem; }
+    .stat-icon-wrap { width: 42px; height: 42px; border-radius: 12px; background: rgba(124,58,237,.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid rgba(124,58,237,.2); }
+
+    /* Section heading */
+    .section-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+    .section-heading h3 { font-size: 1rem; font-weight: 700; }
+    .section-heading-icon { width: 28px; height: 28px; border-radius: 8px; background: rgba(124,58,237,.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    /* Settings nav cards */
+    .settings-nav-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    @media (max-width: 1000px) { .settings-nav-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px)  { .settings-nav-grid { grid-template-columns: 1fr; } }
+    .settings-nav-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; backdrop-filter: blur(20px); text-decoration: none; color: var(--white); display: flex; align-items: center; gap: 16px; transition: border-color .2s, background .2s, transform .2s; position: relative; overflow: hidden; }
+    .settings-nav-card:hover:not(.disabled-card) { border-color: var(--border-h); background: rgba(124,58,237,.07); transform: translateY(-2px); }
+    .settings-nav-card.disabled-card { cursor: default; opacity: .55; }
+    .snc-icon { width: 46px; height: 46px; border-radius: 12px; background: rgba(124,58,237,.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid rgba(124,58,237,.2); color: var(--purple-l); }
+    .snc-body { flex: 1; min-width: 0; }
+    .snc-title { font-size: .92rem; font-weight: 700; margin-bottom: 3px; }
+    .snc-desc { font-size: .75rem; color: var(--muted); line-height: 1.4; }
+    .snc-arrow { color: var(--muted); flex-shrink: 0; transition: color .2s, transform .2s; }
+    .settings-nav-card:hover:not(.disabled-card) .snc-arrow { color: var(--purple-l); transform: translateX(3px); }
+    [dir="rtl"] .settings-nav-card:hover:not(.disabled-card) .snc-arrow { transform: translateX(-3px); }
+    .snc-badge { position: absolute; top: 12px; right: 12px; font-size: .6rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.3); color: var(--purple-l); letter-spacing: .04em; }
+    [dir="rtl"] .snc-badge { right: auto; left: 12px; }
+
+    /* Analytics Charts */
+    .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 32px; }
+    .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px 20px 10px; backdrop-filter: blur(20px); overflow: hidden; transition: border-color .2s; }
+    .chart-card:hover { border-color: var(--border-h); }
+    .chart-card.full { grid-column: 1 / -1; }
+    .chart-card-hd { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; gap: 8px; }
+    .chart-card-hd-icon { width: 34px; height: 34px; border-radius: 10px; background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .chart-card-hd-text { flex: 1; min-width: 0; }
+    .chart-card-title { font-size: .82rem; font-weight: 700; color: var(--white); letter-spacing: -.01em; line-height: 1.3; }
+    .chart-card-desc { font-size: .7rem; color: var(--muted); margin-top: 2px; }
+    .chart-placeholder { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: .78rem; min-height: 200px; opacity: .6; }
+    @media (max-width: 860px) {
+      .charts-grid { grid-template-columns: 1fr; }
+      .chart-card.full { grid-column: 1; }
+    }
+
+    /* Feedback section extras */
+    .fb-summary-wrap { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+    .fb-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(251,191,36,.09); border:1px solid rgba(251,191,36,.22); border-radius:8px; padding:5px 11px; font-size:.74rem; color:var(--white); line-height:1; }
+    .fb-badge strong { color:#fbbf24; font-size:.85rem; font-family:'Orbitron',monospace; }
+    .star-score-wrap { display:inline-flex; align-items:center; gap:6px; }
+    .star-score { font-size:.9rem; font-weight:800; color:#fbbf24; font-family:'Orbitron',monospace; }
+    .star-stars { color:#fbbf24; font-size:.8rem; letter-spacing:1px; }
+
+    /* Mobile */
+    @media (max-width: 860px) {
+      .menu-toggle { display: flex; }
+      .nav-sidebar { transform: translateX(-100%); width: 220px !important; align-items: stretch; overflow-x: unset; z-index: 95; transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1); }
+      [dir="rtl"] .nav-sidebar { transform: translateX(100%); }
+      .nav-sidebar.open { transform: translateX(0) !important; box-shadow: 4px 0 24px rgba(0,0,0,.5); }
+      .nav-sidebar.open .nav-back { width: 100%; gap: 10px; padding: 0 12px 0 8px; }
+      .nav-sidebar.open .nav-back .nav-label { opacity: 1; visibility: visible; pointer-events: auto; }
+      .nav-sidebar.open .nav-item { width: 100%; gap: 10px; padding: 0 12px 0 8px; justify-content: flex-start; border-radius: 10px; }
+      .nav-sidebar.open .nav-item-label { opacity: 1; visibility: visible; pointer-events: auto; }
+      .nav-sidebar.open .nav-status { opacity: 0; }
+      .nav-sidebar.open .nav-divider { width: calc(100% - 24px); }
+      .mgmt-sidebar { left: 0 !important; right: auto !important; width: 260px !important; z-index: 92; transform: translateX(-100%); }
+      [dir="rtl"] .mgmt-sidebar { left: auto !important; right: 0 !important; transform: translateX(100%); }
+      .mgmt-sidebar.open { transform: translateX(0) !important; }
+      .main { margin-left: 0 !important; margin-right: 0 !important; padding: 20px 16px 40px; }
+      [dir="rtl"] .main { margin-left: 0 !important; margin-right: 0 !important; }
+    }
+    /* ── Profile Sidebar ─────────────────────────────── */
+    .profile-backdrop { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0); pointer-events: none; transition: background .28s; }
+    .profile-backdrop.open { background: rgba(0,0,0,.55); pointer-events: all; }
+    .profile-sidebar { position: fixed; top: 0; right: 0; bottom: 0; z-index: 201; width: 300px; max-width: 92vw; background: rgba(8,2,22,.97); border-left: 1px solid rgba(124,58,237,.18); box-shadow: -12px 0 60px rgba(0,0,0,.7); display: flex; flex-direction: column; transform: translateX(110%); transition: transform .32s cubic-bezier(.22,1,.36,1); overflow: hidden; }
+    [dir="rtl"] .profile-sidebar { right:auto; left:0; border-left:none; border-right:1px solid rgba(124,58,237,.18); box-shadow:12px 0 60px rgba(0,0,0,.7); transform:translateX(-110%); }
+    .profile-sidebar.open { transform: translateX(0); }
+    .prof-banner { width:100%; height:100px; flex-shrink:0; position:relative; background:linear-gradient(135deg,#2d0b6b 0%,#0a0020 60%,#06b6d4 100%); }
+    .prof-banner-solid { width:100%; height:100%; }
+    .prof-banner-overlay { position:absolute; inset:0; background:linear-gradient(to bottom,transparent 50%,rgba(8,2,22,.95) 100%); }
+    .prof-close { position:absolute; top:10px; right:10px; width:28px; height:28px; border-radius:50%; background:rgba(0,0,0,.5); border:1px solid rgba(255,255,255,.1); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--muted); transition:background .18s,color .18s; z-index:5; }
+    [dir="rtl"] .prof-close { right:auto; left:10px; }
+    .prof-close:hover { background:rgba(220,38,38,.25); color:#fca5a5; }
+    .prof-avatar-wrap { position:relative; margin:-38px 0 0 20px; width:80px; height:80px; flex-shrink:0; }
+    [dir="rtl"] .prof-avatar-wrap { margin:-38px 20px 0 0; }
+    .prof-avatar { width:80px; height:80px; border-radius:50%; object-fit:cover; display:block; border:3px solid rgba(8,2,22,.97); box-shadow:0 0 0 2px rgba(124,58,237,.5); }
+    .prof-avatar-fallback { width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg,rgba(124,58,237,.4),rgba(6,182,212,.2)); border:3px solid rgba(8,2,22,.97); box-shadow:0 0 0 2px rgba(124,58,237,.5); display:flex; align-items:center; justify-content:center; font-family:'Orbitron',monospace; font-size:1.6rem; font-weight:800; color:var(--purple-l); }
+    .prof-online-dot { position:absolute; bottom:6px; right:6px; width:14px; height:14px; border-radius:50%; background:#23a55a; border:3px solid rgba(8,2,22,.97); box-shadow:0 0 6px rgba(35,165,90,.7); z-index:4; }
+    .prof-body { flex:1; overflow-y:auto; padding:12px 20px 24px; scrollbar-width:thin; scrollbar-color:rgba(124,58,237,.3) transparent; }
+    .prof-names { margin-bottom:14px; }
+    .prof-display-name { font-size:1.15rem; font-weight:700; color:var(--white); letter-spacing:-.01em; line-height:1.2; }
+    .prof-username { font-size:.75rem; color:var(--muted); margin-top:2px; }
+    .prof-block { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:12px 14px; margin-bottom:10px; }
+    .prof-block-label { font-size:.6rem; font-weight:700; letter-spacing:.12em; color:rgba(203,194,255,.5); text-transform:uppercase; margin-bottom:8px; font-family:'Orbitron',monospace; }
+    .prof-id-text { font-size:.75rem; font-family:'Orbitron',monospace; color:var(--muted); letter-spacing:.06em; cursor:pointer; transition:color .15s; }
+    .prof-id-text:hover { color:var(--purple-l); }
+    .prof-badges { display:flex; flex-wrap:wrap; gap:8px; }
+    .prof-badge { display:flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:9px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); position:relative; cursor:default; transition:transform .15s,background .15s,box-shadow .15s; }
+    .prof-badge:hover { transform:translateY(-2px) scale(1.08); background:rgba(255,255,255,.09); box-shadow:0 4px 14px rgba(0,0,0,.4); }
+    .prof-badge img { width:20px; height:20px; object-fit:contain; }
+    .prof-badge-tip { position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); background:rgba(10,3,30,.97); border:1px solid rgba(124,58,237,.3); border-radius:7px; padding:5px 10px; font-size:.65rem; white-space:nowrap; color:var(--white); opacity:0; pointer-events:none; transition:opacity .15s; z-index:10; box-shadow:0 4px 16px rgba(0,0,0,.5); }
+    .prof-badge:hover .prof-badge-tip { opacity:1; }
+    .prof-footer { padding:14px 20px; border-top:1px solid rgba(255,255,255,.06); display:flex; flex-direction:column; gap:8px; }
+    .prof-btn { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; font-size:.82rem; font-weight:600; text-decoration:none; cursor:pointer; border:1px solid transparent; transition:background .18s,border-color .18s,transform .12s; font-family:inherit; }
+    .prof-btn:active { transform:scale(.97); }
+    .prof-btn.help { background:rgba(6,182,212,.08); border-color:rgba(6,182,212,.3); color:var(--cyan-l); }
+    .prof-btn.help:hover { background:rgba(6,182,212,.14); border-color:rgba(6,182,212,.5); }
+    .prof-btn.logout { background:rgba(220,38,38,.07); border-color:rgba(220,38,38,.25); color:#fca5a5; }
+    .prof-btn.logout:hover { background:rgba(220,38,38,.12); border-color:rgba(220,38,38,.45); }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div class="glow glow-a"></div>
+  <div class="glow glow-b"></div>
+  <div class="nav-overlay" id="nav-overlay"></div>
+
+  <!-- Profile Sidebar backdrop -->
+  <div class="profile-backdrop" id="prof-backdrop"></div>
+
+  <!-- Profile Sidebar -->
+  <aside class="profile-sidebar" id="prof-sidebar" aria-hidden="true">
+    <div class="prof-banner">
+      <% if (user.banner) { %>
+        <img src="https://cdn.discordapp.com/banners/<%= user.id %>/<%= user.banner %>.png?size=480" alt="" style="width:100%;height:100%;object-fit:cover;" />
+      <% } else if (user.bannerColor) { %>
+        <div class="prof-banner-solid" data-bg="<%= user.bannerColor %>"></div>
+      <% } %>
+      <div class="prof-banner-overlay"></div>
+      <button class="prof-close" id="close-profile" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="prof-avatar-wrap">
+      <% if (user.avatar) { %>
+        <img class="prof-avatar" src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=160" alt="<%= user.displayName || user.username %>" />
+      <% } else { %>
+        <div class="prof-avatar-fallback"><%= (user.displayName || user.username).charAt(0).toUpperCase() %></div>
+      <% } %>
+      <div class="prof-online-dot"></div>
+    </div>
+    <div class="prof-body">
+      <div class="prof-names">
+        <div class="prof-display-name"><%= user.displayName || user.username %></div>
+        <div class="prof-username">@<%= user.username %></div>
+      </div>
+      <div class="prof-block">
+        <div class="prof-block-label"><%= t.home.profileId %></div>
+        <div class="prof-id-text" id="prof-copy-id"><%= user.id %></div>
+      </div>
+      <% const flags2 = Number(user.publicFlags || 0); const BADGE_CDN = 'https://cdn.discordapp.com/badge-icons/'; const badges2 = [];
+        if (flags2 & 1)      badges2.push({ label: t.home.badgeStaff,      img: 'staff.png' });
+        if (flags2 & 2)      badges2.push({ label: t.home.badgePartner,    img: 'partner.png' });
+        if (flags2 & 4)      badges2.push({ label: t.home.badgeHsEvents,   img: 'hypesquad.png' });
+        if (flags2 & 8)      badges2.push({ label: t.home.badgeBug1,       img: 'bug_hunter_level_1.png' });
+        if (flags2 & 64)     badges2.push({ label: t.home.badgeBravery,    img: 'hypesquad_house_1.png' });
+        if (flags2 & 128)    badges2.push({ label: t.home.badgeBrilliance, img: 'hypesquad_house_2.png' });
+        if (flags2 & 256)    badges2.push({ label: t.home.badgeBalance,    img: 'hypesquad_house_3.png' });
+        if (flags2 & 512)    badges2.push({ label: t.home.badgeEarlySupp,  img: 'early_supporter.png' });
+        if (flags2 & 16384)  badges2.push({ label: t.home.badgeBug2,       img: 'bug_hunter_level_2.png' });
+        if (flags2 & 131072) badges2.push({ label: t.home.badgeVerifDev,   img: 'verified_bot_developer.png' });
+        if (flags2 & 262144) badges2.push({ label: t.home.badgeModAlumni,  img: 'certified_moderator.png' });
+        if (flags2 & 4194304)badges2.push({ label: t.home.badgeActiveDev,  img: 'active_developer.png' }); %>
+      <% if (badges2.length > 0) { %>
+        <div class="prof-block">
+          <div class="prof-block-label"><%= t.home.profileBadges %></div>
+          <div class="prof-badges">
+            <% badges2.forEach(b => { %>
+              <div class="prof-badge">
+                <img src="<%= BADGE_CDN %><%= b.img %>" alt="<%= b.label %>" onerror="this.closest('.prof-badge').style.display='none'" />
+                <span class="prof-badge-tip"><%= b.label %></span>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+    </div>
+    <div class="prof-footer">
+      <% if (typeof isShip !== 'undefined' && isShip) { %>
+      <a href="/settings" class="prof-btn" style="background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);color:var(--purple-l);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        <%= lang === 'ar' ? 'إعدادات النظام' : 'System Settings' %>
+      </a>
+      <% } %>
+      <a href="https://discord.gg/jfFSmVM5kK" target="_blank" class="prof-btn help">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        <%= t.home.profileHelp %>
+      </a>
+      <a href="/auth/logout" class="prof-btn logout" id="logout-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <%= t.home.profileLogout %>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <% if (guildInfo.icon) { %>
+        <img class="guild-icon-top" src="https://cdn.discordapp.com/icons/<%= guildId %>/<%= guildInfo.icon %>.png?size=64" alt="<%= guildInfo.name %>" />
+      <% } else { %>
+        <div class="guild-icon-top-fallback"><%= guildInfo.name.charAt(0).toUpperCase() %></div>
+      <% } %>
+      <div class="guild-meta">
+        <div class="guild-meta-name"><%= guildInfo.name %></div>
+        <div class="guild-meta-id"><%= guildId %></div>
+      </div>
+      <div class="topbar-sep"></div>
+      <a href="/dashboard" class="topbar-brand nav-link">
+        <img src="https://res.cloudinary.com/difucqa9h/image/upload/v1770643265/discord_images/yaix1pbnbdv3srvf12gl.png" alt="CODE NEXUS" />
+        <span>CODE NEXUS</span>
+      </a>
+    </div>
+    <div class="topbar-right">
+      <button class="user-chip" id="open-profile" aria-label="Profile">
+        <% if (user.avatar) { %>
+          <img class="user-chip-av" src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=64" alt="<%= user.displayName || user.username %>" />
+        <% } else { %>
+          <div class="user-chip-av-fallback"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--purple-l)" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+        <% } %>
+        <span><%= user.displayName || user.username %></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <select class="lang-select" id="lang-select" aria-label="Language">
+        <% supported.forEach(code => { %>
+          <option value="<%= code %>" <%= lang === code ? 'selected' : '' %>><%= langFlags[code] %> <%= langLabels[code] %></option>
+        <% }) %>
+      </select>
+      <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Nav sidebar (server icons) -->
+  <aside class="nav-sidebar" aria-label="Server navigation">
+    <a href="/dashboard" class="nav-back nav-link" aria-label="<%= t.guild.backBtn %>">
+      <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+      <span class="nav-label"><%= t.guild.backBtn %></span>
+    </a>
+    <div class="nav-divider"></div>
+    <% guilds.forEach(g => { %>
+      <a href="/dashboard/<%= g.id %>" class="nav-item <%= g.id === guildId ? 'active' : '' %> nav-link" aria-label="<%= g.name %>">
+        <div class="nav-item-icon">
+          <% if (g.icon) { %>
+            <img src="https://cdn.discordapp.com/icons/<%= g.id %>/<%= g.icon %>.png?size=64" alt="<%= g.name %>" />
+          <% } else { %>
+            <div class="nav-item-fallback"><%= g.name.charAt(0).toUpperCase() %></div>
+          <% } %>
+          <span class="nav-status <%= g.inBot ? 'on' : 'off' %>"></span>
+        </div>
+        <div class="nav-item-label">
+          <span class="nav-item-name"><%= g.name %></span>
+          <span class="nav-item-dot <%= g.inBot ? 'on' : 'off' %>"></span>
+        </div>
+      </a>
+    <% }) %>
+  </aside>
+
+  <!-- Management Sidebar -->
+  <aside class="mgmt-sidebar" id="mgmt-sidebar">
+    <div class="mgmt-header">
+      <div class="mgmt-header-inner">
+        <div class="mgmt-header-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 18 18"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 2C2.00779 2 1 3.00779 1 4.25V5.75C1 6.99221 2.00779 8 3.25 8H14.75C15.9922 8 17 6.99221 17 5.75V4.25C17 3.00779 15.9922 2 14.75 2H3.25ZM3 5C3 5.5522 3.4477 6 4 6C4.5522 6 5 5.5522 5 5C5 4.4478 4.5523 4 4 4C3.4477 4 3 4.4478 3 5ZM6 5C6 5.5522 6.4477 6 7 6C7.5522 6 8 5.5522 8 5C8 4.4478 7.5523 4 7 4C6.4477 4 6 4.4478 6 5Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 10C2.00779 10 1 11.0078 1 12.25V13.75C1 14.9922 2.00779 16 3.25 16H14.75C15.9922 16 17 14.9922 17 13.75V12.25C17 11.0078 15.9922 10 14.75 10H3.25Z" fill="currentColor" fill-opacity="0.4"/></svg>
+        </div>
+        <span class="mgmt-header-title"><%= lang === 'ar' ? 'إدارة السيرفر' : 'Manage Server' %></span>
+      </div>
+      <button class="mgmt-sort-btn" id="mgmt-sort-btn" aria-label="sort">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M9.53,2.22c-.293-.293-.768-.293-1.061,0l-3.5,3.5c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l2.97-2.97,2.97,2.97c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-3.5-3.5Z" fill="currentColor"/><path d="M11.97,11.22l-2.97,2.97-2.97-2.97c-.293-.293-.768-.293-1.061,0s-.293,.768,0,1.061l3.5,3.5c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22l3.5-3.5c.293-.293,.293-.768,0-1.061s-.768-.293-1.061,0Z" fill="currentColor" fill-opacity="0.4"/></svg>
+      </button>
+    </div>
+    <div class="mgmt-body">
+      <div class="mgmt-nav">
+        <!-- General -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'عام' : 'General' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path opacity="0.4" d="M14.25 2H12.75C11.784 2 11 2.784 11 3.75V6.25C11 7.216 11.784 8 12.75 8H14.25C15.216 8 16 7.216 16 6.25V3.75C16 2.784 15.216 2 14.25 2Z" fill="currentColor"/><path opacity="0.4" d="M5.25 10H3.75C2.784 10 2 10.784 2 11.75V14.25C2 15.216 2.784 16 3.75 16H5.25C6.216 16 7 15.216 7 14.25V11.75C7 10.784 6.216 10 5.25 10Z" fill="currentColor"/><path d="M7.75 2H3.75C2.784 2 2 2.784 2 3.75V6.25C2 7.216 2.784 8 3.75 8H7.75C8.716 8 9.5 7.216 9.5 6.25V3.75C9.5 2.784 8.716 2 7.75 2Z" fill="currentColor"/><path d="M14.25 10H10.25C9.284 10 8.5 10.784 8.5 11.75V14.25C8.5 15.216 9.284 16 10.25 16H14.25C15.216 16 16 15.216 16 14.25V11.75C16 10.784 15.216 10 14.25 10Z" fill="currentColor"/></svg></div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'نظرة عامة' : 'Overview' %></span>
+            </a>
+          </div>
+        </div>
+        <!-- Levels -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'المستويات' : 'Levels' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/levels" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 6C5.962 6 3.5 8.463 3.5 11.5C3.5 14.537 5.962 17 9 17C12.038 17 14.5 14.537 14.5 11.5C14.5 8.463 12.038 6 9 6Z" fill="currentColor" fill-opacity="0.4"/><path d="M14.283 1C13.842 1 13.437 1.231 13.212 1.606L10.463 6.197C11.932 6.601 13.155 7.6 13.858 8.918L17.44 2.891C17.939 2.058 17.338 1 16.367 1H14.283Z" fill="currentColor"/><path d="M1.633 1C0.662 1 0.061 2.059 0.561 2.892L4.151 8.903C4.854 7.592 6.074 6.599 7.537 6.197L4.789 1.608C4.565 1.234 4.153 1 3.717 1H1.633Z" fill="currentColor"/></svg></div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'إعدادات المستوى' : 'Level Settings' %></span>
+            </a>
+          </div>
+        </div>
+        <!-- Tickets -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'التذاكر' : 'Tickets' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/tickets" class="mgmt-item active nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path opacity="0.4" d="M14.25 2H12.75C11.784 2 11 2.784 11 3.75V6.25C11 7.216 11.784 8 12.75 8H14.25C15.216 8 16 7.216 16 6.25V3.75C16 2.784 15.216 2 14.25 2Z" fill="currentColor"/><path opacity="0.4" d="M5.25 10H3.75C2.784 10 2 10.784 2 11.75V14.25C2 15.216 2.784 16 3.75 16H5.25C6.216 16 7 15.216 7 14.25V11.75C7 10.784 6.216 10 5.25 10Z" fill="currentColor"/><path d="M7.75 2H3.75C2.784 2 2 2.784 2 3.75V6.25C2 7.216 2.784 8 3.75 8H7.75C8.716 8 9.5 7.216 9.5 6.25V3.75C9.5 2.784 8.716 2 7.75 2Z" fill="currentColor"/><path d="M14.25 10H10.25C9.284 10 8.5 10.784 8.5 11.75V14.25C8.5 15.216 9.284 16 10.25 16H14.25C15.216 16 16 15.216 16 14.25V11.75C16 10.784 15.216 10 14.25 10Z" fill="currentColor"/></svg></div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'نظرة عامة' : 'Overview' %></span>
+            </a>
+            <a href="/dashboard/<%= guildId %>/tickets/general" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 11.5C10.3807 11.5 11.5 10.3807 11.5 9C11.5 7.6193 10.3807 6.5 9 6.5C7.6193 6.5 6.5 7.6193 6.5 9C6.5 10.3807 7.6193 11.5 9 11.5Z" fill="currentColor"/><path opacity="0.4" fill-rule="evenodd" clip-rule="evenodd" d="M7.6853 1.5H10.3147C10.7234 1.5 11.0941 1.7443 11.2629 2.1191L11.8071 3.3564C12.3536 3.5819 12.8668 3.8791 13.3352 4.237L14.6429 3.9095C15.0369 3.8108 15.4509 3.9764 15.6553 4.3295L16.9699 6.6705C17.1743 7.0235 17.1014 7.4708 16.7954 7.7392L15.7702 8.636C15.7899 8.757 15.8 8.876 15.8 9C15.8 9.124 15.7899 9.243 15.7702 9.364L16.7954 10.2608C17.1014 10.5292 17.1743 10.9765 16.9699 11.3295L15.6553 13.6705C15.4509 14.0236 15.0369 14.1892 14.6429 14.0905L13.3352 13.763C12.8668 14.1209 12.3536 14.4181 11.8071 14.6436L11.2629 15.8809C11.0941 16.2557 10.7234 16.5 10.3147 16.5H7.6853C7.2766 16.5 6.9059 16.2557 6.7371 15.8809L6.1929 14.6436C5.6464 14.4181 5.1332 14.1209 4.6648 13.763L3.3571 14.0905C2.9631 14.1892 2.5491 14.0236 2.3447 13.6705L1.0301 11.3295C0.8257 10.9765 0.8986 10.5292 1.2046 10.2608L2.2298 9.364C2.2101 9.243 2.2 9.124 2.2 9C2.2 8.876 2.2101 8.757 2.2298 8.636L1.2046 7.7392C0.8986 7.4708 0.8257 7.0235 1.0301 6.6705L2.3447 4.3295C2.5491 3.9764 2.9631 3.8108 3.3571 3.9095L4.6648 4.237C5.1332 3.8791 5.6464 3.5819 6.1929 3.3564L6.7371 2.1191C6.9059 1.7443 7.2766 1.5 7.6853 1.5Z" fill="currentColor"/></svg></div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الإعدادات العامة' : 'General Settings' %></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Section: Utility ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'الأدوات' : 'Utility' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/utility" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M15.573 3.913C15.462 3.642 15.138 3.527 14.881 3.674L12.434 5.076L10.924 3.566L12.326 1.119C12.473 0.862 12.358 0.538 12.087 0.427C10.973 -0.0319999 9.667 0.218 8.808 1.077C7.94 1.945 7.692 3.264 8.169 4.385L1.292 11.262C0.236 12.318 0.236 14.032 1.292 15.088L2.912 16.708C3.968 17.764 5.682 17.764 6.738 16.708L13.615 9.831C14.736 10.308 16.055 10.06 16.923 9.192C17.782 8.333 18.032 7.027 17.573 5.913C17.462 5.642 17.138 5.527 16.881 5.674L14.434 7.076L12.924 5.566L14.326 3.119Z" fill="currentColor" fill-opacity="0.4"/><path fill-rule="evenodd" clip-rule="evenodd" d="M2 13.5C2 12.672 2.672 12 3.5 12C4.328 12 5 12.672 5 13.5C5 14.328 4.328 15 3.5 15C2.672 15 2 14.328 2 13.5Z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الأوامر العامة' : 'General Commands' %></span>
+            </a>
+            <a href="/dashboard/<%= guildId %>/moderation" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 1L2 4.5V9c0 4.418 3.083 8.572 7 9.5 3.917-.928 7-5.082 7-9.5V4.5L9 1z" fill="currentColor" fill-opacity="0.4"/><path fill-rule="evenodd" clip-rule="evenodd" d="M6.5 7.5l2.5 2.5 3.5-3.5 1 1-4.5 4.5-3.5-3.5 1-1z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الأوامر الإدارية' : 'Moderation' %></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Section: Protection ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'الحماية' : 'Protection' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/protection" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 1L2 4.5V9c0 4.418 3.083 8.572 7 9.5 3.917-.928 7-5.082 7-9.5V4.5L9 1z" fill="currentColor" fill-opacity="0.4"/><path fill-rule="evenodd" clip-rule="evenodd" d="M6.5 7.5l2.5 2.5 3.5-3.5 1 1-4.5 4.5-3.5-3.5 1-1z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الأمان' : 'Security' %></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Section: Members ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'الأعضاء' : 'Members' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/auto-roles" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 2a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zm0 9c4 0 6 2 6 3v1H3v-1c0-1 2-3 6-3z" fill="currentColor" fill-opacity="0.4"/><path d="M13.5 8a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm1.5 2c2 0 3 1 3 2v1h-3v-1c0-.6-.2-1.2-.5-1.7.3-.2.7-.3 1-.3l-.5.5z" fill="currentColor"/></svg>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الرتب التلقائية' : 'Auto Roles' %></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ── Section: Settings ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'الإعدادات' : 'Settings' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <a href="/dashboard/<%= guildId %>/setting" class="mgmt-item nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 11.5C10.3807 11.5 11.5 10.3807 11.5 9C11.5 7.6193 10.3807 6.5 9 6.5C7.6193 6.5 6.5 7.6193 6.5 9C6.5 10.3807 7.6193 11.5 9 11.5Z" fill="currentColor"/><path opacity="0.4" fill-rule="evenodd" clip-rule="evenodd" d="M7.6853 1.5H10.3147C10.7234 1.5 11.0941 1.7443 11.2629 2.1191L11.8071 3.3564C12.3536 3.5819 12.8668 3.8791 13.3352 4.237L14.6429 3.9095C15.0369 3.8108 15.4509 3.9764 15.6553 4.3295L16.9699 6.6705C17.1743 7.0235 17.1014 7.4708 16.7954 7.7392L15.7702 8.636C15.7899 8.757 15.8 8.876 15.8 9C15.8 9.124 15.7899 9.243 15.7702 9.364L16.7954 10.2608C17.1014 10.5292 17.1743 10.9765 16.9699 11.3295L15.6553 13.6705C15.4509 14.0236 15.0369 14.1892 14.6429 14.0905L13.3352 13.763C12.8668 14.1209 12.3536 14.4181 11.8071 14.6436L11.2629 15.8809C11.0941 16.2557 10.7234 16.5 10.3147 16.5H7.6853C7.2766 16.5 6.9059 16.2557 6.7371 15.8809L6.1929 14.6436C5.6464 14.4181 5.1332 14.1209 4.6648 13.763L3.3571 14.0905C2.9631 14.1892 2.5491 14.0236 2.3447 13.6705L1.0301 11.3295C0.8257 10.9765 0.8986 10.5292 1.2046 10.2608L2.2298 9.364C2.2101 9.243 2.2 9.124 2.2 9C2.2 8.876 2.2101 8.757 2.2298 8.636L1.2046 7.7392C0.8986 7.4708 0.8257 7.0235 1.0301 6.6705L2.3447 4.3295C2.5491 3.9764 2.9631 3.8108 3.3571 3.9095L4.6648 4.237C5.1332 3.8791 5.6464 3.5819 6.1929 3.3564L6.7371 2.1191C6.9059 1.7443 7.2766 1.5 7.6853 1.5Z" fill="currentColor"/></svg></div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الإعدادات' : 'Settings' %></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mgmt-footer">
+      <div class="mgmt-footer-user">
+        <% if (user.avatar) { %>
+          <img class="mgmt-footer-av" src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=64" alt="<%= user.displayName || user.username %>" />
+        <% } else { %>
+          <div class="mgmt-footer-av-fallback"><%= (user.displayName || user.username).charAt(0).toUpperCase() %></div>
+        <% } %>
+        <span class="mgmt-footer-name">@<%= user.username %></span>
+      </div>
+      <button class="mgmt-footer-dots" id="footer-dots-btn" aria-label="User menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 18 18"><circle cx="9" cy="9" r="1.25" fill="currentColor"/><circle cx="3.25" cy="9" r="1.25" fill="currentColor"/><circle cx="14.75" cy="9" r="1.25" fill="currentColor"/></svg>
+      </button>
+      <!-- User popup -->
+      <div class="footer-popup" id="footer-popup">
+        <div class="footer-popup-info">
+          <div class="footer-popup-info-tag"><%= lang === 'ar' ? 'مسجل كـ' : 'Logged in as' %></div>
+          <div class="footer-popup-info-name">@<%= user.username %></div>
+        </div>
+        <a href="/logout" class="footer-popup-item danger">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 18 18" fill="none"><path d="M6.5 3H3.75C2.784 3 2 3.784 2 4.75v8.5C2 14.216 2.784 15 3.75 15H6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M12 6l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 9H7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <%= lang === 'ar' ? 'تسجيل الخروج' : 'Log out' %>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <h2><%= t.tickets.pageTitle %></h2>
+        <p><%= t.tickets.pageDesc %></p>
+      </div>
+      <label class="toggle-switch" title="<%= lang === 'ar' ? 'تفعيل / تعطيل نظام التذاكر' : 'Enable / Disable Ticket System' %>">
+        <input type="checkbox" id="ticket-enable" <%= ticketSettings.ENABLE ? 'checked' : '' %>>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Stats Overview -->
+    <div class="section-heading">
+      <div class="section-heading-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 18 18" fill="none"><path d="M2 14V10.25C2 9.284 2.784 8.5 3.75 8.5H5.25C6.216 8.5 7 9.284 7 10.25V14H2Z" fill="var(--purple-l)"/><path d="M7.5 14V6.75C7.5 5.784 8.284 5 9.25 5H10.75C11.716 5 12.5 5.784 12.5 6.75V14H7.5Z" fill="var(--purple-l)" fill-opacity="0.6"/><path d="M13 14V3.75C13 2.784 13.784 2 14.75 2H15.25C16.216 2 17 2.784 17 3.75V14H13Z" fill="var(--purple-l)" fill-opacity="0.35"/><path d="M1 14H17" stroke="var(--purple-l)" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <h3><%= lang === 'ar' ? 'إحصائيات' : 'Statistics' %></h3>
+    </div>
+
+    <div class="stats-grid">
+      <!-- Total Open -->
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="stat-label"><%= t.tickets.statOpen %></div>
+          <div id="stat-open" class="stat-value <%= ticketStats.open === 0 ? 'muted-val' : '' %>"><%= ticketStats.open %></div>
+        </div>
+        <div class="stat-icon-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18" fill="none"><rect x="2" y="4" width="14" height="11" rx="1.75" fill="var(--purple-l)" fill-opacity="0.2" stroke="var(--purple-l)" stroke-width="1.3"/><path d="M2 7h14" stroke="var(--purple-l)" stroke-width="1.3"/><circle cx="9" cy="11" r="1.5" fill="var(--purple-l)"/></svg>
+        </div>
+      </div>
+      <!-- Claimed -->
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="stat-label"><%= t.tickets.statClaimed %></div>
+          <div id="stat-claimed" class="stat-value <%= ticketStats.claimed === 0 ? 'muted-val' : '' %>"><%= ticketStats.claimed %></div>
+        </div>
+        <div class="stat-icon-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="7" r="3.5" fill="var(--purple-l)" fill-opacity="0.2" stroke="var(--purple-l)" stroke-width="1.3"/><path d="M3 16c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="var(--purple-l)" stroke-width="1.3" stroke-linecap="round"/><path d="M12 5l1.5 1.5L16 4" stroke="var(--purple-l)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <!-- Closed Today -->
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="stat-label"><%= t.tickets.statClosedToday %></div>
+          <div id="stat-closed-today" class="stat-value <%= ticketStats.closed_today === 0 ? 'muted-val' : '' %>"><%= ticketStats.closed_today %></div>
+        </div>
+        <div class="stat-icon-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18" fill="none"><path d="M14 3H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Z" fill="var(--purple-l)" fill-opacity="0.15" stroke="var(--purple-l)" stroke-width="1.3"/><path d="M6 9l2 2 4-4" stroke="var(--purple-l)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <!-- Avg Response -->
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="stat-label"><%= t.tickets.statAvgResponse %></div>
+          <div id="stat-avg" class="stat-value small-val <%= avgDisplay === '—' ? 'muted-val' : '' %>"><%= avgDisplay %></div>
+        </div>
+        <div class="stat-icon-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" fill="var(--purple-l)" fill-opacity="0.15" stroke="var(--purple-l)" stroke-width="1.3"/><path d="M9 5v4l2.5 2.5" stroke="var(--purple-l)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <!-- Ticket Limit -->
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="stat-label"><%= t.tickets.statLimit %></div>
+          <div id="stat-limit" class="stat-value"><%= ticketSettings.TICKET_LIMIT_PER_USER || 1 %></div>
+        </div>
+        <div class="stat-icon-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18" fill="none"><rect x="3" y="3" width="5" height="5" rx="1.2" fill="var(--purple-l)" fill-opacity="0.2" stroke="var(--purple-l)" stroke-width="1.3"/><rect x="10" y="3" width="5" height="5" rx="1.2" fill="var(--purple-l)" fill-opacity="0.4" stroke="var(--purple-l)" stroke-width="1.3"/><rect x="3" y="10" width="5" height="5" rx="1.2" fill="var(--purple-l)" fill-opacity="0.6" stroke="var(--purple-l)" stroke-width="1.3"/><rect x="10" y="10" width="5" height="5" rx="1.2" fill="var(--purple-l)" fill-opacity="0.8" stroke="var(--purple-l)" stroke-width="1.3"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ── Analytics Charts ──────────────────────────────────────────────── -->
+    <div class="section-heading">
+      <div class="section-heading-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="6" height="10" rx="1.2" fill="var(--purple-l)" fill-opacity=".9"/><rect x="10" y="5" width="6" height="7" rx="1.2" fill="var(--purple-l)" fill-opacity=".55"/><rect x="2" y="14" width="14" height="1.2" rx=".6" fill="var(--purple-l)" fill-opacity=".4"/></svg>
+      </div>
+      <h3><%= lang === 'ar' ? 'تحليلات' : 'Analytics' %></h3>
+    </div>
+
+    <div class="charts-grid">
+
+      <!-- 1. Tickets Over Time — Line (full width) -->
+      <div class="chart-card full">
+        <div class="chart-card-hd">
+          <div class="chart-card-hd-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none"><polyline points="2,13 6,8 10,10 16,4" stroke="var(--purple-l)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="chart-card-hd-text">
+            <div class="chart-card-title"><%= lang === 'ar' ? 'التذاكر عبر الوقت' : 'Tickets Over Time' %></div>
+            <div class="chart-card-desc"><%= lang === 'ar' ? 'عدد التذاكر المفتوحة يومياً — آخر 30 يوم' : 'Daily tickets opened — last 30 days' %></div>
+          </div>
+        </div>
+        <div id="chart-over-time"><div class="chart-placeholder"><%= lang === 'ar' ? 'جارٍ التحميل…' : 'Loading…' %></div></div>
+      </div>
+
+      <!-- 2. Open vs Closed — Donut -->
+      <div class="chart-card">
+        <div class="chart-card-hd">
+          <div class="chart-card-hd-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="var(--purple-l)" stroke-width="1.4"/><path d="M9 9V2" stroke="var(--purple-l)" stroke-width="1.4" stroke-linecap="round"/><path d="M9 9L15 13" stroke="var(--purple-l)" stroke-width="1.4" stroke-linecap="round" opacity=".5"/></svg>
+          </div>
+          <div class="chart-card-hd-text">
+            <div class="chart-card-title"><%= lang === 'ar' ? 'مفتوحة vs مغلقة' : 'Open vs Closed' %></div>
+            <div class="chart-card-desc"><%= lang === 'ar' ? 'نظرة سريعة على حالة التذاكر' : 'Quick view of support health' %></div>
+          </div>
+        </div>
+        <div id="chart-open-closed"><div class="chart-placeholder"><%= lang === 'ar' ? 'جارٍ التحميل…' : 'Loading…' %></div></div>
+      </div>
+
+      <!-- 3. By Panel — Bar -->
+      <div class="chart-card">
+        <div class="chart-card-hd">
+          <div class="chart-card-hd-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none"><rect x="2" y="7" width="3" height="8" rx="1" fill="var(--purple-l)"/><rect x="7" y="4" width="3" height="11" rx="1" fill="var(--purple-l)" opacity=".7"/><rect x="12" y="9" width="3" height="6" rx="1" fill="var(--purple-l)" opacity=".45"/></svg>
+          </div>
+          <div class="chart-card-hd-text">
+            <div class="chart-card-title"><%= lang === 'ar' ? 'التذاكر حسب القسم' : 'Tickets by Panel' %></div>
+            <div class="chart-card-desc"><%= lang === 'ar' ? 'أي قسم يستقبل أكثر الطلبات' : 'Which panel gets the most requests' %></div>
+          </div>
+        </div>
+        <div id="chart-by-panel"><div class="chart-placeholder"><%= lang === 'ar' ? 'جارٍ التحميل…' : 'Loading…' %></div></div>
+      </div>
+
+      <!-- 4. Heatmap — full width -->
+      <div class="chart-card full">
+        <div class="chart-card-hd">
+          <div class="chart-card-hd-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="4" height="4" rx="1" fill="var(--purple-l)" opacity=".3"/><rect x="7" y="2" width="4" height="4" rx="1" fill="var(--purple-l)" opacity=".6"/><rect x="12" y="2" width="4" height="4" rx="1" fill="var(--purple-l)" opacity=".9"/><rect x="2" y="7" width="4" height="4" rx="1" fill="var(--purple-l)" opacity=".6"/><rect x="7" y="7" width="4" height="4" rx="1" fill="var(--purple-l)"/><rect x="12" y="7" width="4" height="4" rx="1" fill="var(--purple-l)" opacity=".4"/><rect x="2" y="12" width="4" height="4" rx="1" fill="var(--purple-l)" opacity=".9"/><rect x="7" y="12" width="4" height="4" rx="1" fill="var(--purple-l)" opacity=".3"/><rect x="12" y="12" width="4" height="4" rx="1" fill="var(--purple-l)" opacity=".7"/></svg>
+          </div>
+          <div class="chart-card-hd-text">
+            <div class="chart-card-title"><%= lang === 'ar' ? 'نشاط التذاكر خلال الأسبوع' : 'Ticket Activity Heatmap' %></div>
+            <div class="chart-card-desc"><%= lang === 'ar' ? 'أفضل أوقات نشاط الدعم حسب اليوم والساعة (UTC)' : 'Best support hours by day of week × hour (UTC)' %></div>
+          </div>
+        </div>
+        <div id="chart-heatmap"><div class="chart-placeholder"><%= lang === 'ar' ? 'جارٍ التحميل…' : 'Loading…' %></div></div>
+      </div>
+
+      <!-- 5. Staff Response — Horizontal Bar -->
+      <div class="chart-card">
+        <div class="chart-card-hd">
+          <div class="chart-card-hd-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M2 5h9" stroke="var(--purple-l)" stroke-width="1.5" stroke-linecap="round"/><path d="M2 9h13" stroke="var(--purple-l)" stroke-width="1.5" stroke-linecap="round" opacity=".6"/><path d="M2 13h6" stroke="var(--purple-l)" stroke-width="1.5" stroke-linecap="round" opacity=".35"/></svg>
+          </div>
+          <div class="chart-card-hd-text">
+            <div class="chart-card-title"><%= lang === 'ar' ? 'أسرع المشرفين في الرد' : 'Fastest Staff Response' %></div>
+            <div class="chart-card-desc"><%= lang === 'ar' ? 'متوسط وقت إغلاق التذكرة لكل مشرف' : 'Avg close time per staff member' %></div>
+          </div>
+        </div>
+        <div id="chart-staff-response"><div class="chart-placeholder"><%= lang === 'ar' ? 'جارٍ التحميل…' : 'Loading…' %></div></div>
+      </div>
+
+      <!-- 6. Resolution Over Time — Area -->
+      <div class="chart-card">
+        <div class="chart-card-hd">
+          <div class="chart-card-hd-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M2 14 L5 9 L9 11 L13 6 L16 8" stroke="var(--purple-l)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 14 L5 9 L9 11 L13 6 L16 8 L16 14 Z" fill="var(--purple-l)" opacity=".12"/></svg>
+          </div>
+          <div class="chart-card-hd-text">
+            <div class="chart-card-title"><%= lang === 'ar' ? 'وقت حل التذاكر' : 'Resolution Time Over Time' %></div>
+            <div class="chart-card-desc"><%= lang === 'ar' ? 'متوسط وقت الحل يومياً — آخر 30 يوم' : 'Avg resolution time daily — last 30 days' %></div>
+          </div>
+        </div>
+        <div id="chart-resolution"><div class="chart-placeholder"><%= lang === 'ar' ? 'جارٍ التحميل…' : 'Loading…' %></div></div>
+      </div>
+
+      <!-- 7. Tickets per Staff — Horizontal Bar -->
+      <div class="chart-card">
+        <div class="chart-card-hd">
+          <div class="chart-card-hd-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="6" r="3" stroke="var(--purple-l)" stroke-width="1.4"/><path d="M3 15c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="var(--purple-l)" stroke-width="1.4" stroke-linecap="round" opacity=".6"/></svg>
+          </div>
+          <div class="chart-card-hd-text">
+            <div class="chart-card-title"><%= lang === 'ar' ? 'عدد التذاكر لكل مشرف' : 'Tickets per Staff' %></div>
+            <div class="chart-card-desc"><%= lang === 'ar' ? 'إجمالي التذاكر المُغلقة لكل عضو' : 'Total tickets closed per staff member' %></div>
+          </div>
+        </div>
+        <div id="chart-staff-tickets"><div class="chart-placeholder"><%= lang === 'ar' ? 'جارٍ التحميل…' : 'Loading…' %></div></div>
+      </div>
+
+      <!-- 8. Escalated — Donut -->
+      <div class="chart-card">
+        <div class="chart-card-hd">
+          <div class="chart-card-hd-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 14V4" stroke="var(--purple-l)" stroke-width="1.5" stroke-linecap="round"/><path d="M5 8l4-4 4 4" stroke="var(--purple-l)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="chart-card-hd-text">
+            <div class="chart-card-title"><%= lang === 'ar' ? 'التذاكر المصعّدة' : 'Escalated Tickets' %></div>
+            <div class="chart-card-desc"><%= lang === 'ar' ? 'نسبة التذاكر العادية مقابل المصعّدة' : 'Normal vs escalated ticket ratio' %></div>
+          </div>
+        </div>
+        <div id="chart-escalated"><div class="chart-placeholder"><%= lang === 'ar' ? 'جارٍ التحميل…' : 'Loading…' %></div></div>
+      </div>
+
+      <!-- 9. Daily / Weekly / Monthly — Bar (full width) -->
+      <div class="chart-card full">
+        <div class="chart-card-hd">
+          <div class="chart-card-hd-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none"><rect x="2" y="9" width="3" height="6" rx="1" fill="var(--purple-l)"/><rect x="7" y="5" width="3" height="10" rx="1" fill="var(--purple-l)" opacity=".7"/><rect x="12" y="2" width="3" height="13" rx="1" fill="var(--purple-l)" opacity=".45"/></svg>
+          </div>
+          <div class="chart-card-hd-text">
+            <div class="chart-card-title"><%= lang === 'ar' ? 'التذاكر المستلمة يوميًا / أسبوعيًا / شهريًا' : 'Tickets Received Daily / Weekly / Monthly' %></div>
+            <div class="chart-card-desc"><%= lang === 'ar' ? 'آخر 7 أيام مع مقارنة سريعة للفترات' : 'Last 7 days with quick period comparison' %></div>
+          </div>
+        </div>
+        <div id="chart-dwm-badges" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"></div>
+        <div id="chart-daily-weekly-monthly"><div class="chart-placeholder"><%= lang === 'ar' ? 'جارٍ التحميل…' : 'Loading…' %></div></div>
+      </div>
+
+      <!-- 10. Staff Received — Horizontal Bar (full width) -->
+      <div class="chart-card full">
+        <div class="chart-card-hd">
+          <div class="chart-card-hd-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none"><circle cx="6" cy="6" r="2.5" stroke="var(--purple-l)" stroke-width="1.4"/><circle cx="13" cy="5" r="2" stroke="var(--purple-l)" stroke-width="1.3" opacity=".6"/><path d="M1 14c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="var(--purple-l)" stroke-width="1.4" stroke-linecap="round" opacity=".8"/><path d="M13 9c1.66 0 3 1.34 3 3" stroke="var(--purple-l)" stroke-width="1.3" stroke-linecap="round" opacity=".45"/></svg>
+          </div>
+          <div class="chart-card-hd-text">
+            <div class="chart-card-title"><%= lang === 'ar' ? 'ترتيب الإدارة حسب التذاكر المستلمة' : 'Staff Ranking by Tickets Received' %></div>
+            <div class="chart-card-desc"><%= lang === 'ar' ? 'من الأكثر استلامًا للتذاكر إلى الأقل' : 'From most tickets handled to least' %></div>
+          </div>
+        </div>
+        <div id="chart-staff-received"><div class="chart-placeholder"><%= lang === 'ar' ? 'جارٍ التحميل…' : 'Loading…' %></div></div>
+      </div>
+
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ── Feedback & Ratings Charts ─────────────────────────────────────── -->
+    <div class="section-heading">
+      <div class="section-heading-icon" style="background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.22);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 18 18" fill="none"><path d="M9 2l1.6 3.6 3.9.6-2.8 2.7.66 3.9L9 11.1l-3.36 1.8.66-3.9L3.5 6.2l3.9-.6z" fill="#fbbf24"/></svg>
+      </div>
+      <h3 style="color:var(--white)"><%= lang === 'ar' ? 'تقييمات وجودة الدعم' : 'Feedback & Ratings' %></h3>
+    </div>
+
+    <!-- Summary badges -->
+    <div class="fb-summary-wrap" id="fb-summary-badges">
+      <div class="fb-badge"><%= lang === 'ar' ? 'الإجمالي: ' : 'Total: ' %><strong id="fb-total">—</strong></div>
+      <div class="fb-badge"><%= lang === 'ar' ? 'اليوم: ' : 'Today: ' %><strong id="fb-daily">—</strong></div>
+      <div class="fb-badge"><%= lang === 'ar' ? 'الأسبوع: ' : 'This Week: ' %><strong id="fb-weekly">—</strong></div>
+      <div class="fb-badge"><%= lang === 'ar' ? 'الشهر: ' : 'This Month: ' %><strong id="fb-monthly">—</strong></div>
+      <div class="fb-badge star-score-wrap"><%= lang === 'ar' ? 'متوسط: ' : 'Avg: ' %><span id="fb-avg-score" class="star-score">—</span>&nbsp;<span id="fb-avg-stars" class="star-stars"></span></div>
+    </div>
+
+    <div class="charts-grid">
+
+      <!-- 11. Star Rating Distribution — Donut -->
+      <div class="chart-card">
+        <div class="chart-card-hd">
+          <div class="chart-card-hd-icon" style="background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.22);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 2l1.6 3.6 3.9.6-2.8 2.7.66 3.9L9 11.1l-3.36 1.8.66-3.9L3.5 6.2l3.9-.6z" fill="#fbbf24"/></svg>
+          </div>
+          <div class="chart-card-hd-text">
+            <div class="chart-card-title"><%= lang === 'ar' ? 'توزيع التقييمات (نجوم)' : 'Star Rating Distribution' %></div>
+            <div class="chart-card-desc"><%= lang === 'ar' ? 'نسبة التقييمات الجيدة مقابل السيئة' : 'Good vs bad rating ratio at a glance' %></div>
+          </div>
+        </div>
+        <div id="chart-star-dist"><div class="chart-placeholder"><%= lang === 'ar' ? 'جارٍ التحميل…' : 'Loading…' %></div></div>
+      </div>
+
+      <!-- 12. Ratings by Panel — Bar -->
+      <div class="chart-card">
+        <div class="chart-card-hd">
+          <div class="chart-card-hd-icon" style="background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.22);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none"><rect x="2" y="7" width="3" height="8" rx="1" fill="#fbbf24"/><rect x="7" y="4" width="3" height="11" rx="1" fill="#fbbf24" opacity=".7"/><rect x="12" y="9" width="3" height="6" rx="1" fill="#fbbf24" opacity=".45"/></svg>
+          </div>
+          <div class="chart-card-hd-text">
+            <div class="chart-card-title"><%= lang === 'ar' ? 'متوسط التقييم حسب القسم' : 'Avg Rating by Panel' %></div>
+            <div class="chart-card-desc"><%= lang === 'ar' ? 'أي قسم حصل على أفضل تقييمات' : 'Which panel scored highest in satisfaction' %></div>
+          </div>
+        </div>
+        <div id="chart-ratings-by-panel"><div class="chart-placeholder"><%= lang === 'ar' ? 'جارٍ التحميل…' : 'Loading…' %></div></div>
+      </div>
+
+      <!-- 13. Ratings Over Time — Area (full width) -->
+      <div class="chart-card full">
+        <div class="chart-card-hd">
+          <div class="chart-card-hd-icon" style="background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.22);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M2 14 L5 10 L8 11 L12 7 L16 9" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 14 L5 10 L8 11 L12 7 L16 9 L16 14 Z" fill="#fbbf24" opacity=".12"/></svg>
+          </div>
+          <div class="chart-card-hd-text">
+            <div class="chart-card-title"><%= lang === 'ar' ? 'تطور متوسط التقييم يوميًا — آخر 30 يوم' : 'Avg Rating Over Time — Last 30 Days' %></div>
+            <div class="chart-card-desc"><%= lang === 'ar' ? 'منحنى رضا العملاء عبر الزمن' : 'Customer satisfaction trend over time' %></div>
+          </div>
+        </div>
+        <div id="chart-ratings-over-time"><div class="chart-placeholder"><%= lang === 'ar' ? 'جارٍ التحميل…' : 'Loading…' %></div></div>
+      </div>
+
+      <!-- 14. Staff Avg Rating — Horizontal Bar (full width) -->
+      <div class="chart-card full">
+        <div class="chart-card-hd">
+          <div class="chart-card-hd-icon" style="background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.22);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none"><circle cx="6" cy="6" r="2.5" stroke="#fbbf24" stroke-width="1.4"/><circle cx="13" cy="5" r="2" stroke="#fbbf24" stroke-width="1.3" opacity=".6"/><path d="M1 14c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="#fbbf24" stroke-width="1.4" stroke-linecap="round" opacity=".8"/></svg>
+          </div>
+          <div class="chart-card-hd-text">
+            <div class="chart-card-title"><%= lang === 'ar' ? 'متوسط تقييم كل مشرف' : 'Avg Rating per Staff Member' %></div>
+            <div class="chart-card-desc"><%= lang === 'ar' ? 'ترتيب المشرفين حسب رضا العملاء' : 'Staff ranked by average customer satisfaction score' %></div>
+          </div>
+        </div>
+        <div id="chart-staff-ratings"><div class="chart-placeholder"><%= lang === 'ar' ? 'جارٍ التحميل…' : 'Loading…' %></div></div>
+      </div>
+
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Settings Navigation -->
+    <div class="section-heading">
+      <div class="section-heading-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 18 18"><path d="M9 11.5C10.3807 11.5 11.5 10.3807 11.5 9C11.5 7.6193 10.3807 6.5 9 6.5C7.6193 6.5 6.5 7.6193 6.5 9C6.5 10.3807 7.6193 11.5 9 11.5Z" fill="var(--purple-l)"/><path opacity="0.4" fill-rule="evenodd" clip-rule="evenodd" d="M7.6853 1.5H10.3147C10.7234 1.5 11.0941 1.7443 11.2629 2.1191L11.8071 3.3564C12.3536 3.5819 12.8668 3.8791 13.3352 4.237L14.6429 3.9095C15.0369 3.8108 15.4509 3.9764 15.6553 4.3295L16.9699 6.6705C17.1743 7.0235 17.1014 7.4708 16.7954 7.7392L15.7702 8.636C15.7899 8.757 15.8 8.876 15.8 9C15.8 9.124 15.7899 9.243 15.7702 9.364L16.7954 10.2608C17.1014 10.5292 17.1743 10.9765 16.9699 11.3295L15.6553 13.6705C15.4509 14.0236 15.0369 14.1892 14.6429 14.0905L13.3352 13.763C12.8668 14.1209 12.3536 14.4181 11.8071 14.6436L11.2629 15.8809C11.0941 16.2557 10.7234 16.5 10.3147 16.5H7.6853C7.2766 16.5 6.9059 16.2557 6.7371 15.8809L6.1929 14.6436C5.6464 14.4181 5.1332 14.1209 4.6648 13.763L3.3571 14.0905C2.9631 14.1892 2.5491 14.0236 2.3447 13.6705L1.0301 11.3295C0.8257 10.9765 0.8986 10.5292 1.2046 10.2608L2.2298 9.364C2.2101 9.243 2.2 9.124 2.2 9C2.2 8.876 2.2101 8.757 2.2298 8.636L1.2046 7.7392C0.8986 7.4708 0.8257 7.0235 1.0301 6.6705L2.3447 4.3295C2.5491 3.9764 2.9631 3.8108 3.3571 3.9095L4.6648 4.237C5.1332 3.8791 5.6464 3.5819 6.1929 3.3564L6.7371 2.1191C6.9059 1.7443 7.2766 1.5 7.6853 1.5Z" fill="var(--purple-l)"/></svg>
+      </div>
+      <h3><%= t.tickets.settingsTitle %></h3>
+    </div>
+
+    <div class="settings-nav-grid">
+      <!-- General Settings -->
+      <a href="/dashboard/<%= guildId %>/tickets/general" class="settings-nav-card">
+        <div class="snc-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 18 18"><path d="M9 11.5C10.3807 11.5 11.5 10.3807 11.5 9C11.5 7.6193 10.3807 6.5 9 6.5C7.6193 6.5 6.5 7.6193 6.5 9C6.5 10.3807 7.6193 11.5 9 11.5Z" fill="currentColor"/><path opacity="0.4" fill-rule="evenodd" clip-rule="evenodd" d="M7.6853 1.5H10.3147C10.7234 1.5 11.0941 1.7443 11.2629 2.1191L11.8071 3.3564C12.3536 3.5819 12.8668 3.8791 13.3352 4.237L14.6429 3.9095C15.0369 3.8108 15.4509 3.9764 15.6553 4.3295L16.9699 6.6705C17.1743 7.0235 17.1014 7.4708 16.7954 7.7392L15.7702 8.636C15.7899 8.757 15.8 8.876 15.8 9C15.8 9.124 15.7899 9.243 15.7702 9.364L16.7954 10.2608C17.1014 10.5292 17.1743 10.9765 16.9699 11.3295L15.6553 13.6705C15.4509 14.0236 15.0369 14.1892 14.6429 14.0905L13.3352 13.763C12.8668 14.1209 12.3536 14.4181 11.8071 14.6436L11.2629 15.8809C11.0941 16.2557 10.7234 16.5 10.3147 16.5H7.6853C7.2766 16.5 6.9059 16.2557 6.7371 15.8809L6.1929 14.6436C5.6464 14.4181 5.1332 14.1209 4.6648 13.763L3.3571 14.0905C2.9631 14.1892 2.5491 14.0236 2.3447 13.6705L1.0301 11.3295C0.8257 10.9765 0.8986 10.5292 1.2046 10.2608L2.2298 9.364C2.2101 9.243 2.2 9.124 2.2 9C2.2 8.876 2.2101 8.757 2.2298 8.636L1.2046 7.7392C0.8986 7.4708 0.8257 7.0235 1.0301 6.6705L2.3447 4.3295C2.5491 3.9764 2.9631 3.8108 3.3571 3.9095L4.6648 4.237C5.1332 3.8791 5.6464 3.5819 6.1929 3.3564L6.7371 2.1191C6.9059 1.7443 7.2766 1.5 7.6853 1.5Z" fill="currentColor"/></svg>
+        </div>
+        <div class="snc-body">
+          <div class="snc-title"><%= t.tickets.cardGeneral %></div>
+          <div class="snc-desc"><%= t.tickets.cardGeneralDesc %></div>
+        </div>
+        <div class="snc-arrow">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </a>
+
+      <!-- Panels -->
+      <a href="/dashboard/<%= guildId %>/tickets/panels" class="settings-nav-card nav-link">
+        <div class="snc-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 18 18"><rect x="2" y="4" width="14" height="11" rx="1.75" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="1.3"/><path d="M6 8h6M6 11h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M2 7h14" stroke="currentColor" stroke-width="1.3"/></svg>
+        </div>
+        <div class="snc-body">
+          <div class="snc-title"><%= t.tickets.cardPanels %></div>
+          <div class="snc-desc"><%= t.tickets.cardPanelsDesc %></div>
+        </div>
+        <div class="snc-arrow">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </a>
+
+    </div>
+  </main>
+
+  <!-- Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script>
+    (function () {
+      const canvas = document.getElementById('c');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+      renderer.setPixelRatio(1); renderer.setSize(innerWidth, innerHeight);
+      renderer.setClearColor(0x040010, 1);
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 500);
+      camera.position.z = 1;
+      const N = 2800, pos = new Float32Array(N * 3);
+      for (let i = 0; i < N * 3; i++) pos[i] = (Math.random() - .5) * 240;
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const mat = new THREE.PointsMaterial({ color: 0xb8b0ff, size: 0.24, transparent: true, opacity: 0.45, depthWrite: false });
+      scene.add(new THREE.Points(geo, mat));
+      let mx = 0, t = 0;
+      document.addEventListener('mousemove', e => { mx = (e.clientX / innerWidth - .5) * .25; });
+      window.addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+      const stars = scene.children[0];
+      (function render() { requestAnimationFrame(render); t += 0.00022; stars.rotation.y = t + mx * .15; renderer.render(scene, camera); })();
+    })();
+
+    // Nav links
+    document.querySelectorAll('.nav-link').forEach(a => {
+      a.addEventListener('click', e => { e.preventDefault(); window.location.href = a.href; });
+    });
+
+    // Mobile menu
+    const menuBtn = document.getElementById('menu-toggle');
+    const sidebar = document.getElementById('mgmt-sidebar');
+    const overlay = document.getElementById('nav-overlay');
+    function openSidebar()  { sidebar.classList.add('open');    overlay.classList.add('open');    document.body.style.overflow = 'hidden'; }
+    function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+    if (menuBtn) menuBtn.addEventListener('click', () => sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
+    if (overlay) overlay.addEventListener('click', () => closeSidebar());
+
+    // Section collapse
+    document.querySelectorAll('.mgmt-section-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('open');
+        btn.nextElementSibling.classList.toggle('open');
+      });
+    });
+
+    // Language select
+    document.getElementById('lang-select')?.addEventListener('change', function() {
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', this.value);
+      window.location.href = url.toString();
+    });
+    // ── Analytics Charts ─────────────────────────────────────────────────────
+    (function initAnalyticsCharts() {
+      const GUILD = '<%= guildId %>';
+      const PL    = '#a78bfa'; // purple-l
+      const PD    = '#7c3aed'; // purple
+      const CY    = '#67e8f9'; // cyan
+      const GR    = '#34d399'; // green
+      const OR    = '#fb923c'; // orange
+      const MU    = 'rgba(203,194,255,.45)'; // muted text
+
+      const BASE = {
+        chart:       { background: 'transparent', toolbar: { show: false }, fontFamily: "'Inter','Tajawal',sans-serif" },
+        theme:       { mode: 'dark' },
+        grid:        { borderColor: 'rgba(124,58,237,.1)', strokeDashArray: 4 },
+        tooltip:     { theme: 'dark', style: { fontSize: '12px' } },
+        dataLabels:  { enabled: false },
+        xaxis:       { axisBorder: { show: false }, axisTicks: { show: false }, labels: { style: { colors: MU, fontSize: '11px' } } },
+        yaxis:       { labels: { style: { colors: MU, fontSize: '11px' } } },
+        legend:      { labels: { colors: MU }, fontSize: '12px' },
+      };
+
+      function noData(id) {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '<div class="chart-placeholder">— ' + (document.documentElement.lang === 'ar' ? 'لا توجد بيانات بعد' : 'No data yet') + ' —</div>';
+      }
+
+      async function render() {
+        try {
+          const res = await fetch('/dashboard/' + GUILD + '/tickets/charts');
+          if (!res.ok) return;
+          const d = await res.json();
+
+          // 1. Line: Tickets Over Time
+          if (d.ticketsOverTime.counts.some(v => v > 0)) {
+            new ApexCharts(document.getElementById('chart-over-time'), {
+              ...BASE,
+              chart: { ...BASE.chart, type: 'line', height: 230 },
+              series: [{ name: '<%= lang==="ar"?"تذاكر":"Tickets" %>', data: d.ticketsOverTime.counts }],
+              colors: [PL],
+              stroke: { curve: 'smooth', width: 2.5 },
+              fill:   { type: 'gradient', gradient: { shade: 'dark', type: 'vertical', opacityFrom: .35, opacityTo: .02 } },
+              markers:{ size: 3, colors: [PL], strokeWidth: 0 },
+              xaxis:  { ...BASE.xaxis, categories: d.ticketsOverTime.dates.map(v => v.slice(5)), tickAmount: 6 },
+            }).render();
+          } else noData('chart-over-time');
+
+          // 2. Donut: Open vs Closed
+          if (d.openVsClosed.open + d.openVsClosed.closed > 0) {
+            new ApexCharts(document.getElementById('chart-open-closed'), {
+              ...BASE,
+              chart:  { ...BASE.chart, type: 'donut', height: 230 },
+              series: [d.openVsClosed.open, d.openVsClosed.closed],
+              labels: ['<%= lang==="ar"?"مفتوحة":"Open" %>', '<%= lang==="ar"?"مغلقة":"Closed" %>'],
+              colors: [PL, GR],
+              plotOptions: { pie: { donut: { size: '62%', labels: { show: true, total: { show: true, color: MU, fontSize: '13px', fontWeight: 700 } } } } },
+              legend: { ...BASE.legend, position: 'bottom' },
+            }).render();
+          } else noData('chart-open-closed');
+
+          // 3. Bar: By Panel
+          if (d.byPanel.labels.length > 0) {
+            new ApexCharts(document.getElementById('chart-by-panel'), {
+              ...BASE,
+              chart:  { ...BASE.chart, type: 'bar', height: 230 },
+              series: [{ name: '<%= lang==="ar"?"تذاكر":"Tickets" %>', data: d.byPanel.counts }],
+              colors: [PD],
+              fill:   { type: 'solid' },
+              plotOptions: { bar: { borderRadius: 5, columnWidth: '60%', distributed: true } },
+              xaxis:  { ...BASE.xaxis, categories: d.byPanel.labels },
+              legend: { show: false },
+            }).render();
+          } else noData('chart-by-panel');
+
+          // 4. Heatmap
+          if (d.heatmap.some(s => s.data.some(p => p.y > 0))) {
+            new ApexCharts(document.getElementById('chart-heatmap'), {
+              ...BASE,
+              chart:  { ...BASE.chart, type: 'heatmap', height: 210 },
+              series: d.heatmap,
+              colors: [PD],
+              dataLabels: { enabled: false },
+              plotOptions: { heatmap: { shadeIntensity: .85, radius: 3, colorScale: { ranges: [
+                { from: 0, to: 0,  color: 'rgba(124,58,237,.07)', name: '0'   },
+                { from: 1, to: 3,  color: 'rgba(124,58,237,.38)', name: '1–3'  },
+                { from: 4, to: 8,  color: 'rgba(167,139,250,.65)', name: '4–8' },
+                { from: 9, to: 999,color: PL,                       name: '9+' },
+              ]}}},
+              xaxis: { ...BASE.xaxis, labels: { style: { colors: MU, fontSize: '10px' }, rotate: 0, formatter: v => [0,6,12,18].includes(+v.split(':')[0]) ? v : '' } },
+            }).render();
+          } else noData('chart-heatmap');
+
+          // 5. Horizontal Bar: Staff Response
+          if (d.staffResponse.labels.length > 0) {
+            new ApexCharts(document.getElementById('chart-staff-response'), {
+              ...BASE,
+              chart:  { ...BASE.chart, type: 'bar', height: Math.max(200, d.staffResponse.labels.length * 42) },
+              series: [{ name: '<%= lang==="ar"?"متوسط (دقيقة)":"Avg (min)" %>', data: d.staffResponse.avgMin }],
+              colors: [CY],
+              fill:   { type: 'solid' },
+              plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '52%' } },
+              xaxis:  { ...BASE.xaxis, categories: d.staffResponse.labels },
+              legend: { show: false },
+              tooltip: { y: { formatter: v => v + ' min' } },
+            }).render();
+          } else noData('chart-staff-response');
+
+          // 6. Area: Resolution Over Time
+          if (d.resolutionOverTime.avgMin.some(v => v !== null)) {
+            new ApexCharts(document.getElementById('chart-resolution'), {
+              ...BASE,
+              chart:  { ...BASE.chart, type: 'area', height: 230 },
+              series: [{ name: '<%= lang==="ar"?"متوسط (دقيقة)":"Avg (min)" %>', data: d.resolutionOverTime.avgMin }],
+              colors: [GR],
+              stroke: { curve: 'smooth', width: 2 },
+              fill:   { type: 'gradient', gradient: { opacityFrom: .35, opacityTo: .02 } },
+              markers:{ size: 3, colors: [GR], strokeWidth: 0 },
+              xaxis:  { ...BASE.xaxis, categories: d.resolutionOverTime.dates.map(v => v.slice(5)), tickAmount: 6 },
+              tooltip: { y: { formatter: v => v !== null ? v + ' min' : '—' } },
+            }).render();
+          } else noData('chart-resolution');
+
+          // 7. Horizontal Bar: Staff Tickets
+          if (d.staffTickets.labels.length > 0) {
+            new ApexCharts(document.getElementById('chart-staff-tickets'), {
+              ...BASE,
+              chart:  { ...BASE.chart, type: 'bar', height: Math.max(200, d.staffTickets.labels.length * 42) },
+              series: [{ name: '<%= lang==="ar"?"تذاكر مُغلقة":"Closed" %>', data: d.staffTickets.counts }],
+              colors: [OR],
+              fill:   { type: 'solid' },
+              plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '52%' } },
+              xaxis:  { ...BASE.xaxis, categories: d.staffTickets.labels },
+              legend: { show: false },
+            }).render();
+          } else noData('chart-staff-tickets');
+
+          // 8. Donut: Escalated
+          if (d.escalated.normal + d.escalated.escalated > 0) {
+            new ApexCharts(document.getElementById('chart-escalated'), {
+              ...BASE,
+              chart:  { ...BASE.chart, type: 'donut', height: 230 },
+              series: [d.escalated.normal, d.escalated.escalated],
+              labels: ['<%= lang==="ar"?"عادي":"Normal" %>', '<%= lang==="ar"?"مصعّد":"Escalated" %>'],
+              colors: [PL, OR],
+              plotOptions: { pie: { donut: { size: '62%', labels: { show: true, total: { show: true, color: MU, fontSize: '13px', fontWeight: 700 } } } } },
+              legend: { ...BASE.legend, position: 'bottom' },
+            }).render();
+          } else noData('chart-escalated');
+
+          // 9. Bar: Daily / Weekly / Monthly
+          if (d.dailyWeeklyMonthly) {
+            const dwm = d.dailyWeeklyMonthly;
+            if (dwm.last7.counts.some(v => v > 0)) {
+              new ApexCharts(document.getElementById('chart-daily-weekly-monthly'), {
+                ...BASE,
+                chart: { ...BASE.chart, type: 'bar', height: 220 },
+                series: [{ name: '<%= lang==="ar"?"المستلمة":"Received" %>', data: dwm.last7.counts }],
+                colors: ['#7c3aed'],
+                fill: { type: 'gradient', gradient: { shade: 'dark', type: 'vertical', opacityFrom: .9, opacityTo: .5 } },
+                plotOptions: { bar: { borderRadius: 5, columnWidth: '55%', distributed: true } },
+                xaxis: { ...BASE.xaxis, categories: dwm.last7.dates.map(v => v.slice(5)) },
+                legend: { show: false },
+                annotations: {
+                  yaxis: [{
+                    y: dwm.summary.weekly / 7,
+                    borderColor: '#a78bfa',
+                    borderWidth: 1,
+                    strokeDashArray: 4,
+                    label: { text: '<%= lang==="ar"?"متوسط أسبوعي":"7d avg" %>', style: { color: '#a78bfa', background: 'transparent', fontSize: '10px' } },
+                  }],
+                },
+              }).render();
+            } else {
+              noData('chart-daily-weekly-monthly');
+            }
+            // Summary badges
+            const bdg = document.getElementById('chart-dwm-badges');
+            if (bdg) {
+              const lbl = (k, v) => `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.2);border-radius:8px;padding:4px 10px;font-size:.75rem;color:var(--white);">${k}<strong style="color:var(--purple-l)">${v}</strong></span>`;
+              bdg.innerHTML = lbl('<%= lang==="ar"?"اليوم: ":"Today: " %>', dwm.summary.daily)
+                            + lbl('<%= lang==="ar"?"الأسبوع: ":"This Week: " %>', dwm.summary.weekly)
+                            + lbl('<%= lang==="ar"?"الشهر: ":"This Month: " %>', dwm.summary.monthly);
+            }
+          }
+
+          // 10. H-Bar: Staff Received
+          if (d.staffReceived && d.staffReceived.labels.length > 0) {
+            new ApexCharts(document.getElementById('chart-staff-received'), {
+              ...BASE,
+              chart: { ...BASE.chart, type: 'bar', height: Math.max(200, d.staffReceived.labels.length * 42) },
+              series: [{ name: '<%= lang==="ar"?"تذاكر":"Tickets" %>', data: d.staffReceived.counts }],
+              colors: ['#a78bfa'],
+              fill: { type: 'gradient', gradient: { shade: 'dark', type: 'horizontal', opacityFrom: .9, opacityTo: .5 } },
+              plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '52%', distributed: true } },
+              xaxis:  { ...BASE.xaxis, categories: d.staffReceived.labels },
+              legend: { show: false },
+            }).render();
+          } else noData('chart-staff-received');
+
+          // ── Feedback charts ────────────────────────────────────────────────────────────
+          // Populate summary badges
+          if (d.ratingsOverTime && d.ratingsOverTime.summary) {
+            const s = d.ratingsOverTime.summary;
+            const setT = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+            setT('fb-total',   s.total  || 0);
+            setT('fb-daily',   s.daily  || 0);
+            setT('fb-weekly',  s.weekly || 0);
+            setT('fb-monthly', s.monthly|| 0);
+            if (s.total > 0 && d.starDist) {
+              const totalStars = d.starDist.counts.reduce((a, v, i) => a + v * (i + 1), 0);
+              const avgRating  = (totalStars / s.total).toFixed(2);
+              const avgEl = document.getElementById('fb-avg-score');
+              const starEl = document.getElementById('fb-avg-stars');
+              if (avgEl) avgEl.textContent = avgRating;
+              if (starEl) {
+                const filled = Math.round(avgRating);
+                starEl.textContent = '★'.repeat(filled) + '☆'.repeat(5 - filled);
+              }
+            }
+          }
+
+          // 11. Star Rating Distribution — Donut
+          if (d.starDist && d.starDist.counts.some(v => v > 0)) {
+            new ApexCharts(document.getElementById('chart-star-dist'), {
+              ...BASE,
+              chart:  { ...BASE.chart, type: 'donut', height: 260 },
+              series: d.starDist.counts,
+              labels: ['1 ★', '2 ★★', '3 ★★★', '4 ★★★★', '5 ★★★★★'],
+              colors: ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e'],
+              plotOptions: { pie: { donut: {
+                size: '65%',
+                labels: { show: true, total: {
+                  show: true, label: '<%= lang==="ar"?"المجموع":"Total" %>',
+                  color: 'rgba(203,194,255,.7)', fontSize: '13px', fontWeight: 700
+                }}
+              }}},
+              legend: { ...BASE.legend, position: 'bottom' },
+              tooltip: { y: { formatter: (v, { seriesIndex }) => v + ' تقييم (' + ['1★','2★★','3★★★','4★★★★','5★★★★★'][seriesIndex] + ')' } },
+            }).render();
+          } else noData('chart-star-dist');
+
+          // 12. Ratings by Panel — Bar
+          if (d.ratingsByPanel && d.ratingsByPanel.labels.length > 0) {
+            new ApexCharts(document.getElementById('chart-ratings-by-panel'), {
+              ...BASE,
+              chart:  { ...BASE.chart, type: 'bar', height: 260 },
+              series: [{ name: '<%= lang==="ar"?"متوسط التقييم":"Avg Rating" %>', data: d.ratingsByPanel.avgs }],
+              colors: ['#fbbf24'],
+              fill: { type: 'gradient', gradient: { shade: 'dark', type: 'vertical', opacityFrom: .9, opacityTo: .55 } },
+              plotOptions: { bar: { borderRadius: 5, columnWidth: '55%', distributed: true } },
+              xaxis:  { ...BASE.xaxis, categories: d.ratingsByPanel.labels },
+              yaxis:  { ...BASE.yaxis, min: 0, max: 5, tickAmount: 5, labels: { ...BASE.yaxis.labels, formatter: v => v + '★' } },
+              legend: { show: false },
+              tooltip: { y: { formatter: v => v + ' / 5' } },
+              annotations: { yaxis: [{
+                y: 4, borderColor: 'rgba(251,191,36,.4)', borderWidth: 1, strokeDashArray: 4,
+                label: { text: '4.0', style: { color: '#fbbf24', background: 'transparent', fontSize: '10px' } },
+              }]},
+            }).render();
+          } else noData('chart-ratings-by-panel');
+
+          // 13. Ratings Over Time — Area
+          if (d.ratingsOverTime && d.ratingsOverTime.avgRating.some(v => v !== null)) {
+            new ApexCharts(document.getElementById('chart-ratings-over-time'), {
+              ...BASE,
+              chart:  { ...BASE.chart, type: 'area', height: 230 },
+              series: [{ name: '<%= lang==="ar"?"متوسط التقييم":"Avg Rating" %>', data: d.ratingsOverTime.avgRating }],
+              colors: ['#fbbf24'],
+              stroke: { curve: 'smooth', width: 2.5 },
+              fill:   { type: 'gradient', gradient: { opacityFrom: .35, opacityTo: .02 } },
+              markers:{ size: 3, colors: ['#fbbf24'], strokeWidth: 0 },
+              xaxis:  { ...BASE.xaxis, categories: d.ratingsOverTime.dates.map(v => v.slice(5)), tickAmount: 6 },
+              yaxis:  { ...BASE.yaxis, min: 0, max: 5, tickAmount: 5, labels: { ...BASE.yaxis.labels, formatter: v => v + '★' } },
+              tooltip: { y: { formatter: v => v !== null ? v + ' / 5' : '—' } },
+            }).render();
+          } else noData('chart-ratings-over-time');
+
+          // 14. Staff Avg Rating — Horizontal Bar
+          if (d.staffRatings && d.staffRatings.labels.length > 0) {
+            new ApexCharts(document.getElementById('chart-staff-ratings'), {
+              ...BASE,
+              chart:  { ...BASE.chart, type: 'bar', height: Math.max(200, d.staffRatings.labels.length * 44) },
+              series: [{ name: '<%= lang==="ar"?"متوسط التقييم":"Avg Rating" %>', data: d.staffRatings.avgs }],
+              colors: ['#fbbf24'],
+              fill: { type: 'gradient', gradient: { shade: 'dark', type: 'horizontal', opacityFrom: .9, opacityTo: .5 } },
+              plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '52%', distributed: true } },
+              xaxis:  { ...BASE.xaxis, categories: d.staffRatings.labels, min: 0, max: 5,
+                        labels: { ...BASE.xaxis.labels, formatter: v => v + '★' } },
+              legend: { show: false },
+              tooltip: { y: { formatter: (v, { dataPointIndex }) => v + ' / 5 (' + d.staffRatings.counts[dataPointIndex] + ' <%= lang==="ar"?"تقييم":"ratings" %>)' } },
+            }).render();
+          } else noData('chart-staff-ratings');
+
+        } catch (e) { console.warn('[charts]', e); }
+      }
+
+      // Load ApexCharts: try local first, fallback to CDN
+      function boot() {
+        if (window.ApexCharts) { render(); return; }
+        const s = document.createElement('script');
+        s.src = '/apexcharts.js';
+        s.onerror = () => {
+          // Fallback to CDN if local not found
+          const cdn = document.createElement('script');
+          cdn.src = 'https://cdn.jsdelivr.net/npm/apexcharts@3/dist/apexcharts.min.js';
+          cdn.onload = render;
+          document.head.appendChild(cdn);
+        };
+        s.onload = render;
+        document.head.appendChild(s);
+      }
+
+      // Boot immediately — no lazy-load delay
+      boot();
+
+      // ── Socket.io real-time refresh ────────────────────────────────────
+      (function connectSocket() {
+        const si = document.createElement('script');
+        si.src = '/socket.io/socket.io.js';
+        si.onload = () => {
+          try {
+            const socket = window.io();
+            socket.emit('join:guild', '<%= guildId %>');
+            socket.on('tickets:update', () => { render(); });
+          } catch (_e) { /* ignore if socket.io unavailable */ }
+        };
+        document.head.appendChild(si);
+      })();
+    })();
+    // ── Enable / Disable toggle ──────────────────────────────────────────────
+    (function initEnableToggle() {
+      const cb = document.getElementById('ticket-enable');
+      if (!cb) return;
+      let _saving = false;
+      cb.addEventListener('change', async function () {
+        if (_saving) return;
+        _saving = true;
+        cb.disabled = true;
+        const label = cb.closest('label');
+        if (label) label.style.opacity = '.6';
+        try {
+          const res = await fetch('/dashboard/<%= guildId %>/tickets/toggle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ enabled: cb.checked }),
+          });
+          const data = await res.json();
+          if (!res.ok || !data.success) {
+            // Revert on failure
+            cb.checked = !cb.checked;
+            console.error('[toggle]', data);
+          }
+        } catch (err) {
+          cb.checked = !cb.checked;
+          console.error('[toggle]', err);
+        } finally {
+          _saving = false;
+          cb.disabled = false;
+          if (label) label.style.opacity = '';
+        }
+      });
+    })();
+    // ── Footer user popup ────────────────────────────────────────────────────
+    (function initFooterPopup() {
+      const dotsBtn = document.getElementById('footer-dots-btn');
+      const popup   = document.getElementById('footer-popup');
+      if (!dotsBtn || !popup) return;
+
+      dotsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        popup.classList.toggle('open');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!popup.contains(e.target) && e.target !== dotsBtn) {
+          popup.classList.remove('open');
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') popup.classList.remove('open');
+      });
+    })();
+
+    // ── Guild sort (nav-sidebar) ─────────────────────────────────────────────
+    (function initGuildSort() {
+      const sortBtn    = document.getElementById('mgmt-sort-btn');
+      const navSidebar = document.querySelector('.nav-sidebar');
+      if (!sortBtn || !navSidebar) return;
+
+      const navItems   = Array.from(navSidebar.querySelectorAll('.nav-item'));
+      const origOrder  = navItems.slice();
+      let   sorted     = false;
+
+      sortBtn.addEventListener('click', () => {
+        sorted = !sorted;
+        sortBtn.classList.toggle('sorted', sorted);
+
+        const ordered = sorted
+          ? navItems.slice().sort((a, b) => {
+              const na = (a.querySelector('.nav-item-name')?.textContent || '').trim().toLowerCase();
+              const nb = (b.querySelector('.nav-item-name')?.textContent || '').trim().toLowerCase();
+              return na.localeCompare(nb);
+            })
+          : origOrder;
+
+        const divider = navSidebar.querySelector('.nav-divider');
+        const after   = divider ? divider.nextSibling : null;
+        ordered.forEach(el => navSidebar.insertBefore(el, after));
+      });
+    })();
+
+    // ── Real-time stats polling ──────────────────────────────────────────────
+    (function initStatsPolling() {
+      const GUILD_ID   = '<%= guildId %>';
+      const POLL_MS    = 10000; // 10 s
+
+      const elOpen    = document.getElementById('stat-open');
+      const elClaimed = document.getElementById('stat-claimed');
+      const elClosed  = document.getElementById('stat-closed-today');
+      const elAvg     = document.getElementById('stat-avg');
+      const elLimit   = document.getElementById('stat-limit');
+
+      function setVal(el, val, muted) {
+        if (!el) return;
+        el.textContent = val;
+        el.classList.toggle('muted-val', !!muted);
+      }
+
+      function pulse(el) {
+        if (!el) return;
+        el.style.transition = 'opacity .15s';
+        el.style.opacity    = '0.3';
+        setTimeout(() => { el.style.opacity = '1'; }, 160);
+      }
+
+      async function fetchStats() {
+        try {
+          const res  = await fetch(`/dashboard/${GUILD_ID}/tickets/stats`);
+          if (!res.ok) return;
+          const data = await res.json();
+
+          [elOpen, elClaimed, elClosed, elAvg, elLimit].forEach(pulse);
+
+          setVal(elOpen,    data.open,         data.open    === 0);
+          setVal(elClaimed, data.claimed,       data.claimed === 0);
+          setVal(elClosed,  data.closed_today,  data.closed_today === 0);
+          setVal(elAvg,     data.avg_display,   data.avg_display === '—');
+          setVal(elLimit,   data.limit,         false);
+        } catch (_e) { /* silent */ }
+      }
+
+      setInterval(fetchStats, POLL_MS);
+    })();
+
+    /* ── Profile sidebar ── */
+    const profSidebar  = document.getElementById('prof-sidebar');
+    const profBackdrop = document.getElementById('prof-backdrop');
+    const openBtn      = document.getElementById('open-profile');
+    const closeBtn     = document.getElementById('close-profile');
+    const copyId       = document.getElementById('prof-copy-id');
+    const bannerSolid  = document.querySelector('.prof-banner-solid');
+    if (bannerSolid && bannerSolid.dataset.bg) bannerSolid.style.background = bannerSolid.dataset.bg;
+    function openProfile()  { if (!profSidebar) return; profSidebar.classList.add('open'); profBackdrop.classList.add('open'); profSidebar.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+    function closeProfile() { if (!profSidebar) return; profSidebar.classList.remove('open'); profBackdrop.classList.remove('open'); profSidebar.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+    if (openBtn)  openBtn.addEventListener('click', openProfile);
+    document.querySelectorAll('.open-profile-btn').forEach(b => b.addEventListener('click', openProfile));
+    if (closeBtn) closeBtn.addEventListener('click', closeProfile);
+    if (profBackdrop) profBackdrop.addEventListener('click', closeProfile);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProfile(); });
+    if (copyId) {
+      copyId.addEventListener('click', () => {
+        navigator.clipboard.writeText(copyId.textContent.trim()).then(() => {
+          const orig = copyId.textContent;
+          copyId.textContent = '✓ Copied!'; copyId.style.color = 'var(--cyan-l)';
+          setTimeout(() => { copyId.textContent = orig; copyId.style.color = ''; }, 1500);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
+
+<%#
+  This project was programmed by the Code Nexus team.
+  If you encounter any problems, open an Issue or log into the Discord server:
+  https://discord.gg/UvEYbFd2rj
+%>
