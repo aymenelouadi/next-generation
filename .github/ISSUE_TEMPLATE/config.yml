@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discord Support Server
+    url: https://discord.gg/your-invite-link
+    about: Join our Discord server for general help and support questions. (Replace this URL with your actual invite link.)
+  - name: 📖 Documentation
+    url: https://github.com/aymenelouadi/Bot-Discord-Dashboard-ALL-IN-ONE---Next-Generation#readme
+    about: Read the README for setup and usage instructions.
+  - name: 🔒 Security Vulnerability
+    url: https://github.com/aymenelouadi/Bot-Discord-Dashboard-ALL-IN-ONE---Next-Generation/security/advisories/new
+    about: Report a security vulnerability privately via GitHub Security Advisories.

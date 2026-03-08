@@ -1,0 +1,43 @@
+{
+  "name": "discord-bot-dashboard",
+  "version": "1.0.0",
+  "description": "An all-in-one Discord bot with web dashboard built with Discord.js v14 and Express",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "deploy-commands": "node src/bot/handlers/deployCommands.js",
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "dashboard",
+    "nodejs",
+    "discordjs",
+    "express",
+    "mongodb"
+  ],
+  "author": "aymenelouadi",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "passport": "^0.6.0",
+    "passport-discord": "^0.1.4",
+    "express-rate-limit": "^8.3.0",
+    "mongoose": "^8.9.5",
+    "ejs": "^3.1.9",
+    "dotenv": "^16.3.1",
+    "connect-mongo": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "eslint": "^8.56.0"
+  }
+}

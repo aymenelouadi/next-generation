@@ -1,0 +1,69 @@
+name: 🚀 Feature Request
+description: Suggest a new feature or enhancement
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature! Please fill in the details below.
+        Before submitting, please **search existing issues** to check if this has already been requested.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm the following before submitting.
+      options:
+        - label: I have searched existing issues and this feature has not been requested before.
+          required: true
+        - label: I have read the [CONTRIBUTING](../CONTRIBUTING.md) guidelines.
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: Is your feature request related to a problem? Describe it.
+      placeholder: I'm always frustrated when...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the feature or solution you'd like to see.
+      placeholder: I would like the bot to...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which area of the project does this feature relate to?
+      options:
+        - Discord Bot — Command
+        - Discord Bot — Event / Automation
+        - Web Dashboard
+        - Database / Configuration
+        - Developer Experience / Tooling
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: I also considered...
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any mockups, examples, or additional information here.
