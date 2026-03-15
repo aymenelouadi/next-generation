@@ -1,0 +1,361 @@
+<%#
+  ── Promotional Card Partial ────────────────────────────────────────────────
+  Floating bottom-right card that promotes:
+    • ⭐ GitHub star
+    • Trustpilot review
+  Behaviour:
+    • Appears after 3 s on first visit (delayed so it's not intrusive)
+    • X button → hides for current session only   (sessionStorage)
+    • "Don't show again" → hides permanently       (localStorage)
+  Required locals: t (translation object), lang
+  ─────────────────────────────────────────────────────────────────────────── -%>
+
+<style>
+/* ── Promo card ──────────────────────────────────────────────────────────── */
+#cn-promo {
+  position: fixed;
+  bottom: 80px;
+  right: 28px;
+  z-index: 9500;
+  width: 320px;
+  max-width: calc(100vw - 40px);
+
+  background: linear-gradient(145deg,
+    rgba(14, 5, 38, 0.97) 0%,
+    rgba(22, 8, 56, 0.97) 100%);
+  border: 1px solid rgba(124, 58, 237, 0.4);
+  border-radius: 18px;
+  box-shadow:
+    0 8px 40px rgba(4, 0, 16, 0.65),
+    0 0 0 1px rgba(124, 58, 237, 0.12),
+    inset 0 1px 0 rgba(167, 139, 250, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  overflow: hidden;
+
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  pointer-events: none;
+  transition:
+    opacity .38s cubic-bezier(.22, 1, .36, 1),
+    transform .38s cubic-bezier(.22, 1, .36, 1);
+}
+#cn-promo.cn-promo-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+#cn-promo.cn-promo-hiding {
+  opacity: 0;
+  transform: translateY(14px) scale(0.96);
+  pointer-events: none;
+}
+
+/* RTL — place card on the left */
+[dir="rtl"] #cn-promo { right: auto; left: 28px; }
+
+/* Mobile — full-width strip */
+@media (max-width: 600px) {
+  #cn-promo {
+    bottom: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 18px 18px 0 0;
+    border-bottom: none;
+  }
+  [dir="rtl"] #cn-promo { right: 0; left: 0; }
+}
+
+/* ── Gradient top accent bar ── */
+#cn-promo::before {
+  content: '';
+  display: block;
+  height: 2px;
+  background: linear-gradient(90deg,
+    #7c3aed 0%, #a78bfa 40%, #06b6d4 70%, #7c3aed 100%);
+  background-size: 200% 100%;
+  animation: cn-promo-bar 3.5s linear infinite;
+}
+@keyframes cn-promo-bar { to { background-position: -200% center; } }
+
+/* ── Inner layout ── */
+.cn-promo-inner {
+  padding: 16px 18px 18px;
+}
+
+/* ── Close button ── */
+.cn-promo-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: rgba(203, 194, 255, 0.5);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, color .15s;
+  flex-shrink: 0;
+}
+.cn-promo-close:hover {
+  background: rgba(124, 58, 237, 0.18);
+  color: #a78bfa;
+  border-color: rgba(124, 58, 237, 0.35);
+}
+[dir="rtl"] .cn-promo-close { right: auto; left: 12px; }
+
+/* ── Tag ── */
+.cn-promo-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: .62rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #a78bfa;
+  background: rgba(124, 58, 237, 0.14);
+  border: 1px solid rgba(124, 58, 237, 0.28);
+  border-radius: 20px;
+  padding: 3px 9px;
+  margin-bottom: 10px;
+}
+.cn-promo-tag svg {
+  opacity: .85;
+  flex-shrink: 0;
+}
+
+/* ── Title ── */
+.cn-promo-title {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -.02em;
+  background: linear-gradient(135deg, #f1f5f9 30%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 7px;
+  padding-right: 30px; /* space for close btn */
+}
+[dir="rtl"] .cn-promo-title { padding-right: 0; padding-left: 30px; }
+
+/* ── Description ── */
+.cn-promo-desc {
+  font-size: .78rem;
+  color: rgba(203, 194, 255, 0.55);
+  line-height: 1.55;
+  margin: 0 0 14px;
+}
+
+/* ── Action buttons ── */
+.cn-promo-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cn-promo-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 14px;
+  border-radius: 11px;
+  font-size: .82rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: filter .18s, transform .12s, background .18s, border-color .18s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.cn-promo-btn:active { transform: scale(.97); }
+
+/* GitHub star button */
+.cn-promo-btn-star {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: #fff;
+  border-color: rgba(124, 58, 237, 0.5);
+  box-shadow: 0 4px 18px rgba(124, 58, 237, 0.35);
+}
+.cn-promo-btn-star:hover {
+  filter: brightness(1.12);
+  box-shadow: 0 6px 24px rgba(124, 58, 237, 0.55);
+}
+
+/* Trustpilot button */
+.cn-promo-btn-review {
+  background: rgba(0, 182, 122, 0.1);
+  color: #34d399;
+  border-color: rgba(0, 182, 122, 0.3);
+}
+.cn-promo-btn-review:hover {
+  background: rgba(0, 182, 122, 0.18);
+  border-color: rgba(0, 182, 122, 0.5);
+}
+
+/* Don't show again */
+.cn-promo-btn-dismiss {
+  background: transparent;
+  color: rgba(203, 194, 255, 0.32);
+  border: none;
+  font-size: .72rem;
+  font-weight: 500;
+  padding: 4px 0 0;
+  text-align: center;
+  width: 100%;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color .15s;
+}
+.cn-promo-btn-dismiss:hover { color: rgba(203, 194, 255, 0.65); }
+
+/* ── Light theme ── */
+html[data-theme="light"] #cn-promo {
+  background: linear-gradient(145deg, rgba(255,255,255,.97), rgba(244,240,255,.97));
+  border-color: rgba(124, 58, 237, 0.25);
+  box-shadow: 0 8px 40px rgba(80, 40, 160, 0.18), 0 0 0 1px rgba(124,58,237,.1);
+}
+html[data-theme="light"] .cn-promo-close {
+  background: rgba(0,0,0,.03);
+  border-color: rgba(0,0,0,.07);
+  color: rgba(80,40,160,.45);
+}
+html[data-theme="light"] .cn-promo-close:hover {
+  background: rgba(124,58,237,.09);
+  color: #6d28d9;
+}
+html[data-theme="light"] .cn-promo-title {
+  background: linear-gradient(135deg, #16063b 30%, #6d28d9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+html[data-theme="light"] .cn-promo-desc { color: rgba(80,40,160,.55); }
+html[data-theme="light"] .cn-promo-btn-dismiss { color: rgba(80,40,160,.35); }
+html[data-theme="light"] .cn-promo-btn-dismiss:hover { color: rgba(80,40,160,.6); }
+</style>
+
+<!-- Promo Card -->
+<div id="cn-promo" role="complementary" aria-label="<%= t.promo.title %>">
+  <div class="cn-promo-inner">
+
+    <!-- Close (session only) -->
+    <button class="cn-promo-close" id="cn-promo-close" aria-label="Close">
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2.8"
+           stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <!-- Tag -->
+    <div class="cn-promo-tag">
+      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
+           fill="currentColor">
+        <path d="M12 .587l3.668 7.568L24 9.306l-6 5.852 1.416 8.265L12 19.05l-7.416 4.373L6 15.158 0 9.306l8.332-1.151z"/>
+      </svg>
+      <%= t.promo.tag %>
+    </div>
+
+    <!-- Title -->
+    <div class="cn-promo-title"><%= t.promo.title %></div>
+
+    <!-- Description -->
+    <p class="cn-promo-desc"><%= t.promo.desc %></p>
+
+    <!-- Action buttons -->
+    <div class="cn-promo-actions">
+      <a href="https://github.com/aymenelouadi/next-generation"
+         target="_blank" rel="noopener"
+         class="cn-promo-btn cn-promo-btn-star"
+         id="cn-promo-star">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+             fill="currentColor"><path d="M12 .587l3.668 7.568L24 9.306l-6 5.852 1.416 8.265L12 19.05l-7.416 4.373L6 15.158 0 9.306l8.332-1.151z"/></svg>
+        <%= t.promo.starBtn %>
+      </a>
+      <a href="https://www.trustpilot.com/evaluate/codnex.xyz"
+         target="_blank" rel="noopener"
+         class="cn-promo-btn cn-promo-btn-review"
+         id="cn-promo-review">
+        <!-- Trustpilot star icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+             fill="currentColor"><path d="M12 .587l3.668 7.568L24 9.306l-6 5.852 1.416 8.265L12 19.05l-7.416 4.373L6 15.158 0 9.306l8.332-1.151z"/></svg>
+        <%= t.promo.reviewBtn %>
+      </a>
+      <!-- Don't show again -->
+      <button class="cn-promo-btn-dismiss" id="cn-promo-dismiss">
+        <%= t.promo.dismissBtn %>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  var STORAGE_KEY  = 'cn-promo-hidden';
+  var SESSION_KEY  = 'cn-promo-session';
+  var card         = document.getElementById('cn-promo');
+  var btnClose     = document.getElementById('cn-promo-close');
+  var btnDismiss   = document.getElementById('cn-promo-dismiss');
+  var btnStar      = document.getElementById('cn-promo-star');
+
+  if (!card) return;
+
+  /* ── Already permanently dismissed? ─────────────────────────── */
+  if (localStorage.getItem(STORAGE_KEY) === '1') {
+    card.remove();
+    return;
+  }
+
+  /* ── Dismissed this session? ─────────────────────────────────── */
+  if (sessionStorage.getItem(SESSION_KEY) === '1') {
+    card.remove();
+    return;
+  }
+
+  /* ── Helper: hide with animation ────────────────────────────── */
+  function hideCard() {
+    card.classList.add('cn-promo-hiding');
+    card.classList.remove('cn-promo-visible');
+    setTimeout(function () { card.style.display = 'none'; }, 420);
+  }
+
+  /* ── Close button (session only) ────────────────────────────── */
+  btnClose.addEventListener('click', function () {
+    sessionStorage.setItem(SESSION_KEY, '1');
+    hideCard();
+  });
+
+  /* ── Don't show again (permanent) ───────────────────────────── */
+  btnDismiss.addEventListener('click', function () {
+    localStorage.setItem(STORAGE_KEY, '1');
+    hideCard();
+  });
+
+  /* ── Star click = track & optionally mark "engaged" ─────────── */
+  if (btnStar) {
+    btnStar.addEventListener('click', function () {
+      /* Optional: mark as starred so we don't nag again for stars */
+      localStorage.setItem('cn-promo-starred', '1');
+    });
+  }
+
+  /* ── Show after 3 s delay ────────────────────────────────────── */
+  setTimeout(function () {
+    /* One final guard in case user dismissed mid-load */
+    if (localStorage.getItem(STORAGE_KEY) === '1') return;
+    if (sessionStorage.getItem(SESSION_KEY) === '1') return;
+    card.classList.add('cn-promo-visible');
+  }, 3000);
+
+})();
+</script>

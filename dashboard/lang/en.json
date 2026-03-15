@@ -302,5 +302,13 @@
     "savingBtn":         "Saving...",
     "savedBtn":          "✓ Saved!",
     "noActivity":        "No ticket activity recorded yet."
+  },
+  "promo": {
+    "tag":        "OPEN SOURCE",
+    "title":      "Help keep this project alive",
+    "desc":       "Next Generation is free & open-source. A quick ⭐ on GitHub or a Trustpilot review makes a huge difference and helps keep it free for everyone.",
+    "starBtn":    "⭐ Star on GitHub",
+    "reviewBtn":  "✦ Rate on Trustpilot",
+    "dismissBtn": "Don't show again"
   }
 }
