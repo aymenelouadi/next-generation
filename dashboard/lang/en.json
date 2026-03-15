@@ -64,7 +64,8 @@
     "badgeBug2":     "Bug Hunter Lv2",
     "badgeVerifDev": "Verified Developer",
     "badgeModAlumni": "Moderator Alumni",
-    "badgeActiveDev": "Active Developer"
+    "badgeActiveDev": "Active Developer",
+    "badgeNitro":     "Nitro"
   },
   "guild": {
     "pageTitle":     "Dashboard",

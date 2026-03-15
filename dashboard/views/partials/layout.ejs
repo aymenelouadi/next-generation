@@ -70,6 +70,7 @@
         if (_flags & 131072) _badges.push({ label: t.home.badgeVerifDev,    img: 'verified_bot_developer.png' });
         if (_flags & 262144) _badges.push({ label: t.home.badgeModAlumni,   img: 'certified_moderator.png' });
         if (_flags & 4194304)_badges.push({ label: t.home.badgeActiveDev,   img: 'active_developer.png' });
+        if (Number(user.premiumType || 0) > 0) _badges.push({ label: t.home.badgeNitro, img: 'nitro.png' });
       %>
       <% if (_badges.length > 0) { %>
         <div class="prof-block">

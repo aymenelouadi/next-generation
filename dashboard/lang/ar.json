@@ -64,7 +64,8 @@
     "badgeBug2":     "صياد الأخطاء Lv2",
     "badgeVerifDev": "مطور موثق",
     "badgeModAlumni": "خريج المشرفين",
-    "badgeActiveDev": "مطور نشط"
+    "badgeActiveDev": "مطور نشط",
+    "badgeNitro":     "نيترو"
   },
   "guild": {
     "pageTitle":     "لوحة التحكم",

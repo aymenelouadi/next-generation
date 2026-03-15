@@ -55,6 +55,7 @@ router.get('/discord/redirect', async (req, res) => {
             banner:          userInfo.banner || null,
             bannerColor:     userInfo.banner_color || null,
             publicFlags:     Number(userInfo.public_flags || userInfo.flags || 0),
+            premiumType:     Number(userInfo.premium_type || 0),
             email:           userInfo.email,
             ip:              req.clientIp || req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown',
             loginAt:         new Date().toISOString(),
