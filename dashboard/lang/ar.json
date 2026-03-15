@@ -98,7 +98,20 @@
     "qaAutoRoles":      "الرتب التلقائية",
     "qaLevels":         "المستويات",
     "qaSettings":       "الإعدادات",
-    "msUnit":           "ms"
+    "msUnit":           "ms",
+    "systemHealthTitle": "صحة النظام",
+    "healthDb":         "قاعدة البيانات",
+    "healthApi":        "API",
+    "healthGateway":    "Discord Gateway",
+    "healthConnected":  "متصل",
+    "healthWorking":    "يعمل",
+    "healthOffline":    "غير متصل",
+    "onlineLabel":      "أونلاين",
+    "communityTitle":   "المجتمع",
+    "communityGithub":  "أعجب على GitHub",
+    "communityReview":  "أضف تقييماً",
+    "communitySupport": "ادعمنا",
+    "communityHelp":    "احصل على مساعدة"
   },
   "tickets": {
     "pageTitle":         "التذاكر",

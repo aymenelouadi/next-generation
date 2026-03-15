@@ -98,7 +98,20 @@
     "qaAutoRoles":      "Auto Roles",
     "qaLevels":         "Levels",
     "qaSettings":       "Settings",
-    "msUnit":           "ms"
+    "msUnit":           "ms",
+    "systemHealthTitle": "System Health",
+    "healthDb":         "Database",
+    "healthApi":        "API",
+    "healthGateway":    "Discord Gateway",
+    "healthConnected":  "Connected",
+    "healthWorking":    "Working",
+    "healthOffline":    "Offline",
+    "onlineLabel":      "Online",
+    "communityTitle":   "Community",
+    "communityGithub":  "Star on GitHub",
+    "communityReview":  "Leave a Review",
+    "communitySupport": "Support Us",
+    "communityHelp":    "Get Help"
   },
   "tickets": {
     "pageTitle":         "Tickets",

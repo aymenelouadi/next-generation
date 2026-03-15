@@ -1291,10 +1291,24 @@
       .topbar-sep { display: none; }
       .lang-select { display: none; }
       .stats-grid { grid-template-columns: 1fr 1fr; }
+      .server-banner-bg, .server-banner-gradient { height: 90px; }
+      .server-header-inner { flex-direction: row; flex-wrap: wrap; margin-top: -28px; padding: 0 16px 18px; gap: 12px; }
+      .server-header-icon, .server-header-icon-fallback { width: 60px; height: 60px; }
+      .server-header-name { font-size: 1rem; }
+      .health-grid { grid-template-columns: 1fr 1fr; }
+      .community-body { flex-direction: column; align-items: flex-start; }
     }
     @media (max-width: 480px) {
       .stats-grid { grid-template-columns: 1fr; }
       .main { padding: 18px 12px 40px; }
+      .server-header-inner { flex-direction: column; align-items: flex-start; }
+      .server-header-chips .server-chip { font-size: .6rem; padding: 2px 8px; }
+      .module-grid { grid-template-columns: 1fr 1fr; }
+      .health-grid { grid-template-columns: 1fr; }
+      .qa-grid { gap: 7px; }
+      .qa-btn { padding: 8px 13px; font-size: .72rem; }
+      .community-links { gap: 6px; }
+      .comm-btn { padding: 7px 12px; font-size: .7rem; }
     }
 
     @keyframes pulse {
@@ -1309,50 +1323,67 @@
       }
     }
 
-    /* ── Server info header ─────────────────────────── */
+    /* ── Server info card ───────────────────────────── */
     .server-header {
-      display: flex;
-      align-items: center;
-      gap: 20px;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 20px;
-      padding: 22px 26px;
-      backdrop-filter: blur(20px);
-      position: relative;
       overflow: hidden;
+      backdrop-filter: blur(20px);
     }
-    .server-header::before {
+    .server-banner-bg {
+      width: 100%;
+      height: 130px;
+      object-fit: cover;
+      display: block;
+    }
+    .server-banner-gradient {
+      width: 100%;
+      height: 130px;
+      background: linear-gradient(135deg, rgba(124,58,237,.45) 0%, rgba(6,182,212,.25) 60%, rgba(4,0,16,.6) 100%);
+      position: relative;
+    }
+    .server-banner-gradient::after {
       content: '';
       position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--purple), var(--cyan), transparent);
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 60%, rgba(4,0,16,.7) 100%);
+    }
+    .server-header-inner {
+      padding: 0 24px 22px;
+      display: flex;
+      align-items: flex-end;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-top: -36px;
+      position: relative;
+      z-index: 1;
     }
     .server-header-icon {
-      width: 66px;
-      height: 66px;
+      width: 76px;
+      height: 76px;
       border-radius: 18px;
       object-fit: cover;
       flex-shrink: 0;
-      filter: drop-shadow(0 4px 18px rgba(124,58,237,.45));
+      border: 3px solid rgba(4,0,16,.9);
+      filter: drop-shadow(0 4px 18px rgba(124,58,237,.5));
     }
     .server-header-icon-fallback {
-      width: 66px;
-      height: 66px;
+      width: 76px;
+      height: 76px;
       border-radius: 18px;
-      background: linear-gradient(135deg, rgba(124,58,237,.35), rgba(6,182,212,.2));
-      border: 1px solid rgba(124,58,237,.35);
+      background: linear-gradient(135deg, rgba(124,58,237,.5), rgba(6,182,212,.3));
+      border: 3px solid rgba(4,0,16,.9);
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'Orbitron', monospace;
-      font-size: 1.6rem;
+      font-size: 1.8rem;
       font-weight: 800;
       color: var(--purple-l);
       flex-shrink: 0;
     }
-    .server-header-body { flex: 1; min-width: 0; }
+    .server-header-body { flex: 1; min-width: 0; padding-top: 8px; }
     .server-header-name {
       font-size: 1.2rem;
       font-weight: 800;
@@ -1370,7 +1401,7 @@
       color: var(--muted);
       font-family: 'Orbitron', monospace;
       letter-spacing: .06em;
-      margin-top: 4px;
+      margin-top: 3px;
     }
     .server-header-chips {
       display: flex;
@@ -1390,6 +1421,7 @@
       background: rgba(124,58,237,.12);
       border: 1px solid rgba(124,58,237,.25);
       color: var(--purple-l);
+      white-space: nowrap;
     }
     .server-chip.cyan {
       background: rgba(6,182,212,.08);
@@ -1401,6 +1433,34 @@
       border-color: rgba(34,197,94,.25);
       color: #4ade80;
     }
+    .server-chip.gold {
+      background: rgba(217,119,6,.08);
+      border-color: rgba(217,119,6,.22);
+      color: var(--gold-l);
+    }
+
+    /* ── Stat card sub-info ─────────────────────────── */
+    .stat-sub {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+    .stat-sub-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: .65rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .stat-sub-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .stat-sub-dot.online  { background: #4ade80; box-shadow: 0 0 6px rgba(74,222,128,.6); }
+    .stat-sub-dot.offline { background: var(--muted); }
 
     /* ── Module status grid ─────────────────────────── */
     .module-grid {
@@ -1505,6 +1565,192 @@
       background: rgba(34,197,94,.15);
       box-shadow: 0 4px 20px rgba(34,197,94,.18);
     }
+
+    /* ── System Health ──────────────────────────────── */
+    .health-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .health-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: border-color .22s;
+    }
+    .health-card:hover { border-color: var(--border-h); }
+    .health-card-left { display: flex; align-items: center; gap: 10px; }
+    .health-icon-wrap {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .health-icon-wrap.purple { background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.2); }
+    .health-icon-wrap.cyan   { background: rgba(6,182,212,.1);   border: 1px solid rgba(6,182,212,.2);  }
+    .health-icon-wrap.indigo { background: rgba(99,102,241,.1);  border: 1px solid rgba(99,102,241,.22); }
+    .health-meta { display: flex; flex-direction: column; gap: 2px; }
+    .health-label {
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      font-family: 'Orbitron', monospace;
+      color: var(--muted);
+    }
+    .health-status {
+      font-size: .82rem;
+      font-weight: 700;
+    }
+    .health-dot-wrap { display: flex; align-items: center; gap: 6px; }
+    .health-pulse {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .health-pulse.ok {
+      background: #4ade80;
+      box-shadow: 0 0 8px rgba(74,222,128,.5);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .health-pulse.err {
+      background: #ef4444;
+      box-shadow: 0 0 8px rgba(239,68,68,.5);
+    }
+
+    /* ── Community card ─────────────────────────────── */
+    .community-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+    .community-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--purple), var(--cyan), var(--gold), #ec4899);
+    }
+    .community-body {
+      padding: 22px 26px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 18px;
+    }
+    .community-text h3 {
+      font-size: 1rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--white) 40%, var(--purple-l));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 4px;
+    }
+    .community-text p {
+      font-size: .75rem;
+      color: var(--muted);
+      max-width: 320px;
+    }
+    .community-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .comm-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: .75rem;
+      font-weight: 700;
+      text-decoration: none;
+      border: 1px solid;
+      transition: transform .18s, box-shadow .18s, background .2s;
+      white-space: nowrap;
+    }
+    .comm-btn:hover { transform: translateY(-2px); }
+    .comm-btn.github {
+      background: rgba(255,255,255,.06);
+      border-color: rgba(255,255,255,.15);
+      color: var(--white);
+    }
+    .comm-btn.github:hover { background: rgba(255,255,255,.12); box-shadow: 0 4px 16px rgba(0,0,0,.3); }
+    .comm-btn.trustpilot {
+      background: rgba(0,184,90,.08);
+      border-color: rgba(0,184,90,.25);
+      color: #00b85a;
+    }
+    .comm-btn.trustpilot:hover { background: rgba(0,184,90,.15); box-shadow: 0 4px 16px rgba(0,184,90,.2); }
+    .comm-btn.kofi {
+      background: rgba(255,94,91,.07);
+      border-color: rgba(255,94,91,.22);
+      color: #ff5e5b;
+    }
+    .comm-btn.kofi:hover { background: rgba(255,94,91,.14); box-shadow: 0 4px 16px rgba(255,94,91,.2); }
+    .comm-btn.discord {
+      background: rgba(88,101,242,.1);
+      border-color: rgba(88,101,242,.3);
+      color: #8a9eff;
+    }
+    .comm-btn.discord:hover { background: rgba(88,101,242,.18); box-shadow: 0 4px 16px rgba(88,101,242,.25); }
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-decoration: none;
+      border: 1px solid;
+      transition: background .2s, transform .18s, box-shadow .2s;
+      font-family: inherit;
+      cursor: pointer;
+      background: none;
+    }
+    .qa-btn:hover { transform: translateY(-2px); }
+    .qa-btn.purple {
+      background: rgba(124,58,237,.12);
+      border-color: rgba(124,58,237,.35);
+      color: var(--purple-l);
+    }
+    .qa-btn.purple:hover {
+      background: rgba(124,58,237,.22);
+      box-shadow: 0 4px 20px rgba(124,58,237,.25);
+    }
+    .qa-btn.cyan {
+      background: rgba(6,182,212,.08);
+      border-color: rgba(6,182,212,.25);
+      color: var(--cyan-l);
+    }
+    .qa-btn.cyan:hover {
+      background: rgba(6,182,212,.15);
+      box-shadow: 0 4px 20px rgba(6,182,212,.2);
+    }
+    .qa-btn.gold {
+      background: rgba(217,119,6,.08);
+      border-color: rgba(217,119,6,.25);
+      color: var(--gold-l);
+    }
+    .qa-btn.gold:hover {
+      background: rgba(217,119,6,.15);
+      box-shadow: 0 4px 20px rgba(217,119,6,.18);
+    }
+    .qa-btn.green {
+      background: rgba(34,197,94,.08);
+      border-color: rgba(34,197,94,.25);
+      color: #4ade80;
+    }
+    .qa-btn.green:hover {
+      background: rgba(34,197,94,.15);
+      box-shadow: 0 4px 20px rgba(34,197,94,.18);
+    }
   </style>
 </head>
 
@@ -1528,46 +1774,59 @@
       </div>
 
       <div class="server-header">
-        <% if (guildInfo.icon) { %>
+        <%/* Banner: use actual banner image if available, else gradient */%>
+        <% if (guildBanner) { %>
           <img
-            class="server-header-icon"
-            src="https://cdn.discordapp.com/icons/<%= guildId %>/<%= guildInfo.icon %>.png?size=128"
+            class="server-banner-bg"
+            src="https://cdn.discordapp.com/banners/<%= guildId %>/<%= guildBanner %>.png?size=1024"
             alt=""
           />
         <% } else { %>
-          <div class="server-header-icon-fallback">
-            <%= (guildInfo.name || '?')[0].toUpperCase() %>
-          </div>
+          <div class="server-banner-gradient"></div>
         <% } %>
 
-        <div class="server-header-body">
-          <div class="server-header-name"><%= guildInfo.name %></div>
-          <div class="server-header-id"><%= t.guild.serverId %>: <%= guildId %></div>
-          <div class="server-header-chips">
-            <% if (memberCount !== null) { %>
-              <span class="server-chip">
-                <i data-lucide="users" style="width:11px;height:11px;"></i>
-                <%= memberCount.toLocaleString() %> <%= t.guild.memberCount %>
-              </span>
-            <% } %>
-            <% if (channelCount !== null) { %>
-              <span class="server-chip cyan">
-                <i data-lucide="hash" style="width:11px;height:11px;"></i>
-                <%= channelCount %> <%= t.guild.channelsLabel %>
-              </span>
-            <% } %>
-            <% if (roleCount !== null) { %>
-              <span class="server-chip green">
-                <i data-lucide="shield" style="width:11px;height:11px;"></i>
-                <%= roleCount %> <%= t.guild.rolesLabel %>
-              </span>
-            <% } %>
-            <% if (botPing !== null) { %>
-              <span class="server-chip" style="background:rgba(217,119,6,.08);border-color:rgba(217,119,6,.22);color:var(--gold-l);">
-                <i data-lucide="activity" style="width:11px;height:11px;"></i>
-                <%= botPing %><%= t.guild.msUnit %> <%= t.guild.pingLabel %>
-              </span>
-            <% } %>
+        <div class="server-header-inner">
+          <% if (guildInfo.icon) { %>
+            <img
+              class="server-header-icon"
+              src="https://cdn.discordapp.com/icons/<%= guildId %>/<%= guildInfo.icon %>.png?size=128"
+              alt=""
+            />
+          <% } else { %>
+            <div class="server-header-icon-fallback">
+              <%= (guildInfo.name || '?')[0].toUpperCase() %>
+            </div>
+          <% } %>
+
+          <div class="server-header-body">
+            <div class="server-header-name"><%= guildInfo.name %></div>
+            <div class="server-header-id"><%= t.guild.serverId %>: <%= guildId %></div>
+            <div class="server-header-chips">
+              <% if (memberCount !== null) { %>
+                <span class="server-chip">
+                  <i data-lucide="users" style="width:11px;height:11px;"></i>
+                  <%= memberCount.toLocaleString() %> <%= t.guild.memberCount %>
+                </span>
+              <% } %>
+              <% if (channelCount !== null) { %>
+                <span class="server-chip cyan">
+                  <i data-lucide="hash" style="width:11px;height:11px;"></i>
+                  <%= channelCount %> <%= t.guild.channelsLabel %>
+                </span>
+              <% } %>
+              <% if (roleCount !== null) { %>
+                <span class="server-chip green">
+                  <i data-lucide="shield" style="width:11px;height:11px;"></i>
+                  <%= roleCount %> <%= t.guild.rolesLabel %>
+                </span>
+              <% } %>
+              <% if (botPing !== null) { %>
+                <span class="server-chip gold">
+                  <i data-lucide="activity" style="width:11px;height:11px;"></i>
+                  <%= botPing %>ms <%= t.guild.pingLabel %>
+                </span>
+              <% } %>
+            </div>
           </div>
         </div>
       </div>
@@ -1589,6 +1848,12 @@
           <div class="stat-info">
             <div class="stat-label"><%= t.guild.memberCount %></div>
             <div class="stat-value"><%= memberCount.toLocaleString() %></div>
+            <% if (onlineCount && onlineCount > 0) { %>
+            <div class="stat-sub">
+              <span class="stat-sub-item"><span class="stat-sub-dot online"></span> <%= onlineCount.toLocaleString() %> <%= t.guild.onlineLabel %></span>
+              <span class="stat-sub-item"><span class="stat-sub-dot offline"></span> <%= (memberCount - onlineCount).toLocaleString() %> Offline</span>
+            </div>
+            <% } %>
           </div>
           <div class="stat-icon-wrap">
             <i data-lucide="users" style="width:22px;height:22px;stroke:var(--purple-l);fill:rgba(124,58,237,.12);"></i>
@@ -1717,6 +1982,105 @@
           <i data-lucide="settings" style="width:15px;height:15px;"></i>
           <%= t.guild.qaSettings %>
         </a>
+      </div>
+    </section>
+
+    <!-- ── System Health ─────────────────────────────── -->
+    <section>
+      <div class="section-heading">
+        <div class="section-heading-icon">
+          <i data-lucide="heart-pulse" style="width:16px;height:16px;stroke:var(--purple-l);"></i>
+        </div>
+        <h2><%= t.guild.systemHealthTitle %></h2>
+      </div>
+
+      <div class="health-grid">
+        <!-- Database -->
+        <div class="health-card">
+          <div class="health-card-left">
+            <div class="health-icon-wrap purple">
+              <i data-lucide="database" style="width:17px;height:17px;stroke:var(--purple-l);"></i>
+            </div>
+            <div class="health-meta">
+              <span class="health-label"><%= t.guild.healthDb %></span>
+              <span class="health-status" style="color:#4ade80;"><%= t.guild.healthConnected %></span>
+            </div>
+          </div>
+          <div class="health-dot-wrap">
+            <div class="health-pulse ok"></div>
+          </div>
+        </div>
+
+        <!-- API -->
+        <div class="health-card">
+          <div class="health-card-left">
+            <div class="health-icon-wrap cyan">
+              <i data-lucide="globe" style="width:17px;height:17px;stroke:var(--cyan-l);"></i>
+            </div>
+            <div class="health-meta">
+              <span class="health-label"><%= t.guild.healthApi %></span>
+              <span class="health-status" style="color:#4ade80;"><%= t.guild.healthWorking %></span>
+            </div>
+          </div>
+          <div class="health-dot-wrap">
+            <div class="health-pulse ok"></div>
+          </div>
+        </div>
+
+        <!-- Discord Gateway -->
+        <div class="health-card">
+          <div class="health-card-left">
+            <div class="health-icon-wrap indigo">
+              <i data-lucide="radio" style="width:17px;height:17px;stroke:#818cf8;"></i>
+            </div>
+            <div class="health-meta">
+              <span class="health-label"><%= t.guild.healthGateway %></span>
+              <span class="health-status" style="color:<%= gatewayOnline ? '#4ade80' : '#ef4444' %>;">
+                <%= gatewayOnline ? t.guild.healthConnected : t.guild.healthOffline %>
+              </span>
+            </div>
+          </div>
+          <div class="health-dot-wrap">
+            <div class="health-pulse <%= gatewayOnline ? 'ok' : 'err' %>"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Community ─────────────────────────────────── -->
+    <section>
+      <div class="section-heading">
+        <div class="section-heading-icon">
+          <i data-lucide="globe-2" style="width:16px;height:16px;stroke:var(--purple-l);"></i>
+        </div>
+        <h2><%= t.guild.communityTitle %></h2>
+      </div>
+
+      <div class="community-card">
+        <div class="community-body">
+          <div class="community-text">
+            <h3>Next Generation Bot</h3>
+            <p>Support the project, leave a review, or get help from the community.</p>
+          </div>
+          <div class="community-links">
+            <a href="https://github.com/aymenelouadi/next-generation" target="_blank" rel="noopener" class="comm-btn github">
+              <i data-lucide="github" style="width:14px;height:14px;"></i>
+              <%= t.guild.communityGithub %>
+            </a>
+            <a href="https://www.trustpilot.com/evaluate/codnex.xyz" target="_blank" rel="noopener" class="comm-btn trustpilot">
+              <i data-lucide="star" style="width:14px;height:14px;"></i>
+              <%= t.guild.communityReview %>
+            </a>
+            <a href="https://ko-fi.com/code_nexus" target="_blank" rel="noopener" class="comm-btn kofi">
+              <i data-lucide="coffee" style="width:14px;height:14px;"></i>
+              <%= t.guild.communitySupport %>
+            </a>
+            <a href="https://discord.gg/W4ptSeajeS" target="_blank" rel="noopener" class="comm-btn discord">
+              <i data-lucide="message-circle" style="width:14px;height:14px;"></i>
+              <%= t.guild.communityHelp %>
+            </a>
+          </div>
+        </div>
       </div>
     </section>
 

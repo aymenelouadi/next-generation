@@ -527,11 +527,19 @@ app.get('/dashboard/:guildId', require('./middleware/auth'), (req, res) => {
     const supported  = ['ar', 'en'];
 
     // Server stats from Discord cache
-    const discordGuild = botClient ? botClient.guilds.cache.get(guildId) : null;
-    const memberCount  = discordGuild ? discordGuild.memberCount : null;
-    const channelCount = discordGuild ? discordGuild.channels.cache.size : null;
-    const roleCount    = discordGuild ? discordGuild.roles.cache.size : null;
-    const botPing      = botClient ? Math.round(botClient.ws.ping) : null;
+    const discordGuild  = botClient ? botClient.guilds.cache.get(guildId) : null;
+    const memberCount   = discordGuild ? discordGuild.memberCount : null;
+    const channelCount  = discordGuild ? discordGuild.channels.cache.size : null;
+    const roleCount     = discordGuild ? discordGuild.roles.cache.size : null;
+    const botPing       = botClient ? Math.round(botClient.ws.ping) : null;
+    // Banner: try from cache first, fallback to OAuth guildInfo
+    const guildBanner   = discordGuild?.banner || guildInfo?.banner || null;
+    // Gateway status: ws.status === 0 = READY
+    const gatewayOnline = botClient ? (botClient.ws.status === 0) : false;
+    // Online member count (only if presences cached)
+    const onlineCount   = discordGuild
+        ? discordGuild.members.cache.filter(m => m.presence && m.presence.status !== 'offline').size || null
+        : null;
 
     // Module status from DB
     const ticketsData  = guildDb.read(guildId, 'tickets', {});
@@ -563,6 +571,9 @@ app.get('/dashboard/:guildId', require('./middleware/auth'), (req, res) => {
         channelCount,
         roleCount,
         botPing,
+        guildBanner,
+        gatewayOnline,
+        onlineCount,
         moduleStatus,
     });
 });
