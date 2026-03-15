@@ -67,15 +67,19 @@
     "badgeActiveDev": "مطور نشط"
   },
   "guild": {
-    "pageTitle":   "لوحة التحكم",
-    "overview":    "نظرة عامة",
-    "levelLabel":  "المستوى",
-    "rankLabel":   "الترتيب",
-    "backBtn":     "الرئيسية",
-    "serverId":    "معرف السرفر",
-    "noData":      "—",
-    "langLabel":   "اللغة",
-    "noLevel":     "لا توجد بيانات بعد"
+    "pageTitle":     "لوحة التحكم",
+    "overview":      "نظرة عامة",
+    "levelLabel":    "المستوى",
+    "rankLabel":     "الترتيب",
+    "backBtn":       "الرئيسية",
+    "serverId":      "معرف السرفر",
+    "noData":        "—",
+    "langLabel":     "اللغة",
+    "noLevel":       "لا توجد بيانات بعد",
+    "welcomeTitle":  "مرحباً بك في",
+    "welcomeSub":    "أنت الآن تدير هذا السرفر",
+    "memberCount":   "عضو",
+    "onlineCount":   "أونلاين"
   },
   "tickets": {
     "pageTitle":         "التذاكر",

@@ -105,5 +105,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+### 🛠️ Post-Release Updates — 2026-03-15
+
+#### 🔒 Security Hardening (`dashboard/server.js`, `dashboard/routes/auth.js`)
+- Added `helmet` middleware (CSP & COEP disabled for dashboard compatibility)
+- Added `express-rate-limit` with IPv6-safe `ipKeyGenerator` — fixes `ValidationError` on IPv6 addresses
+- Fixed Socket.io CORS — origin now computed from `QAUTH_LINK` in production instead of wildcard `*`
+- Added startup warning when `SESSION` environment variable is missing
+- Fixed path traversal vulnerability on guild delete endpoint — `guildId` now validated against `/^\d{17,20}$/` before any `fs.rmSync` call
+- Removed `accessToken` from session storage — token is not used post-login and should never be persisted
+- Added `requestIp` middleware for accurate client IP logging behind reverse proxies
+
+#### 🎟️ Ticket System — Improvements
+
+**Transcript library replaced** (`systems/ticket_transcript.js`)
+- Swapped `discord-html-transcripts` → `discord-transcript-v2`
+- Updated import: `const { createTranscript, ExportReturnType } = require('discord-transcript-v2')`
+- Updated `returnType` value: `ExportReturnType.Buffer` (typed enum instead of string literal)
+
+**Multi-panel: title & description fields** (`dashboard/views/tickets_panels.ejs`, `systems/tickets.js`)
+- Added `#mp-title` (text input, max 256 chars) and `#mp-description` (textarea) to the multi-panel configuration card
+- `loadMpData()` now populates both new fields from saved data
+- Save payload includes `panelTitle` and `description`
+- `_buildMultiPanelPayload()` renders title + description as `TextDisplay` components above the separator line
+
+**Fix: Multi-panel stale data on selector change** (`dashboard/views/tickets_panels.ejs`)
+- `loadMpData(null)` previously only cleared `mpPanels`; it now fully resets every MP field (channel, toggles, title, description, banner, accent color, visibility rows)
+- Added `_collectMpState(id)` helper — snapshots all current MP form values into an object
+- `_mpList` is now fully synced on save: new entries use `_collectMpState`, existing entries use `Object.assign` — previously only `{ id }` was stored, causing data loss on switch-away / switch-back
+- `renderMpPanels()` now always calls `_buildMpPanelSelList()` — previously the panel picker was only rebuilt on remove (×) click, causing "already used" filter to desync on load
+
+**Fix: Single-panel stale data on selector change** (`dashboard/views/tickets_panels.ejs`)
+- `resetPanelForm()` previously only cleared `panel-id` and the selector; now resets all 40+ fields (every checkbox, select, text input, banner, accent color, button color, display mode, ACL rows, support roles, form questions, hours grid, action buttons)
+- Added `_collectPanelState(id)` helper — mirrors `_collectMpState` for single panels
+- Save handler now uses `_collectPanelState` for both new panel (`_panelList.push`) and existing panel (`Object.assign`) — previously only `panelTitle`, `btnText`, `btnEmoji` were updated
+- Panel selector choice is now persisted in `sessionStorage` per guild — refreshing the page restores the last active panel; selecting "new panel" (`''`) is also remembered so a refresh keeps the blank form instead of jumping back to the last saved panel
+
+#### 🐛 Bug Fixes
+
+**Fix: `DiscordAPIError[10062]: Unknown interaction` — Uncaught exception** (`systems/ticket_after.js`)
+- All `return handler()` calls inside `registerAfterHandlers` were missing `await` — in JavaScript, `return asyncFn()` without `await` inside a `try/catch` does not let the catch block intercept rejections, so every error from ticket handlers escaped as an uncaught exception. Fixed by changing all to `return await handler()`
+- All `showModal` calls (`closeTicket`, `handleAddUserButton`, `handleRemoveUserButton`, `_showFormModal`) wrapped in `try/catch` — error code `10062` (interaction token expired, 3-second Discord window) is now caught and silently ignored; user can simply click the button again
+- `_showFormModal` converted from regular function to `async function` to support `await interaction.showModal()`
+- Global catch block in `registerAfterHandlers` now early-returns on `err.code === 10062` instead of attempting `interaction.reply()` (which would also fail since the token is expired)
+- `handleActionSelect` inner dispatches also changed to `return await handler()` for consistent propagation
+
+---
+
 > This project was programmed by the Code Nexus team.  
 > Discord: https://discord.gg/UvEYbFd2rj

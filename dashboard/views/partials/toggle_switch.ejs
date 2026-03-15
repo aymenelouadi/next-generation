@@ -1,0 +1,15 @@
+<label class="toggle-switch"<%
+  if (locals.disabled) { %> style="opacity:.42;pointer-events:none"<% }
+  if (locals.title)    { %> title="<%- title %>"<% }
+%>>
+  <input type="checkbox"
+    <% if (locals.id)         { %>id="<%- id %>"<% } %>
+    <% if (locals.inputClass) { %>class="<%- inputClass %>"<% } %>
+    <% if (locals.name)       { %>name="<%- name %>"<% } %>
+    <% if (locals.dataKey)    { %>data-key="<%- dataKey %>"<% } %>
+    <% if (locals.checked)    { %>checked<% } %>
+    <% if (locals.disabled)   { %>disabled<% } %>
+    <% if (locals.onChange)   { %>onchange="<%- onChange %>"<% } %>
+  >
+  <span class="toggle-slider"></span>
+</label>

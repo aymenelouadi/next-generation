@@ -6,7 +6,8 @@
 
 const {
     SlashCommandBuilder, PermissionFlagsBits,
-    EmbedBuilder, ActionRowBuilder,
+    ActionRowBuilder, ContainerBuilder, TextDisplayBuilder,
+    SeparatorBuilder, SeparatorSpacingSize, MessageFlags,
     StringSelectMenuBuilder, StringSelectMenuOptionBuilder,
     ButtonBuilder, ButtonStyle
 } = require('discord.js');
@@ -16,12 +17,10 @@ const adminGuard = require('../utils/adminGuard.js');
 const { langOf, t } = require('../utils/cmdLang.js');
 const logSystem  = require('../systems/log.js');
 
-const CV2 = 1 << 15;
-const C   = { Container: 17, Text: 10 };
-
 function errCard(lines) {
-    return { flags: CV2, components: [{ type: C.Container, accent_color: 0xef4444,
-        components: [{ type: C.Text, content: lines.join('\n') }] }] };
+    const c = new ContainerBuilder().setAccentColor(0xef4444)
+        .addTextDisplayComponents(new TextDisplayBuilder().setContent(lines.join('\n')));
+    return { flags: MessageFlags.IsComponentsV2, components: [c] };
 }
 
 module.exports = {
@@ -102,19 +101,41 @@ module.exports = {
             rows.push(navRow);
         }
 
-        const embed = new EmbedBuilder()
-            .setColor(0x5865f2)
-            .setTitle('Command Permission Manager')
-            .setDescription(`Select a command to manage its allowed roles.\n**Commands:** ${commands.length}`)
-            .setFooter({ text: `Page ${page+1}/${totalPages}` });
+        const container = new ContainerBuilder()
+            .setAccentColor(0x5865f2)
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent('## 🛡️ Command Permission Manager')
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+            )
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(
+                    `اختر الأمر لإدارة الرتب المسموحة باستخدامه\n\n📋 **عدد الأوامر:** ${commands.length}`
+                )
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+            );
 
-        const payload = { embeds: [embed], components: rows };
+        for (const row of rows) {
+            container.addActionRowComponents(row);
+        }
 
-        if (isSlash) {
-            if (context.replied || context.deferred) await context.editReply(payload);
-            else await context.reply({ ...payload, ephemeral: true });
+        container.addTextDisplayComponents(
+            new TextDisplayBuilder().setContent(`-# صفحة ${page+1} من ${totalPages}`)
+        );
+
+        const cv2Flags = MessageFlags.IsComponentsV2;
+        const cv2EphFlags = MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral;
+
+        if (context.isButton?.() || context.isStringSelectMenu?.()) {
+            await context.update({ components: [container], flags: cv2Flags });
+        } else if (isSlash) {
+            if (context.replied || context.deferred) await context.editReply({ components: [container], flags: cv2Flags });
+            else await context.reply({ components: [container], flags: cv2EphFlags });
         } else {
-            await context.reply(payload);
+            await context.reply({ components: [container], flags: cv2Flags });
         }
     },
 
@@ -124,18 +145,33 @@ module.exports = {
         const command = settings.actions[commandId];
         const currentRoles = command.rolesAllowed || [];
 
-        const embed = new EmbedBuilder()
-            .setColor(0x5865f2)
-            .setTitle(command.label || commandId)
-            .setDescription(`**Allowed roles:** ${currentRoles.length ? currentRoles.map(id => `<@&${id}>`).join(', ') : 'Everyone (no restriction)'}`);
+        const rolesText = currentRoles.length
+            ? currentRoles.map(id => `<@&${id}>`).join(', ')
+            : 'الجميع (لا يوجد تقييد)';
 
         const row = new ActionRowBuilder().addComponents(
-            new ButtonBuilder().setCustomId(`perm_add_${commandId}`).setLabel('Add Role').setStyle(ButtonStyle.Success),
-            new ButtonBuilder().setCustomId(`perm_remove_${commandId}`).setLabel('Remove Role').setStyle(ButtonStyle.Danger),
-            new ButtonBuilder().setCustomId(`perm_back_${commandId}`).setLabel('← Back').setStyle(ButtonStyle.Secondary)
+            new ButtonBuilder().setCustomId(`perm_add_${commandId}`).setLabel('➕ إضافة رتبة').setStyle(ButtonStyle.Success),
+            new ButtonBuilder().setCustomId(`perm_remove_${commandId}`).setLabel('➖ إزالة رتبة').setStyle(ButtonStyle.Danger),
+            new ButtonBuilder().setCustomId(`perm_back_${commandId}`).setLabel('↩️ رجوع').setStyle(ButtonStyle.Secondary)
         );
 
-        await interaction.update({ embeds: [embed], components: [row] });
+        const container = new ContainerBuilder()
+            .setAccentColor(0x5865f2)
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(`## ${command.label || commandId}`)
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+            )
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(`🎭 **الرتب المسموح لها:**\n${rolesText}`)
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+            )
+            .addActionRowComponents(row);
+
+        await interaction.update({ components: [container], flags: MessageFlags.IsComponentsV2 });
     },
 
     async showRoleSelection(interaction, commandId, action) {
@@ -193,12 +229,25 @@ module.exports = {
             new ButtonBuilder().setCustomId(`perm_back_${commandId}`).setLabel('← Back').setStyle(ButtonStyle.Secondary)
         ));
 
-        const embed = new EmbedBuilder()
-            .setColor(0x5865f2)
-            .setTitle(action === 'add' ? 'Add Role' : 'Remove Role')
-            .setDescription(`Page ${page+1}/${totalPages}`);
+        const container = new ContainerBuilder()
+            .setAccentColor(0x5865f2)
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(
+                    `## ${action === 'add' ? '➕ إضافة رتبة' : '➖ إزالة رتبة'}\n-# صفحة ${page+1} من ${totalPages}`
+                )
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+            );
 
-        await interaction.update({ embeds: [embed], components: rows });
+        for (const row of rows) {
+            container.addActionRowComponents(row);
+        }
+
+        await interaction.update({ components: [container], flags: MessageFlags.IsComponentsV2 });
     },
 
     async updateCommandRoles(commandId, roleId, action) {

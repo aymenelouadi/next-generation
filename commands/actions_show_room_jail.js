@@ -4,7 +4,7 @@
  * https://discord.gg/UvEYbFd2rj
  */
 
-const { SlashCommandBuilder, PermissionFlagsBits, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, ChannelSelectMenuBuilder, ChannelType } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelSelectMenuBuilder, ChannelType, ContainerBuilder, TextDisplayBuilder, SeparatorBuilder, SeparatorSpacingSize, MessageFlags } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 const logSystem  = require('../systems/log.js');
@@ -44,11 +44,11 @@ module.exports = {
                 const moderator = interactionOrMessage.user || interactionOrMessage.author;
                 await logSystem.logCommandUsage({
                     interaction: interactionOrMessage,
-                    commandName: commandName,
+                    commandName: 'actions_show_room_jail',
                     moderator: moderator,
                     target: moderator,
                     reason: 'فتح قائمة ادارة غرف السجن',
-                    action: commandName
+                    action: 'actions_show_room_jail'
                 });
             }
 
@@ -64,50 +64,62 @@ module.exports = {
 
 
     async showMainMenu(context, showRooms, isSlash) {
-        const embed = new EmbedBuilder()
-            .setColor('#27ae60')
-            .setTitle('ادارة غرف السجن المسموح مشاهدتها')
-            .setDescription('يمكن للمسجونين رؤية الغرف المحددة فقط\n\nالغرف الحالية:')
-            .setFooter({ text: 'اختر الإجراء المناسب' });
-
-        if (showRooms.length > 0) {
-            const roomsList = showRooms.map((roomId, index) => {
+        const roomsText = showRooms.length > 0
+            ? showRooms.map((roomId, i) => {
                 const room = context.guild?.channels.cache.get(roomId);
-                return `${index + 1}. ${room ? room.name : 'غير معروف'} (${roomId})`;
-            }).join('\n');
-            embed.addFields({ name: 'قائمة الغرف', value: roomsList });
-        } else {
-            embed.addFields({ name: 'قائمة الغرف', value: 'لا توجد غرف محددة' });
-        }
+                return `${i + 1}. ${room ? `#${room.name}` : 'غير معروف'} (\`${roomId}\`)`;
+              }).join('\n')
+            : '*لا توجد غرف محددة*';
 
         const row = new ActionRowBuilder()
             .addComponents(
                 new ButtonBuilder()
                     .setCustomId('jail_rooms_add')
-                    .setLabel('اضافة غرف')
+                    .setLabel('➕ اضافة غرف')
                     .setStyle(ButtonStyle.Success),
                 new ButtonBuilder()
                     .setCustomId('jail_rooms_remove')
-                    .setLabel('ازالة غرف')
+                    .setLabel('➖ ازالة غرف')
                     .setStyle(ButtonStyle.Danger)
                     .setDisabled(showRooms.length === 0),
                 new ButtonBuilder()
                     .setCustomId('jail_rooms_clear')
-                    .setLabel('مسح الكل')
+                    .setLabel('🗑️ مسح الكل')
                     .setStyle(ButtonStyle.Secondary)
                     .setDisabled(showRooms.length === 0)
             );
 
+        const container = new ContainerBuilder()
+            .setAccentColor(0x27ae60)
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent('## 🔒 ادارة غرف السجن')
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+            )
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(
+                    `يمكن للمسجونين رؤية الغرف المحددة فقط\n\n**📋 الغرف الحالية (${showRooms.length}):**\n${roomsText}`
+                )
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+            )
+            .addActionRowComponents(row);
+
+        const cv2Flags = MessageFlags.IsComponentsV2;
+        const cv2EphFlags = MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral;
+
         if (context.isButton?.() || context.isChannelSelectMenu?.()) {
-            await context.update({ embeds: [embed], components: [row] });
+            await context.update({ components: [container], flags: cv2Flags });
         } else if (isSlash) {
             if (context.replied || context.deferred) {
-                await context.editReply({ embeds: [embed], components: [row] });
+                await context.editReply({ components: [container], flags: cv2Flags });
             } else {
-                await context.reply({ embeds: [embed], components: [row], ephemeral: true });
+                await context.reply({ components: [container], flags: cv2EphFlags });
             }
         } else {
-            await context.reply({ embeds: [embed], components: [row] });
+            await context.reply({ components: [container], flags: cv2Flags });
         }
     },
 
@@ -148,12 +160,24 @@ module.exports = {
             }
         }
 
-        const embed = new EmbedBuilder()
-            .setColor('#27ae60')
-            .setTitle(action === 'add' ? 'اضافة غرف' : 'ازالة غرف')
-            .setDescription(embedDescription);
+        const container = new ContainerBuilder()
+            .setAccentColor(0x27ae60)
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(`## ${action === 'add' ? '➕ اضافة غرف' : '➖ ازالة غرف'}`)
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+            )
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(embedDescription)
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+            )
+            .addActionRowComponents(row)
+            .addActionRowComponents(backButton);
 
-        await interaction.update({ embeds: [embed], components: [row, backButton] });
+        await interaction.update({ components: [container], flags: MessageFlags.IsComponentsV2 });
     },
 
     async updateShowRooms(interaction, selectedChannels, action) {

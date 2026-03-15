@@ -8,6 +8,16 @@ node_modules/
 database/*.json
 !database/.gitkeep
 
+# Dashboard per-guild database + uploads (runtime data)
+dashboard/database/
+dashboard/public/uploads/
+
+# Vendored large libs
+dashboard/public/js/three.min.js
+
+# Archives
+*.zip
+
 # Logs
 *.log
 npm-debug.log*

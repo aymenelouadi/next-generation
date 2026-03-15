@@ -149,6 +149,18 @@ function _buildMultiPanelPayload(mp, panels) {
         if (banner.attachment) files.push(banner.attachment);
     }
 
+    // Title & description text
+    if (mp.panelTitle) {
+        container.addTextDisplayComponents(
+            new TextDisplayBuilder().setContent(`## ${mp.panelTitle}`)
+        );
+    }
+    if (mp.description) {
+        container.addTextDisplayComponents(
+            new TextDisplayBuilder().setContent(mp.description)
+        );
+    }
+
     // Separator before interactive components
     container.addSeparatorComponents(new SeparatorBuilder());
 

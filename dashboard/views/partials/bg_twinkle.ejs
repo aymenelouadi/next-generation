@@ -1,0 +1,34 @@
+<%
+  /* ── Canvas 2D Twinkling Stars Partial ──────────────────────────────────────
+   * Purple dots that pulse in opacity — used on auto-roles page.
+   * No locals needed – no configuration required.
+   * ──────────────────────────────────────────────────────────────────────── */
+%><script>
+  (function () {
+    var canvas = document.getElementById('c');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W, H, stars = [];
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    function initStars() {
+      stars = Array.from({ length: 80 }, function () { return {
+        x: Math.random() * W, y: Math.random() * H,
+        r: Math.random() * 1.2 + .2,
+        a: Math.random() * .6 + .1,
+        s: Math.random() * .3 + .05
+      }; });
+    }
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      stars.forEach(function (s) {
+        s.a += s.s * .006;
+        if (s.a > .7 || s.a < .1) s.s *= -1;
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(167,139,250,' + s.a + ')'; ctx.fill();
+      });
+      requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize', function () { resize(); initStars(); });
+    resize(); initStars(); draw();
+  })();
+</script>

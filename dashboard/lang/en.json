@@ -67,15 +67,19 @@
     "badgeActiveDev": "Active Developer"
   },
   "guild": {
-    "pageTitle":   "Dashboard",
-    "overview":    "Overview",
-    "levelLabel":  "Level",
-    "rankLabel":   "Rank",
-    "backBtn":     "Home",
-    "serverId":    "SERVER ID",
-    "noData":      "—",
-    "langLabel":   "Language",
-    "noLevel":     "No data yet"
+    "pageTitle":     "Dashboard",
+    "overview":      "Overview",
+    "levelLabel":    "Level",
+    "rankLabel":     "Rank",
+    "backBtn":       "Home",
+    "serverId":      "SERVER ID",
+    "noData":        "—",
+    "langLabel":     "Language",
+    "noLevel":       "No data yet",
+    "welcomeTitle":  "Welcome to",
+    "welcomeSub":    "You are now managing this server",
+    "memberCount":   "Members",
+    "onlineCount":   "Online"
   },
   "tickets": {
     "pageTitle":         "Tickets",

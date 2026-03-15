@@ -7,6 +7,7 @@
 <html lang="<%= t.lang %>" dir="<%= t.dir %>">
 
 <head>
+  <%- include('partials/head_theme') %>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>
@@ -14,6 +15,8 @@
   </title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Tajawal:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap"
     rel="stylesheet" />
@@ -712,54 +715,10 @@
     </div>
   </div>
 
-  <!-- Minimal Three.js starfield -->
+  <!-- Stars background -->
   <script src="/js/lucide.min.js"></script>
   <script>lucide.createIcons();</script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-  <script>
-    (function () {
-      const canvas = document.getElementById('c');
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
-      renderer.setPixelRatio(1);
-      renderer.setSize(innerWidth, innerHeight);
-      renderer.setClearColor(0x040010, 1);
-
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 500);
-      camera.position.z = 1;
-
-      // Stars
-      const N = 3200, pos = new Float32Array(N * 3);
-      for (let i = 0; i < N * 3; i++) pos[i] = (Math.random() - .5) * 240;
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-      const mat = new THREE.PointsMaterial({
-        color: 0xb8b0ff, size: 0.26,
-        transparent: true, opacity: 0.65, depthWrite: false
-      });
-      scene.add(new THREE.Points(geo, mat));
-
-      let mx = 0, my = 0, t = 0;
-      document.addEventListener('mousemove', e => {
-        mx = (e.clientX / innerWidth - .5) * .3;
-        my = (e.clientY / innerHeight - .5) * .15;
-      });
-      window.addEventListener('resize', () => {
-        camera.aspect = innerWidth / innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(innerWidth, innerHeight);
-      });
-
-      const stars = scene.children[0];
-      (function render() {
-        requestAnimationFrame(render);
-        t += 0.00028;
-        stars.rotation.y = t + mx * .2;
-        stars.rotation.x = my * .1;
-        renderer.render(scene, camera);
-      })();
-    })();
-  </script>
+  <%- include('partials/bg_stars_bright') %>
 
   <!-- Page transition overlay -->
   <div id="page-overlay" style="
@@ -803,6 +762,7 @@
       setTimeout(() => { window.location.href = href; }, 400);
     });
   </script>
+  <%- include('partials/footer') %>
 </body>
 
 </html>

@@ -4,7 +4,7 @@
  * https://discord.gg/UvEYbFd2rj
  */
 
-const { SlashCommandBuilder, PermissionFlagsBits, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, RoleSelectMenuBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, RoleSelectMenuBuilder, ContainerBuilder, TextDisplayBuilder, SeparatorBuilder, SeparatorSpacingSize, MessageFlags } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 const logSystem  = require('../systems/log.js');
@@ -44,11 +44,11 @@ module.exports = {
                 const moderator = interactionOrMessage.user || interactionOrMessage.author;
                 await logSystem.logCommandUsage({
                     interaction: interactionOrMessage,
-                    commandName: commandName,
+                    commandName: 'actions_mute_role',
                     moderator: moderator,
                     target: moderator,
                     reason: 'فتح قائمة ادارة رتبة الميوت',
-                    action: commandName
+                    action: 'actions_mute_role'
                 });
             }
 
@@ -65,39 +65,52 @@ module.exports = {
 
     async showMainMenu(context, currentRoleId, isSlash) {
         const currentRole = currentRoleId ? context.guild?.roles.cache.get(currentRoleId) : null;
-
-        const embed = new EmbedBuilder()
-            .setColor('#e74c3c')
-            .setTitle('ادارة رتبة الميوت')
-            .setDescription('الرتبة التي تعطى للاعضاء عند كتمهم')
-            .addFields(
-                { name: 'الرتبة الحالية', value: currentRole ? `${currentRole.name} (${currentRoleId})` : 'لا توجد رتبة محددة' }
-            )
-            .setFooter({ text: 'اختر الإجراء المناسب' });
+        const roleText = currentRole ? `${currentRole} \`${currentRoleId}\`` : '*لا توجد رتبة محددة*';
 
         const row = new ActionRowBuilder()
             .addComponents(
                 new ButtonBuilder()
                     .setCustomId('mute_role_set')
-                    .setLabel('تعيين رتبة')
+                    .setLabel('🔧 تعيين رتبة')
                     .setStyle(ButtonStyle.Primary),
                 new ButtonBuilder()
                     .setCustomId('mute_role_remove')
-                    .setLabel('ازالة الرتبة')
+                    .setLabel('🗑️ ازالة الرتبة')
                     .setStyle(ButtonStyle.Danger)
                     .setDisabled(!currentRoleId)
             );
 
+        const container = new ContainerBuilder()
+            .setAccentColor(0xe74c3c)
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent('## 🔇 ادارة رتبة الميوت')
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+            )
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(
+                    `الرتبة التي تعطى للأعضاء عند كتمهم\n\n🎭 **الرتبة الحالية:** ${roleText}`
+                )
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+            )
+            .addActionRowComponents(row);
+
+        const cv2Flags = MessageFlags.IsComponentsV2;
+        const cv2EphFlags = MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral;
+
         if (context.isButton?.() || context.isRoleSelectMenu?.()) {
-            await context.update({ embeds: [embed], components: [row] });
+            await context.update({ components: [container], flags: cv2Flags });
         } else if (isSlash) {
             if (context.replied || context.deferred) {
-                await context.editReply({ embeds: [embed], components: [row] });
+                await context.editReply({ components: [container], flags: cv2Flags });
             } else {
-                await context.reply({ embeds: [embed], components: [row], ephemeral: true });
+                await context.reply({ components: [container], flags: cv2EphFlags });
             }
         } else {
-            await context.reply({ embeds: [embed], components: [row] });
+            await context.reply({ components: [container], flags: cv2Flags });
         }
     },
 
@@ -118,12 +131,24 @@ module.exports = {
                     .setStyle(ButtonStyle.Secondary)
             );
 
-        const embed = new EmbedBuilder()
-            .setColor('#e74c3c')
-            .setTitle('تعيين رتبة الميوت')
-            .setDescription('اختر الرتبة التي ستعطى للاعضاء عند كتمهم');
+        const container = new ContainerBuilder()
+            .setAccentColor(0xe74c3c)
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent('## 🔧 تعيين رتبة الميوت')
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+            )
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent('اختر الرتبة التي ستعطى للأعضاء عند كتمهم')
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+            )
+            .addActionRowComponents(row)
+            .addActionRowComponents(backButton);
 
-        await interaction.update({ embeds: [embed], components: [row, backButton] });
+        await interaction.update({ components: [container], flags: MessageFlags.IsComponentsV2 });
     },
 
     async updateMuteRole(interaction, roleId) {

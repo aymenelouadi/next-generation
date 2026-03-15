@@ -6,10 +6,13 @@
 <!DOCTYPE html>
 <html lang="<%= lang %>" dir="<%= lang === 'ar' ? 'rtl' : 'ltr' %>">
 <head>
+  <%- include('partials/head_theme') %>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= lang === 'ar' ? 'إعدادات النظام' : 'System Settings' %> — CODE NEXUS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Tajawal:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -66,6 +69,20 @@
     }
     .lang-select:hover { border-color: rgba(124,58,237,.5); }
     .lang-select option { background: #0a0022; color: var(--white); }
+    /* Custom lang dropdown */
+    .lcs-wrap{position:relative;display:inline-block}
+    .lcs-btn{display:inline-flex;align-items:center;gap:5px;background:var(--surface);border:1px solid rgba(255,255,255,.12);border-radius:10px;color:var(--white);font-size:.8rem;font-weight:600;padding:6px 10px;cursor:pointer;outline:none;font-family:inherit;transition:border-color .18s,background-color .18s;min-width:100px}
+    .lcs-btn:hover{border-color:rgba(124,58,237,.5);background-color:rgba(124,58,237,.08)}
+    .lcs-wrap.open .lcs-btn{border-color:rgba(124,58,237,.6)}
+    .lcs-flag{display:inline-flex;align-items:center}
+    .lcs-flag .fi,.lcs-item .fi{width:20px;height:15px;border-radius:2px;background-size:cover;flex-shrink:0}
+    .lcs-arrow{flex-shrink:0;transition:transform .18s}
+    .lcs-wrap.open .lcs-arrow{transform:rotate(180deg)}
+    .lcs-menu{display:none;position:absolute;top:calc(100% + 5px);right:0;background:var(--surface,#1a0a3e);border:1px solid rgba(124,58,237,.3);border-radius:10px;padding:4px;list-style:none;margin:0;min-width:130px;z-index:9000;box-shadow:0 8px 24px rgba(4,0,16,.55)}
+    .lcs-wrap.open .lcs-menu{display:block}
+    .lcs-item{display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:.8rem;font-weight:600;color:var(--white);transition:background .15s}
+    .lcs-item:hover,.lcs-item:focus{background:rgba(124,58,237,.18);outline:none}
+    .lcs-item.lcs-active{background:rgba(124,58,237,.25)}
     .user-chip {
       display: flex; align-items: center; gap: 8px; padding: 5px 12px 5px 6px;
       border-radius: 99px; border: 1px solid rgba(255,255,255,.08);
@@ -469,11 +486,26 @@
       <span class="brand-text">CODE NEXUS</span>
     </a>
     <div class="topbar-right">
-      <!-- Lang select -->
-      <select class="lang-select" id="lang-select" aria-label="Language">
-        <option value="ar" <%= lang === 'ar' ? 'selected' : '' %>>🇸🇦 عربي</option>
-        <option value="en" <%= lang === 'en' ? 'selected' : '' %>>🇺🇸 English</option>
+      <!-- Lang select — custom dropdown so flags render correctly on Windows -->
+      <select id="lang-select" style="display:none;" aria-hidden="true">
+        <option value="ar" <%= lang === 'ar' ? 'selected' : '' %>>ar</option>
+        <option value="en" <%= lang === 'en' ? 'selected' : '' %>>en</option>
       </select>
+      <div class="lcs-wrap" id="lcs-wrap">
+        <button class="lcs-btn" id="lcs-btn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Language">
+          <span class="lcs-flag" id="lcs-flag"><span class="fi fi-<%= lang === 'ar' ? 'sa' : 'us' %>"></span></span>
+          <span class="lcs-label" id="lcs-label"><%= lang === 'ar' ? 'عربي' : 'English' %></span>
+          <svg class="lcs-arrow" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <ul class="lcs-menu" id="lcs-menu" role="listbox">
+          <li class="lcs-item<%= lang === 'ar' ? ' lcs-active' : '' %>" role="option" data-value="ar" data-flag="sa" data-label="عربي" tabindex="0">
+            <span class="fi fi-sa"></span><span class="lcs-item-label">عربي</span>
+          </li>
+          <li class="lcs-item<%= lang === 'en' ? ' lcs-active' : '' %>" role="option" data-value="en" data-flag="us" data-label="English" tabindex="0">
+            <span class="fi fi-us"></span><span class="lcs-item-label">English</span>
+          </li>
+        </ul>
+      </div>
       <!-- User chip -->
       <button class="user-chip" id="open-profile" aria-label="Profile">
         <div class="user-chip-avatar">
@@ -863,29 +895,9 @@
   <div class="sys-toast" id="sys-toast"></div>
 
   <!-- Lucide -->
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-  <!-- Three.js stars background -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="/js/lucide.min.js"></script>
+  <%- include('partials/bg_stars_system') %>
   <script>
-    /* ── Stars background ── */
-    (function() {
-      const canvas = document.getElementById('c');
-      if (!canvas || typeof THREE === 'undefined') return;
-      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false });
-      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-      renderer.setSize(innerWidth, innerHeight);
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 2000);
-      camera.position.z = 600;
-      const geo = new THREE.BufferGeometry();
-      const N = 1800;
-      const pos = new Float32Array(N * 3);
-      for (let i = 0; i < N * 3; i++) pos[i] = (Math.random() - 0.5) * 2000;
-      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-      scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffffff, size: 1.1, transparent: true, opacity: 0.55 })));
-      window.addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); });
-      (function animate() { requestAnimationFrame(animate); scene.rotation.y += 0.00015; renderer.render(scene, camera); })();
-    })();
 
     /* ── Lucide ── */
     lucide.createIcons();
@@ -1574,12 +1586,52 @@
     }
 
     /* ── Lang select ── */
+    /* Custom dropdown wiring */
+    (function () {
+      var wrap=document.getElementById('lcs-wrap'),btn=document.getElementById('lcs-btn');
+      var flag=document.getElementById('lcs-flag'),lbl=document.getElementById('lcs-label');
+      var sel=document.getElementById('lang-select');
+      if(!wrap||!btn||!sel)return;
+      function openM(){wrap.classList.add('open');btn.setAttribute('aria-expanded','true');}
+      function closeM(){wrap.classList.remove('open');btn.setAttribute('aria-expanded','false');}
+      btn.addEventListener('click',function(e){e.stopPropagation();wrap.classList.contains('open')?closeM():openM();});
+      document.addEventListener('click',closeM);
+      document.addEventListener('keydown',function(e){if(e.key==='Escape')closeM();});
+      wrap.querySelectorAll('.lcs-item').forEach(function(item){
+        item.addEventListener('click',function(e){
+          e.stopPropagation();var val=item.getAttribute('data-value');
+          if(flag){var fi=flag.querySelector('.fi');if(fi){fi.className='fi fi-'+item.getAttribute('data-flag');}}
+          if(lbl)lbl.textContent=item.getAttribute('data-label')||val;
+          wrap.querySelectorAll('.lcs-item').forEach(function(i){i.classList.remove('lcs-active');});
+          item.classList.add('lcs-active');closeM();
+          sel.value=val;sel.dispatchEvent(new Event('change',{bubbles:true}));
+        });
+        item.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();item.click();}});
+      });
+    })();
     document.getElementById('lang-select').addEventListener('change', function() {
       const u = new URL(window.location.href);
       u.searchParams.set('lang', this.value);
       window.location.href = u.toString();
     });
   </script>
+
+  <!-- Page transition overlay -->
+  <div id="ov" style="position:fixed;inset:0;z-index:9999;background:#040010;animation:pIn .45s cubic-bezier(.4,0,.2,1) forwards;pointer-events:none;"></div>
+  <style>
+    @keyframes pIn  { from { opacity:1 } to { opacity:0 } }
+    @keyframes pOut { from { opacity:0 } to { opacity:1 } }
+    #ov.leave { animation:pOut .35s cubic-bezier(.4,0,.2,1) forwards; pointer-events:all; }
+  </style>
+  <script>
+    (function () {
+      function fadeOut(href) { var ov=document.getElementById('ov'); ov.classList.add('leave'); setTimeout(function(){ window.location.href=href; },360); }
+      document.querySelectorAll('a.nav-link, a#logout-link').forEach(function(a){
+        a.addEventListener('click',function(e){ if(this.target==='_blank') return; e.preventDefault(); fadeOut(this.href); });
+      });
+    })();
+  </script>
+  <%- include('partials/footer') %>
 </body>
 </html>
 

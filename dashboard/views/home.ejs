@@ -7,6 +7,7 @@
 <html lang="<%= t.lang %>" dir="<%= t.dir %>">
 
 <head>
+  <%- include('partials/head_theme') %>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>
@@ -14,6 +15,8 @@
   </title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Tajawal:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap"
     rel="stylesheet" />
@@ -221,6 +224,20 @@
     .lang-select:hover { border-color: rgba(124,58,237,.5); background-color: rgba(124,58,237,.08); }
     .lang-select:focus { border-color: rgba(124,58,237,.6); }
     .lang-select option { background: #0a0022; color: var(--white); }
+    /* Custom lang dropdown */
+    .lcs-wrap{position:relative;display:inline-block}
+    .lcs-btn{display:inline-flex;align-items:center;gap:5px;background:var(--surface);border:1px solid rgba(255,255,255,.12);border-radius:10px;color:var(--white);font-size:.8rem;font-weight:600;padding:6px 10px;cursor:pointer;outline:none;font-family:inherit;transition:border-color .18s,background-color .18s;min-width:100px}
+    .lcs-btn:hover{border-color:rgba(124,58,237,.5);background-color:rgba(124,58,237,.08)}
+    .lcs-wrap.open .lcs-btn{border-color:rgba(124,58,237,.6)}
+    .lcs-flag{display:inline-flex;align-items:center}
+    .lcs-flag .fi,.lcs-item .fi{width:20px;height:15px;border-radius:2px;background-size:cover;flex-shrink:0}
+    .lcs-arrow{flex-shrink:0;transition:transform .18s}
+    .lcs-wrap.open .lcs-arrow{transform:rotate(180deg)}
+    .lcs-menu{display:none;position:absolute;top:calc(100% + 5px);right:0;background:var(--surface,#1a0a3e);border:1px solid rgba(124,58,237,.3);border-radius:10px;padding:4px;list-style:none;margin:0;min-width:130px;z-index:9000;box-shadow:0 8px 24px rgba(4,0,16,.55)}
+    .lcs-wrap.open .lcs-menu{display:block}
+    .lcs-item{display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:.8rem;font-weight:600;color:var(--white);transition:background .15s}
+    .lcs-item:hover,.lcs-item:focus{background:rgba(124,58,237,.18);outline:none}
+    .lcs-item.lcs-active{background:rgba(124,58,237,.25)}
 
     /* Logout */
     .logout-btn {
@@ -504,6 +521,10 @@
       letter-spacing: .04em;
       margin-top: 2px;
     }
+    /* Guild card stats row (inBot only) */
+    .guild-card-stats { display: flex; align-items: center; gap: 5px; font-family: inherit; letter-spacing: normal; }
+    .gcs-item { display: inline-flex; align-items: center; gap: 3px; }
+    .gcs-sep  { opacity: .35; }
 
     /* Status badge */
     .status-badge {
@@ -671,47 +692,7 @@
       font-size: .9rem;
     }
 
-    /* Footer */
-    .site-footer {
-      position: relative;
-      z-index: 10;
-      text-align: center;
-      padding: 28px 20px 36px;
-      border-top: 1px solid rgba(255, 255, 255, .05);
-      max-width: 1100px;
-      margin: 0 auto;
-    }
 
-    .site-footer .footer-logo {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 10px;
-      text-decoration: none;
-    }
-
-    .site-footer .footer-logo img {
-      width: 22px;
-      height: 22px;
-      border-radius: 6px;
-      box-shadow: 0 2px 10px rgba(124, 58, 237, .3);
-    }
-
-    .site-footer .footer-logo span {
-      font-family: 'Orbitron', monospace;
-      font-size: .72rem;
-      font-weight: 800;
-      letter-spacing: .12em;
-      background: linear-gradient(135deg, var(--white), var(--purple-l));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .site-footer p {
-      font-size: .72rem;
-      color: rgba(203, 194, 255, .3);
-    }
 
     @media (max-width: 768px) {
       .profile-sidebar {
@@ -1195,6 +1176,12 @@
         <%= lang === 'ar' ? 'إعدادات النظام' : 'System Settings' %>
       </a>
       <% } %>
+      <!-- Theme toggle -->
+      <button class="theme-toggle-btn" aria-label="Toggle theme">
+        <i data-lucide="sun" style="width:16px;height:16px;stroke:currentColor;flex-shrink:0;"></i>
+        <span class="ttb-label"><%= lang === 'ar' ? 'الوضع النهاري' : 'Light Mode' %></span>
+        <span class="ttb-badge"><%= lang === 'ar' ? 'داكن' : 'Dark' %></span>
+      </button>
       <a href="https://discord.gg/jfFSmVM5kK" target="_blank" class="prof-btn help">
         <i data-lucide="help-circle" style="width:16px;height:16px;stroke:currentColor;"></i>
         <%= t.home.profileHelp %>
@@ -1215,11 +1202,26 @@
       <span class="brand-text">CODE NEXUS</span>
     </a>
     <div class="topbar-right">
-      <!-- Lang select -->
-      <select class="lang-select" id="lang-select-home" aria-label="Language">
-        <option value="ar" <%= lang === 'ar' ? 'selected' : '' %>>🇸🇦 عربي</option>
-        <option value="en" <%= lang === 'en' ? 'selected' : '' %>>🇺🇸 English</option>
+      <!-- Lang select — custom dropdown so flags render correctly on Windows -->
+      <select id="lang-select-home" style="display:none;" aria-hidden="true">
+        <option value="ar" <%= lang === 'ar' ? 'selected' : '' %>>ar</option>
+        <option value="en" <%= lang === 'en' ? 'selected' : '' %>>en</option>
       </select>
+      <div class="lcs-wrap" id="lcs-wrap-home">
+        <button class="lcs-btn" id="lcs-btn-home" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Language">
+          <span class="lcs-flag" id="lcs-flag-home"><span class="fi fi-<%= lang === 'ar' ? 'sa' : 'us' %>"></span></span>
+          <span class="lcs-label" id="lcs-label-home"><%= lang === 'ar' ? 'عربي' : 'English' %></span>
+          <svg class="lcs-arrow" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <ul class="lcs-menu" id="lcs-menu-home" role="listbox">
+          <li class="lcs-item<%= lang === 'ar' ? ' lcs-active' : '' %>" role="option" data-value="ar" data-flag="sa" data-label="عربي" tabindex="0">
+            <span class="fi fi-sa"></span><span class="lcs-item-label">عربي</span>
+          </li>
+          <li class="lcs-item<%= lang === 'en' ? ' lcs-active' : '' %>" role="option" data-value="en" data-flag="us" data-label="English" tabindex="0">
+            <span class="fi fi-us"></span><span class="lcs-item-label">English</span>
+          </li>
+        </ul>
+      </div>
       <!-- User chip → opens profile sidebar -->
       <button class="user-chip" id="open-profile" aria-label="Profile"
         style="background:var(--surface);cursor:pointer;border:1px solid rgba(255,255,255,.08);">
@@ -1295,9 +1297,19 @@
                         <div class="guild-name" title="<%= guild.name %>">
                           <%= guild.name %>
                         </div>
-                        <div class="guild-id">
-                          <%= guild.id %>
+                        <% if (guild.inBot) { %>
+                        <div class="guild-id guild-card-stats" data-gid="<%= guild.id %>">
+                          <span class="gcs-item">
+                            <i data-lucide="users" style="width:9px;height:9px;stroke:currentColor;"></i>
+                            <span class="gcs-total">—</span>
+                          </span>
+                          <span class="gcs-sep">·</span>
+                          <span class="gcs-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 24 24" style="flex-shrink:0;border-radius:50%;box-shadow:0 0 3px rgba(34,197,94,.6);"><circle cx="12" cy="12" r="12" fill="#22c55e"/></svg>
+                            <span class="gcs-online">—</span>
+                          </span>
                         </div>
+                        <% } %>
                       </div>
               </div>
 
@@ -1338,45 +1350,32 @@
   </div>
 
   <!-- Footer -->
-  <footer class="site-footer">
-    <a class="footer-logo" href="https://discord.gg/jfFSmVM5kK" target="_blank">
-      <img src="https://res.cloudinary.com/difucqa9h/image/upload/v1770643265/discord_images/yaix1pbnbdv3srvf12gl.png"
-        alt="CODE NEXUS" />
-      <span>CODE NEXUS</span>
-    </a>
-    <p>
-      <%= t.home.footerRights %>
-    </p>
-  </footer>
+  <%- include('partials/footer') %>
 
   <!-- Lucide -->
   <script src="/js/lucide.min.js"></script>
   <script>lucide.createIcons();</script>
-
-  <!-- Stars -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
   <script>
-    (function () {
-      const canvas = document.getElementById('c');
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
-      renderer.setPixelRatio(1); renderer.setSize(innerWidth, innerHeight);
-      renderer.setClearColor(0x040010, 1);
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 500);
-      camera.position.z = 1;
-      const N = 2800, pos = new Float32Array(N * 3);
-      for (let i = 0; i < N * 3; i++) pos[i] = (Math.random() - .5) * 240;
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-      const mat = new THREE.PointsMaterial({ color: 0xb8b0ff, size: 0.24, transparent: true, opacity: 0.55, depthWrite: false });
-      scene.add(new THREE.Points(geo, mat));
-      let mx = 0, t = 0;
-      document.addEventListener('mousemove', e => { mx = (e.clientX / innerWidth - .5) * .25; });
-      window.addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
-      const stars = scene.children[0];
-      (function render() { requestAnimationFrame(render); t += 0.00022; stars.rotation.y = t + mx * .15; renderer.render(scene, camera); })();
-    })();
+  /* ── Guild card stats fetch ── */
+  (function () {
+    var cards = document.querySelectorAll('.guild-card-stats[data-gid]');
+    cards.forEach(function (el) {
+      var gid = el.getAttribute('data-gid');
+      fetch('/api/guild-stats/' + gid)
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d) return;
+          var tot = el.querySelector('.gcs-total');
+          var onl = el.querySelector('.gcs-online');
+          if (tot && d.memberCount != null) tot.textContent = Number(d.memberCount).toLocaleString();
+          if (onl && d.onlineCount  != null) onl.textContent = Number(d.onlineCount).toLocaleString();
+        })
+        .catch(function () {});
+    });
+  })();
   </script>
+
+  <%- include('partials/bg_stars', { bgOpacity: 0.55 }) %>
 
   <!-- Page transitions -->
   <div id="ov"
@@ -1449,6 +1448,29 @@
     }
 
     /* ── Language select ── */
+    /* Custom dropdown wiring */
+    (function () {
+      var wrap=document.getElementById('lcs-wrap-home'),btn=document.getElementById('lcs-btn-home');
+      var flag=document.getElementById('lcs-flag-home'),lbl=document.getElementById('lcs-label-home');
+      var sel=document.getElementById('lang-select-home');
+      if(!wrap||!btn||!sel)return;
+      function openM(){wrap.classList.add('open');btn.setAttribute('aria-expanded','true');}
+      function closeM(){wrap.classList.remove('open');btn.setAttribute('aria-expanded','false');}
+      btn.addEventListener('click',function(e){e.stopPropagation();wrap.classList.contains('open')?closeM():openM();});
+      document.addEventListener('click',closeM);
+      document.addEventListener('keydown',function(e){if(e.key==='Escape')closeM();});
+      wrap.querySelectorAll('.lcs-item').forEach(function(item){
+        item.addEventListener('click',function(e){
+          e.stopPropagation();var val=item.getAttribute('data-value');
+          if(flag){var fi=flag.querySelector('.fi');if(fi){fi.className='fi fi-'+item.getAttribute('data-flag');}}
+          if(lbl)lbl.textContent=item.getAttribute('data-label')||val;
+          wrap.querySelectorAll('.lcs-item').forEach(function(i){i.classList.remove('lcs-active');});
+          item.classList.add('lcs-active');closeM();
+          sel.value=val;sel.dispatchEvent(new Event('change',{bubbles:true}));
+        });
+        item.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();item.click();}});
+      });
+    })();
     const langSelectHome = document.getElementById('lang-select-home');
     if (langSelectHome) {
       langSelectHome.addEventListener('change', function () {
@@ -1466,7 +1488,12 @@
     }
     document.querySelectorAll('a.nav-link, a.manage-btn, a#logout-link').forEach(a => {
       a.addEventListener('click', function (e) {
-        e.preventDefault(); fadeOut(this.href);
+        e.preventDefault();
+        if (this.classList.contains('manage-btn')) {
+          var parts = this.href.split('/dashboard/');
+          if (parts[1]) sessionStorage.setItem('cn-show-welcome', parts[1].split('?')[0]);
+        }
+        fadeOut(this.href);
       });
     });
   </script>

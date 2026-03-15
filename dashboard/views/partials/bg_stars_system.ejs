@@ -1,0 +1,61 @@
+<%
+  /* System-settings variant — transparent bg, white stars, auto-rotate */
+%><script>
+(function () {
+  'use strict';
+  var canvas = document.getElementById('c');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    canvas.style.display = 'none';
+    return;
+  }
+
+  var isMobile = window.innerWidth <= 768;
+  var N = isMobile ? 500 : 1800;
+  var OP = 0.55, SZ = 1.1, SP = 0.00015;
+  var SPREAD = 2000, ZDIST = 600, FOV = 600;
+  var W, H, stars = [], t = 0, raf;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  function init() {
+    stars = [];
+    for (var i = 0; i < N; i++) stars.push({
+      x: (Math.random() - 0.5) * SPREAD,
+      y: (Math.random() - 0.5) * SPREAD,
+      z: Math.random() * SPREAD,
+    });
+  }
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    t += SP;
+    var cos = Math.cos(t), sin = Math.sin(t);
+    for (var i = 0; i < N; i++) {
+      var s = stars[i];
+      var rx = s.x * cos - s.z * sin;
+      var rz = s.x * sin + s.z * cos;
+      var d  = FOV / (FOV + rz + ZDIST);
+      var sx = rx * d + W * 0.5;
+      var sy = s.y * d + H * 0.5;
+      if (sx < 0 || sx > W || sy < 0 || sy > H || d <= 0) continue;
+      var a = Math.min(d * OP * 2, 0.8);
+      ctx.beginPath();
+      ctx.arc(sx, sy, Math.max(SZ * d, 0.4), 0, 6.2832);
+      ctx.fillStyle = 'rgba(255,255,255,' + a.toFixed(2) + ')';
+      ctx.fill();
+    }
+    raf = requestAnimationFrame(draw);
+  }
+
+  resize(); init(); draw();
+  window.addEventListener('resize', function () { resize(); init(); });
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) cancelAnimationFrame(raf); else draw();
+  });
+})();
+</script>

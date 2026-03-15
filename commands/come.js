@@ -4,7 +4,7 @@
  * https://discord.gg/UvEYbFd2rj
  */
 
-const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, ContainerBuilder, SectionBuilder, TextDisplayBuilder, ThumbnailBuilder, UnfurledMediaBuilder, SeparatorBuilder, SeparatorSpacingSize, MessageFlags } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 const logSystem = require('../systems/log.js');
@@ -98,27 +98,50 @@ module.exports = {
             const date = new Date().toLocaleString('en-US');
             
             try {
-                const embed = new EmbedBuilder()
-                    .setColor(settings.actions.come.color)
-                    .setTitle('استدعاء من الادارة')
-                    .setDescription(`لقد تم استدعاؤك من قبل ادارة **${guild.name}**`)
-                    .addFields(
-                        { name: 'المسؤول:', value: `${moderator.tag} (<@${moderator.id}>)`, inline: true },
-                        { name: 'المحكمة:', value: courtName, inline: true },
-                        { name: 'السبب:', value: reason },
-                        { name: 'التاريخ:', value: date }
+                const accentHex = (settings.actions.come.color || '#5865F2').replace('#', '');
+                const accentColor = parseInt(accentHex, 16);
+                const guildIcon = guild.iconURL({ dynamic: true }) || client.user.displayAvatarURL({ dynamic: true });
+
+                const section = new SectionBuilder()
+                    .addTextDisplayComponents(
+                        new TextDisplayBuilder().setContent(
+                            `## ⚠️ استدعاء من الإدارة\n` +
+                            `لقد تم استدعاؤك من قبل إدارة **${guild.name}**`
+                        )
                     )
-                    .setThumbnail(guild.iconURL({ dynamic: true }) || client.user.displayAvatarURL({ dynamic: true }))
-                    .setFooter({ 
-                        text: `Court System • ${courtName}`,
-                        iconURL: settings.court.logo || client.user.displayAvatarURL({ dynamic: true })
-                    })
-                    .setTimestamp();
-                
+                    .setThumbnailAccessory(
+                        new ThumbnailBuilder().setMedia(
+                            new UnfurledMediaBuilder().setURL(guildIcon)
+                        )
+                    );
+
+                const bodyText = [
+                    `👤 **المسؤول:** ${moderator.tag}`,
+                    `🏛️ **المحكمة:** ${courtName}`,
+                    `📝 **السبب:** ${reason}`,
+                    `🕐 **التاريخ:** ${date}`
+                ].join('\n');
+
+                const container = new ContainerBuilder()
+                    .setAccentColor(isNaN(accentColor) ? 0x5865F2 : accentColor)
+                    .addSectionComponents(section)
+                    .addSeparatorComponents(
+                        new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+                    )
+                    .addTextDisplayComponents(
+                        new TextDisplayBuilder().setContent(bodyText)
+                    )
+                    .addSeparatorComponents(
+                        new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+                    )
+                    .addTextDisplayComponents(
+                        new TextDisplayBuilder().setContent(`-# Court System • ${courtName}`)
+                    );
+
                 let messageLink = '';
                 if (!isSlash && messageId && channelId && guild.id) {
                     messageLink = `https://discord.com/channels/${guild.id}/${channelId}/${messageId}`;
-                    
+
                     const row = new ActionRowBuilder()
                         .addComponents(
                             new ButtonBuilder()
@@ -126,18 +149,13 @@ module.exports = {
                                 .setLabel('رابط الرسالة')
                                 .setStyle(ButtonStyle.Link)
                         );
-                    
-                    await user.send({ 
-                        content: 'لديك استدعاء رسمي من الادارة',
-                        embeds: [embed],
-                        components: [row]
-                    });
-                } else {
-                    await user.send({ 
-                        content: 'لديك استدعاء رسمي من الادارة',
-                        embeds: [embed]
-                    });
+                    container.addActionRowComponents(row);
                 }
+
+                await user.send({
+                    components: [container],
+                    flags: MessageFlags.IsComponentsV2
+                });
                 
             } catch (error) {
                 console.error('Error sending DM to user:', error);

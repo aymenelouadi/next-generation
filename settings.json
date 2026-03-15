@@ -204,7 +204,7 @@
             "admin": true
         },
         "kick": {
-            "label": "kick",
+            "label": "طرد",
             "aliases": [],
             "emoji": "",
             "color": "#e67e22",
@@ -696,8 +696,12 @@
     "DASHBOARD": {
         "ENABLED": true,
         "INTRO": true,
-        "SHIPS": [],
-        "OWNERS": [],
+        "SHIPS": [
+            "756947441592303707"
+        ],
+        "OWNERS": [
+            "756947441592303707"
+        ],
         "SERVERS": {
             "ADD_BOT_ON_MANY_SERVER": false,
             "SERVER_ALLOWED": [],

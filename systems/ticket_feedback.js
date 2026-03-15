@@ -108,27 +108,6 @@ async function sendFeedbackPrompt(interaction, guildId, ticket, panel, dmUser = 
     );
     container.addActionRowComponents(row);
 
-    // Only show the ephemeral reply to the interaction user if they are the
-    // ticket opener themselves (i.e. they closed their own ticket).
-    // When a staff member closes the ticket the ephemeral would go to the
-    // wrong person, so we skip it and rely on the DM below.
-    const closerIsOpener = interaction.user.id === ticket.userId;
-    if (closerIsOpener) {
-        const ephemeralPayload = {
-            components: [container],
-            flags:      MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
-        };
-        try {
-            if (typeof interaction.followUp === 'function') {
-                await interaction.followUp(ephemeralPayload);
-            } else if (typeof interaction.reply === 'function') {
-                await interaction.reply(ephemeralPayload);
-            }
-        } catch (err) {
-            console.error('[ticket_feedback] Failed to send ephemeral prompt:', err.message);
-        }
-    }
-
     // Always DM the ticket opener when a dmUser (opener) is provided.
     // This is the ONLY delivery path when the closer is a staff member.
     if (dmUser) {

@@ -1,0 +1,38 @@
+<%
+  /* ── Canvas 2D Floating Particles Partial ───────────────────────────────────
+   * Soft purple floating dots.  Used on pages without Three.js (moderation, utility).
+   * No locals needed – no configuration required.
+   * ──────────────────────────────────────────────────────────────────────── */
+%><script>
+  (function () {
+    var canvas = document.getElementById('c');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W, H, particles = [];
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    function rand(a, b) { return Math.random() * (b - a) + a; }
+    function init() {
+      resize();
+      particles = Array.from({ length: 60 }, function () { return {
+        x: rand(0, W), y: rand(0, H), r: rand(0.4, 1.4),
+        dx: rand(-0.18, 0.18), dy: rand(-0.12, 0.12),
+        o: rand(0.08, 0.28)
+      }; });
+    }
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      particles.forEach(function (p) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(167,139,250,' + p.o + ')';
+        ctx.fill();
+        p.x += p.dx; p.y += p.dy;
+        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+        if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+      });
+      requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize', resize);
+    init(); draw();
+  })();
+</script>

@@ -4,7 +4,7 @@
  * https://discord.gg/UvEYbFd2rj
  */
 
-const { SlashCommandBuilder, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, RoleSelectMenuBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, RoleSelectMenuBuilder, ContainerBuilder, TextDisplayBuilder, SeparatorBuilder, SeparatorSpacingSize, MessageFlags } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 const logSystem  = require('../systems/log.js');
@@ -44,11 +44,11 @@ module.exports = {
                 const moderator = interactionOrMessage.user || interactionOrMessage.author;
                 await logSystem.logCommandUsage({
                     interaction: interactionOrMessage,
-                    commandName: commandName,
+                    commandName: 'actions_role_jail',
                     moderator: moderator,
                     target: moderator,
                     reason: 'فتح قائمة ادارة رتبة السجن',
-                    action: commandName
+                    action: 'actions_role_jail'
                 });
             }
 
@@ -99,30 +99,40 @@ module.exports = {
 
     async getMainMenuContent(context, currentRoleId) {
         const currentRole = currentRoleId ? context.guild?.roles.cache.get(currentRoleId) : null;
-
-        const embed = new EmbedBuilder()
-            .setColor('#27ae60')
-            .setTitle('ادارة رتبة السجن')
-            .setDescription('الرتبة التي تعطى للاعضاء عند سجنهم')
-            .addFields(
-                { name: 'الرتبة الحالية', value: currentRole ? `${currentRole} (${currentRoleId})` : 'لا توجد رتبة محددة' }
-            )
-            .setFooter({ text: 'اختر الإجراء المناسب' });
+        const roleText = currentRole ? `${currentRole} \`${currentRoleId}\`` : '*لا توجد رتبة محددة*';
 
         const row = new ActionRowBuilder()
             .addComponents(
                 new ButtonBuilder()
                     .setCustomId('jail_role_set')
-                    .setLabel('تعيين رتبة')
+                    .setLabel('🔧 تعيين رتبة')
                     .setStyle(ButtonStyle.Primary),
                 new ButtonBuilder()
                     .setCustomId('jail_role_remove')
-                    .setLabel('ازالة الرتبة')
+                    .setLabel('🗑️ ازالة الرتبة')
                     .setStyle(ButtonStyle.Danger)
                     .setDisabled(!currentRoleId)
             );
 
-        return { embeds: [embed], components: [row] };
+        const container = new ContainerBuilder()
+            .setAccentColor(0x27ae60)
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent('## ⛓️ ادارة رتبة السجن')
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+            )
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(
+                    `الرتبة التي تعطى للأعضاء عند سجنهم\n\n🎭 **الرتبة الحالية:** ${roleText}`
+                )
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+            )
+            .addActionRowComponents(row);
+
+        return { components: [container], flags: MessageFlags.IsComponentsV2 };
     },
 
     async showMainMenu(context, currentRoleId, isSlash) {
@@ -197,23 +207,38 @@ module.exports = {
             rolesList += `${startIndex + index + 1}. ${role} - \`${role.id}\`\n`;
         });
 
-        const embed = new EmbedBuilder()
-            .setColor('#27ae60')
-            .setTitle(`تعيين رتبة السجن (صفحة ${page + 1}/${totalPages})`)
-            .setDescription(`**الرتب المتاحة:**\n${rolesList || 'لا توجد رتب'}`)
-            .setFooter({ text: `إجمالي الرتب: ${roles.length}` });
-
-        const components = [selectRow];
+        const innerComponents = [selectRow];
         if (navigationRow.components.length > 0) {
-            components.push(navigationRow);
+            innerComponents.push(navigationRow);
         }
-        components.push(backButton);
+        innerComponents.push(backButton);
+
+        const container = new ContainerBuilder()
+            .setAccentColor(0x27ae60)
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(
+                    `## 🔧 تعيين رتبة السجن\n-# صفحة ${page + 1} من ${totalPages} — إجمالي الرتب: ${roles.length}`
+                )
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+            )
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(rolesList || '*لا توجد رتب*')
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+            );
+
+        for (const row of innerComponents) {
+            container.addActionRowComponents(row);
+        }
 
         try {
             if (interaction.deferred || interaction.replied) {
-                await interaction.editReply({ embeds: [embed], components });
+                await interaction.editReply({ components: [container], flags: MessageFlags.IsComponentsV2 });
             } else {
-                await interaction.update({ embeds: [embed], components });
+                await interaction.update({ components: [container], flags: MessageFlags.IsComponentsV2 });
             }
         } catch (error) {
             console.error('Error in showRoleSelector:', error);
@@ -223,33 +248,45 @@ module.exports = {
     async showRoleConfirm(interaction, roleId) {
         const role = interaction.guild?.roles.cache.get(roleId);
 
-        const embed = new EmbedBuilder()
-            .setColor('#27ae60')
-            .setTitle('تأكيد تعيين الرتبة')
-            .setDescription(`هل انت متأكد من تعيين الرتبة التالية؟`)
-            .addFields(
-                { name: 'الرتبة المختارة', value: role ? `${role} - \`${role.name}\` (${roleId})` : roleId },
-                { name: 'عدد الأعضاء', value: role ? role.members.size.toString() : '0', inline: true },
-                { name: 'اللون', value: role ? role.hexColor : '#000000', inline: true }
-            );
-
         const row = new ActionRowBuilder()
             .addComponents(
                 new ButtonBuilder()
                     .setCustomId(`jail_role_confirm_${roleId}`)
-                    .setLabel('تأكيد')
+                    .setLabel('✅ تأكيد')
                     .setStyle(ButtonStyle.Success),
                 new ButtonBuilder()
                     .setCustomId('jail_role_cancel')
-                    .setLabel('الغاء')
+                    .setLabel('✖️ الغاء')
                     .setStyle(ButtonStyle.Secondary)
             );
 
+        const roleInfo = [
+            `🎭 **الرتبة:** ${role ? `${role} — \`${role.name}\`` : roleId}`,
+            `👥 **عدد الأعضاء:** ${role ? role.members.size : '0'}`,
+            `🎨 **اللون:** ${role ? role.hexColor : '#000000'}`
+        ].join('\n');
+
+        const container = new ContainerBuilder()
+            .setAccentColor(0x27ae60)
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent('## ✅ تأكيد تعيين الرتبة')
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+            )
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(`هل أنت متأكد من تعيين الرتبة التالية؟\n\n${roleInfo}`)
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+            )
+            .addActionRowComponents(row);
+
         try {
             if (interaction.deferred || interaction.replied) {
-                await interaction.editReply({ embeds: [embed], components: [row] });
+                await interaction.editReply({ components: [container], flags: MessageFlags.IsComponentsV2 });
             } else {
-                await interaction.update({ embeds: [embed], components: [row] });
+                await interaction.update({ components: [container], flags: MessageFlags.IsComponentsV2 });
             }
         } catch (error) {
             console.error('Error in showRoleConfirm:', error);
@@ -259,7 +296,7 @@ module.exports = {
     async handleRoleConfirm(interaction) {
         const roleId = interaction.customId.replace('jail_role_confirm_', '');
         if (!roleId) {
-            return interaction.update({ content: 'حدث خطأ: لم يتم تحديد رتبة', embeds: [], components: [] });
+            return interaction.update({ content: 'حدث خطأ: لم يتم تحديد رتبة', components: [] });
         }
 
         const settingsPath = path.join(__dirname, '../settings.json');

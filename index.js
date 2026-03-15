@@ -131,6 +131,20 @@ Logged in at     : ${loginTime}
         try { guildCmds.init(guild.id); } catch (e) { console.error('[guildCmds.init]', guild.id, e); }
     });
     console.log(`[guildCmds] Initialised commands.json for ${client.guilds.cache.size} guild(s).`);
+
+    // ── Auto-Leave sweep on startup ─────────────────────────────────────────
+    const srvCfg = settingsUtil.get()?.DASHBOARD?.SERVERS || {};
+    if (srvCfg.LEAVE_AUTO) {
+        const allowed = Array.isArray(srvCfg.SERVER_ALLOWED) ? srvCfg.SERVER_ALLOWED : [];
+        if (allowed.length > 0) {
+            for (const [, guild] of client.guilds.cache) {
+                if (!allowed.includes(guild.id)) {
+                    console.log(`[Auto-Leave] Startup sweep — leaving disallowed guild: ${guild.name} (${guild.id})`);
+                    try { await guild.leave(); } catch (e) { console.error('[Auto-Leave] Failed to leave guild:', e); }
+                }
+            }
+        }
+    }
 });
 
 client.on('interactionCreate', async (interaction) => {
@@ -152,16 +166,31 @@ client.on('interactionCreate', async (interaction) => {
         await command.execute(client, interaction);
     } catch (error) {
         console.error('Error handling command:', error);
-        if (!interaction.replied && !interaction.deferred) {
-            await interaction.reply({ content: cmdLang.t(lang, 'system.error'), flags: 64 });
-        } else {
-            await interaction.followUp({ content: cmdLang.t(lang, 'system.error'), flags: 64 });
+        try {
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.reply({ content: cmdLang.t(lang, 'system.error'), flags: 64 });
+            } else {
+                await interaction.followUp({ content: cmdLang.t(lang, 'system.error'), flags: 64 });
+            }
+        } catch (replyError) {
+            if (replyError.code !== 10062) console.error('Failed to send error reply:', replyError);
         }
     }
 });
 
 /* ── Log when bot joins a new guild ── */
-client.on('guildCreate', (guild) => {
+client.on('guildCreate', async (guild) => {
+    // ── Auto-Leave: check if this guild is allowed ──────────────────────────
+    const srvCfg = settingsUtil.get()?.DASHBOARD?.SERVERS || {};
+    if (srvCfg.LEAVE_AUTO) {
+        const allowed = Array.isArray(srvCfg.SERVER_ALLOWED) ? srvCfg.SERVER_ALLOWED : [];
+        if (allowed.length > 0 && !allowed.includes(guild.id)) {
+            console.log(`[Auto-Leave] Leaving disallowed guild: ${guild.name} (${guild.id})`);
+            try { await guild.leave(); } catch (e) { console.error('[Auto-Leave] Failed to leave guild:', e); }
+            return;
+        }
+    }
+
     // Initialise an isolated commands.json for this guild immediately
     try { guildCmds.init(guild.id); } catch (e) { console.error('[guildCmds.init]', guild.id, e); }
     try {

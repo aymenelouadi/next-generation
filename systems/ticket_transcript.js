@@ -6,9 +6,9 @@
 
 /**
  * systems/ticket_transcript.js
- * Generates an HTML transcript using discord-html-transcripts, saves it to
- * disk, posts it to the configured transcript channel, and optionally DMs it
- * to the ticket creator.
+ * Generates an HTML transcript using discord-transcript-v2 (supports CV2 +
+ * embeds), saves it to disk, posts it to the configured transcript channel,
+ * and optionally DMs it to the ticket creator.
  *
  * Only runs when panel.transcriptEnabled === true.
  *
@@ -30,7 +30,7 @@ const {
     MessageFlags,
 } = require('discord.js');
 
-const discordTranscripts = require('discord-html-transcripts');
+const { createTranscript, ExportReturnType } = require('discord-transcript-v2');
 
 const DB_ROOT = path.join(__dirname, '../dashboard/database');
 
@@ -59,14 +59,14 @@ async function generateTranscript(client, guildId, ticket, panel, ticketData, dm
         return { filePath: null, transcriptChannelMsgId: null };
     }
 
-    // ── 2. Generate HTML via discord-html-transcripts ─────────────────────
+    // ── 2. Generate HTML via discord-transcript-v2 ──────────────────────────
     const fileName = `transcript-${ticket.id}.html`;
     let htmlBuffer;
 
     try {
-        htmlBuffer = await discordTranscripts.createTranscript(channel, {
-            limit:      -1,        // fetch all messages
-            returnType: 'buffer',  // Buffer for disk save + reuse
+        htmlBuffer = await createTranscript(channel, {
+            limit:      -1,                      // fetch all messages
+            returnType: ExportReturnType.Buffer,  // Buffer for disk save + reuse
             filename:   fileName,
             saveImages: false,
             poweredBy:  false,

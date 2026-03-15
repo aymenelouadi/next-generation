@@ -1,0 +1,78 @@
+<%
+  var _bgN       = (typeof bgN       !== 'undefined') ? bgN       : 2800;
+  var _bgOpacity = (typeof bgOpacity !== 'undefined') ? bgOpacity : 0.45;
+  var _bgSize    = (typeof bgSize    !== 'undefined') ? bgSize    : 0.24;
+  var _bgSpeed   = (typeof bgSpeed   !== 'undefined') ? bgSpeed   : 0.00022;
+  var _bgMouseY  = (typeof bgMouseY  !== 'undefined') ? bgMouseY  : false;
+%><script type="application/json" id="bg-stars-cfg">{"n":<%- _bgN %>,"op":<%- _bgOpacity %>,"sz":<%- _bgSize %>,"sp":<%- _bgSpeed %>,"my":<%- _bgMouseY ? 'true' : 'false' %>}</script>
+<script>
+(function () {
+  'use strict';
+  var canvas = document.getElementById('c');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  /* Respect battery-saver / accessibility setting */
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    canvas.style.display = 'none';
+    return;
+  }
+
+  var cfg   = JSON.parse(document.getElementById('bg-stars-cfg').textContent);
+  var isMobile = window.innerWidth <= 768;
+  var N    = isMobile ? Math.round(cfg.n * 0.28) : cfg.n;
+  var OP   = cfg.op;
+  var SZ   = cfg.sz * 3 + 0.3;
+  var SP   = cfg.sp * 0.65;
+  var MY   = cfg.my;
+  var DEPTH = 240, FOV = 320;
+  var W, H, stars = [], mx = 0, my = 0, t = 0, raf;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  function init() {
+    stars = [];
+    for (var i = 0; i < N; i++) stars.push({
+      x: (Math.random() - 0.5) * DEPTH,
+      y: (Math.random() - 0.5) * DEPTH,
+      z: Math.random() * DEPTH,
+      r: Math.random() * SZ + 0.25,
+    });
+  }
+  function draw() {
+    ctx.fillStyle = '#040010';
+    ctx.fillRect(0, 0, W, H);
+    t += SP;
+    var cos = Math.cos(t), sin = Math.sin(t);
+    for (var i = 0; i < N; i++) {
+      var s = stars[i];
+      var rx = s.x * cos - s.z * sin + mx * 18;
+      var rz = s.x * sin + s.z * cos;
+      var d  = FOV / (FOV + rz);
+      var sx = rx * d + W * 0.5;
+      var sy = (s.y + (MY ? my * 8 : 0)) * d + H * 0.5;
+      if (sx < 0 || sx > W || sy < 0 || sy > H) continue;
+      var a = Math.min(d * OP * 1.4, 1);
+      ctx.beginPath();
+      ctx.arc(sx, sy, Math.max(s.r * d, 0.3), 0, 6.2832);
+      ctx.fillStyle = 'rgba(184,176,255,' + a.toFixed(2) + ')';
+      ctx.fill();
+    }
+    raf = requestAnimationFrame(draw);
+  }
+
+  resize(); init(); draw();
+  window.addEventListener('resize', function () { resize(); init(); });
+  document.addEventListener('mousemove', function (e) {
+    mx = (e.clientX / W - 0.5) * 0.25;
+    if (MY) my = (e.clientY / H - 0.5) * 0.15;
+  });
+  /* Pause when tab hidden — saves CPU/battery */
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) cancelAnimationFrame(raf); else draw();
+  });
+})();
+</script>

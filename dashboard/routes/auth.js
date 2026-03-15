@@ -56,8 +56,7 @@ router.get('/discord/redirect', async (req, res) => {
             bannerColor:     userInfo.banner_color || null,
             publicFlags:     Number(userInfo.public_flags || userInfo.flags || 0),
             email:           userInfo.email,
-            accessToken:     tokenData.access_token,
-            ip:              req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown',
+            ip:              req.clientIp || req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown',
             loginAt:         new Date().toISOString(),
             verified:        dashboard.CODE_ACCESS === false ? true : false,
         };
@@ -85,7 +84,7 @@ router.get('/discord/redirect', async (req, res) => {
                     username:    userInfo.username,
                     displayName: userInfo.global_name || userInfo.username,
                     avatar:      userInfo.avatar,
-                    ip:          req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown',
+                    ip:          req.clientIp || req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown',
                 });
             } catch (_) {}
             res.redirect(redirectTo);

@@ -1,6 +1,246 @@
 {
   "entries": [
     {
+      "id": "d77f7a6a-fdc8-4f2c-863d-0c8f5e0894b1",
+      "timestamp": "2026-03-14T23:28:28.418Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "8695bc93-f145-48db-b45a-426784807187",
+      "timestamp": "2026-03-14T23:10:32.068Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "a6f68018-ad2d-40a8-8cb8-66788c9cb10b",
+      "timestamp": "2026-03-14T22:41:12.354Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "ea04de97-b7c2-4052-8df8-e95ee83ce1c7",
+      "timestamp": "2026-03-14T21:57:02.892Z",
+      "type": "guild_join",
+      "guildId": "1347992395391832188",
+      "guildName": "Pepo Sp Black 🌙",
+      "guildIcon": "https://cdn.discordapp.com/icons/1347992395391832188/953827c543ea00d4ad712e33e4f21885.png?size=64",
+      "memberCount": 4699,
+      "ownerId": "427816027254947840"
+    },
+    {
+      "id": "337f4a61-7541-4576-9bd4-c8d2cf66a9db",
+      "timestamp": "2026-03-14T21:26:34.027Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "652247da-93b4-4c5f-8f16-ef77f99db1ef",
+      "timestamp": "2026-03-14T20:18:30.111Z",
+      "type": "guild_join",
+      "guildId": "1323057959806177421",
+      "guildName": "test Code Nexus..",
+      "guildIcon": "https://cdn.discordapp.com/icons/1323057959806177421/bfab920f713cddbee609bf661aa05d8b.png?size=64",
+      "memberCount": 11,
+      "ownerId": "756947441592303707"
+    },
+    {
+      "id": "8b796e2c-27f1-468d-bc4b-ad4e0feaf864",
+      "timestamp": "2026-03-14T18:17:24.689Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "b165b556-746c-440c-8f95-6b62f87c2d9e",
+      "timestamp": "2026-03-13T10:05:43.944Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "40fd7a72-6d4c-4d9e-b8ac-4d1059eb52d4",
+      "timestamp": "2026-03-12T09:48:10.044Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "e17c2b1c-7cee-4d84-b898-7304daa6c0d7",
+      "timestamp": "2026-03-11T15:30:28.668Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "e30e9d3b-950d-4c83-a35e-d9b10e844e87",
+      "timestamp": "2026-03-11T15:01:58.255Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "6121449c-d0f5-4a13-becd-52c8b2cf520e",
+      "timestamp": "2026-03-11T14:49:21.587Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "3f00e501-9588-49b2-b1b1-672dbdff69b7",
+      "timestamp": "2026-03-11T14:24:18.716Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "2cfa8e8b-e318-47c8-b702-ee2184ca322d",
+      "timestamp": "2026-03-11T12:45:39.517Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "2478a535-434e-45c8-8ae3-c0eaa3516d01",
+      "timestamp": "2026-03-11T12:42:35.545Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "80bc58d6-3ceb-4ca2-9819-2e1edcbe3152",
+      "timestamp": "2026-03-11T12:41:10.028Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "73ee8a2b-5926-4e6d-9415-6b2312a4ea94",
+      "timestamp": "2026-03-11T12:24:53.589Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "94f6aa36-df8c-44e4-b549-549317f47ad0",
+      "timestamp": "2026-03-11T02:53:01.360Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "995dd9b8-c896-484b-913f-a6712f046d9c",
+      "timestamp": "2026-03-11T01:45:25.888Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "3e1bfe47-8b51-4721-b87e-db115239b35f",
+      "timestamp": "2026-03-11T01:26:52.416Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "e27bf4da-70fd-4da5-8e62-16b1779c7b72",
+      "timestamp": "2026-03-11T00:06:02.260Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "5785c615-9dd8-469e-b2ff-fa7739a79908",
+      "timestamp": "2026-03-10T22:47:28.087Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
+      "id": "911c95a8-8bc8-43a4-b377-5f47b0d7f610",
+      "timestamp": "2026-03-10T18:30:11.568Z",
+      "type": "guild_join",
+      "guildId": "1416620271154106450",
+      "guildName": "Market Nexus",
+      "guildIcon": "https://cdn.discordapp.com/icons/1416620271154106450/95a8cc2306914bac1ee8cb425d4aec4a.png?size=64",
+      "memberCount": 3,
+      "ownerId": "756947441592303707"
+    },
+    {
+      "id": "98b4fed7-61ff-47c0-9056-34380bea37d4",
+      "timestamp": "2026-03-10T15:08:44.879Z",
+      "type": "login",
+      "userId": "756947441592303707",
+      "username": "a2cz",
+      "displayName": "Shaad",
+      "avatar": "4d156fd8691d3705322dd0e183bbe86e",
+      "ip": "::1"
+    },
+    {
       "id": "f4d5e9c5-ee80-4999-ba52-145b6a51e745",
       "timestamp": "2026-03-08T01:54:49.373Z",
       "type": "login",
@@ -321,17 +561,5 @@
       "ip": "::1"
     }
   ],
-  "clearRequest": {
-    "id": "e9d5936e-2137-41fd-9e50-4162b47c9a73",
-    "requestedBy": "756947441592303707",
-    "requestedByName": "a2cz",
-    "timestamp": "2026-03-06T23:27:30.381Z",
-    "needed": [
-      "510649116590604300"
-    ],
-    "approvals": [
-      "756947441592303707"
-    ],
-    "rejections": []
-  }
+  "clearRequest": null
 }

@@ -1,0 +1,156 @@
+<%#
+  ── Shared Footer Partial ────────────────────────────────────────────────────
+  Renders the site footer + injects global dark/light theme system.
+
+  Works on every page:
+    • Guild pages  → picks up --nav-w / --mgmt-w CSS vars (defined per page)
+    • Other pages  → falls back to 0 px (no sidebar offset)
+
+  Required locals: t  (translation object, always provided by the router)
+  ───────────────────────────────────────────────────────────────────────────%>
+
+<style>
+  /* ── Footer ──────────────────────────────────────────── */
+  .site-footer {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 20px 20px 36px;
+    border-top: 1px solid rgba(255, 255, 255, .05);
+    margin-top: 8px;
+    margin-left: calc(var(--nav-w, 0px) + var(--mgmt-w, 0px));
+  }
+  [dir="rtl"] .site-footer {
+    margin-left: 0;
+    margin-right: calc(var(--nav-w, 0px) + var(--mgmt-w, 0px));
+  }
+  @media (max-width: 900px) {
+    .site-footer { margin-left: 0 !important; margin-right: 0 !important; }
+  }
+  .site-footer .footer-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    text-decoration: none;
+  }
+  .site-footer .footer-logo img {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    filter: drop-shadow(0 4px 18px rgba(124, 58, 237, .35));
+  }
+  .site-footer .footer-logo span {
+    font-family: 'Orbitron', monospace;
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    background: linear-gradient(135deg, var(--white, #f1f5f9), var(--purple-l, #a78bfa));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .site-footer p {
+    font-size: .68rem;
+    color: rgba(203, 194, 255, .3);
+  }
+
+  /* ── Theme toggle button ──────────────────────────────── */
+  .theme-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 12px;
+    background: var(--surface, rgba(255,255,255,.04));
+    border: 1px solid var(--border, rgba(124,58,237,.2));
+    border-radius: 10px;
+    color: var(--white, #f8fafc);
+    font-size: .82rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background .18s, border-color .18s;
+    margin-bottom: 6px;
+    text-align: start;
+  }
+  .theme-toggle-btn:hover {
+    background: var(--surface-2, rgba(255,255,255,.07));
+    border-color: var(--border-h, rgba(124,58,237,.5));
+  }
+  .theme-toggle-btn .ttb-label { flex: 1; font-weight: 500; }
+  .theme-toggle-btn .ttb-badge {
+    font-size: .67rem;
+    padding: 2px 7px;
+    border-radius: 20px;
+    background: rgba(124, 58, 237, .15);
+    color: var(--purple-l, #a78bfa);
+    border: 1px solid rgba(124, 58, 237, .2);
+    white-space: nowrap;
+  }
+
+  /* ── Light theme overrides are in partials/head_theme.ejs (<head>) ── */
+  /* Moving them there prevents FOUC when navigating between pages.     */
+
+  /* ── Base ── */
+  /* ── Site footer ── */
+  html[data-theme="light"] .site-footer { border-top-color: rgba(124,58,237,.12); }
+  html[data-theme="light"] .site-footer p { color: rgba(80,40,160,.45); }
+</style>
+
+<footer class="site-footer">
+  <a class="footer-logo" href="https://discord.gg/jfFSmVM5kK" target="_blank" rel="noopener">
+    <img
+      src="https://res.cloudinary.com/difucqa9h/image/upload/v1770643265/discord_images/yaix1pbnbdv3srvf12gl.png"
+      alt="CODE NEXUS" />
+    <span>CODE NEXUS</span>
+  </a>
+  <p><%= t.home.footerRights %></p>
+</footer>
+
+<script>
+/* ── Theme toggle logic (runs after DOM ready) ── */
+(function () {
+  var _isAr = document.documentElement.lang === 'ar';
+  var _labels = {
+    light: { icon: 'moon',  label: _isAr ? 'الوضع الليلي' : 'Dark Mode',  badge: _isAr ? 'فاتح'  : 'Light' },
+    dark:  { icon: 'sun',   label: _isAr ? 'الوضع النهاري' : 'Light Mode', badge: _isAr ? 'داكن'  : 'Dark'  }
+  };
+
+  function _syncButtons(theme) {
+    var d = _labels[theme] || _labels.dark;
+    document.querySelectorAll('.theme-toggle-btn').forEach(function (btn) {
+      var ico   = btn.querySelector('[data-lucide]');
+      var lbl   = btn.querySelector('.ttb-label');
+      var badge = btn.querySelector('.ttb-badge');
+      if (ico)   ico.setAttribute('data-lucide', d.icon);
+      if (lbl)   lbl.textContent = d.label;
+      if (badge) badge.textContent = d.badge;
+    });
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function _applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('cn-theme', theme);
+    _syncButtons(theme);
+  }
+
+  /* Wire up buttons once DOM is ready */
+  function _init() {
+    var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+    _syncButtons(cur);
+    document.querySelectorAll('.theme-toggle-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var now = document.documentElement.getAttribute('data-theme') || 'dark';
+        _applyTheme(now === 'dark' ? 'light' : 'dark');
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _init);
+  } else {
+    _init();
+  }
+})();
+</script>

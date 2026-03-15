@@ -4,7 +4,7 @@
  * https://discord.gg/UvEYbFd2rj
  */
 
-const { SlashCommandBuilder, PermissionFlagsBits, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelectMenuOptionBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuOptionBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ContainerBuilder, TextDisplayBuilder, SeparatorBuilder, SeparatorSpacingSize, MessageFlags } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 const logSystem  = require('../systems/log.js');
@@ -39,16 +39,16 @@ module.exports = {
                 const moderator = interactionOrMessage.user || interactionOrMessage.author;
                 await logSystem.logCommandUsage({
                     interaction: interactionOrMessage,
-                    commandName: commandName,
+                    commandName: 'actions_color',
                     moderator: moderator,
                     target: moderator,
                     reason: 'فتح قائمة تغيير الوان الأوامر',
-                    action: commandName
+                    action: 'actions_color'
                 });
             }
 
             const commands = Object.entries(settings.actions)
-                .filter(([key]) => key !== commandName)
+                .filter(([key]) => key !== 'actions_color')
                 .map(([key, cmd]) => ({
                     id: key,
                     name: cmd.label || key,
@@ -120,23 +120,45 @@ module.exports = {
             }
         }
 
-        const embed = new EmbedBuilder()
-            .setColor('#5865F2')
-            .setTitle('التحكم في ألوان الأوامر')
-            .setDescription(`اختر الأمر لتغيير لونه\nملاحظة: يجب إدخال اللون بصيغة Hex مثل #27ae60\nإجمالي الأوامر: ${commands.length}`)
-            .setFooter({ text: `الصفحة ${page + 1} من ${totalPages}` });
+        const container = new ContainerBuilder()
+            .setAccentColor(0x5865F2)
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent('## 🎨 التحكم في ألوان الأوامر')
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+            )
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(
+                    `اختر الأمر لتغيير لونه\nيجب إدخال اللون بصيغة Hex مثل **#27ae60**\n\n📋 **إجمالي الأوامر:** ${commands.length}`
+                )
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+            );
+
+        for (const row of components) {
+            container.addActionRowComponents(row);
+        }
+
+        container.addTextDisplayComponents(
+            new TextDisplayBuilder().setContent(`-# صفحة ${page + 1} من ${totalPages}`)
+        );
+
+        const cv2Flags = MessageFlags.IsComponentsV2;
+        const cv2EphFlags = MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral;
 
         try {
             if (context.isButton?.() || context.isStringSelectMenu?.()) {
-                await context.update({ embeds: [embed], components });
+                await context.update({ components: [container], flags: cv2Flags });
             } else if (isSlash) {
                 if (context.replied || context.deferred) {
-                    await context.editReply({ embeds: [embed], components });
+                    await context.editReply({ components: [container], flags: cv2Flags });
                 } else {
-                    await context.reply({ embeds: [embed], components, ephemeral: true });
+                    await context.reply({ components: [container], flags: cv2EphFlags });
                 }
             } else {
-                await context.reply({ embeds: [embed], components });
+                await context.reply({ components: [container], flags: cv2Flags });
             }
         } catch (error) {
             console.error('Error in showCommandMenu:', error);

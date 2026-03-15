@@ -75,7 +75,7 @@ function _hex(hex) {
 async function openTicket(interaction, panelId, panel, ticketData) {
     // ─ 0. If panel has a form, show Discord modal first ─────────────────────────
     if (panel.formEnabled && Array.isArray(panel.formQuestions) && panel.formQuestions.length > 0) {
-        return _showFormModal(interaction, panelId, panel);
+        return await _showFormModal(interaction, panelId, panel);
     }
 
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
@@ -272,7 +272,12 @@ async function closeTicket(interaction, ticketId, reason = '') {
                     .setMaxLength(300)
             )
         );
-        return interaction.showModal(modal);
+        try {
+            await interaction.showModal(modal);
+        } catch (err) {
+            if (err.code !== 10062) throw err;
+        }
+        return;
     }
 
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
@@ -465,7 +470,11 @@ async function handleAddUserButton(interaction, ticketId) {
                 .setMaxLength(30)
         )
     );
-    await interaction.showModal(modal);
+    try {
+        await interaction.showModal(modal);
+    } catch (err) {
+        if (err.code !== 10062) throw err;
+    }
 }
 
 async function handleAddUserModal(interaction) {
@@ -520,7 +529,13 @@ async function handleRemoveUserButton(interaction, ticketId) {
                 .setMaxLength(30)
         )
     );
-    await interaction.showModal(modal);
+    try {
+        await interaction.showModal(modal);
+    } catch (err) {
+        if (err.code !== 10062) throw err;
+        // Interaction token expired before we could show the modal — silently ignore.
+        // The user can simply click the button again.
+    }
 }
 
 async function handleRemoveUserModal(interaction) {
@@ -602,7 +617,7 @@ async function handleMpRefresh(interaction, mpId) {
  * Shows the panel's question form as a Discord modal.
  * customId: ticket_form_<panelId>
  */
-function _showFormModal(interaction, panelId, panel) {
+async function _showFormModal(interaction, panelId, panel) {
     const modal = new ModalBuilder()
         .setCustomId(`ticket_form_${panelId}`)
         .setTitle((panel.panelTitle || 'Open Ticket').substring(0, 45));
@@ -619,7 +634,11 @@ function _showFormModal(interaction, panelId, panel) {
         if (q.placeholder) inp.setPlaceholder(q.placeholder.substring(0, 100));
         modal.addComponents(new ActionRowBuilder().addComponents(inp));
     }
-    return interaction.showModal(modal);
+    try {
+        await interaction.showModal(modal);
+    } catch (err) {
+        if (err.code !== 10062) throw err;
+    }
 }
 
 /**
@@ -758,28 +777,28 @@ function registerAfterHandlers(client) {
                 const id = interaction.customId;
 
                 if (id.startsWith('ticket_close_')) {
-                    return closeTicket(interaction, id.slice('ticket_close_'.length));
+                    return await closeTicket(interaction, id.slice('ticket_close_'.length));
                 }
                 if (id.startsWith('ticket_claim_')) {
-                    return claimTicket(interaction, id.slice('ticket_claim_'.length));
+                    return await claimTicket(interaction, id.slice('ticket_claim_'.length));
                 }
                 if (id.startsWith('ticket_unclaim_')) {
-                    return unclaimTicket(interaction, id.slice('ticket_unclaim_'.length));
+                    return await unclaimTicket(interaction, id.slice('ticket_unclaim_'.length));
                 }
                 if (id.startsWith('ticket_add_')) {
-                    return handleAddUserButton(interaction, id.slice('ticket_add_'.length));
+                    return await handleAddUserButton(interaction, id.slice('ticket_add_'.length));
                 }
                 if (id.startsWith('ticket_remove_')) {
-                    return handleRemoveUserButton(interaction, id.slice('ticket_remove_'.length));
+                    return await handleRemoveUserButton(interaction, id.slice('ticket_remove_'.length));
                 }
                 if (id.startsWith('ticket_mp_refresh_')) {
-                    return handleMpRefresh(interaction, id.slice('ticket_mp_refresh_'.length));
+                    return await handleMpRefresh(interaction, id.slice('ticket_mp_refresh_'.length));
                 }
                 if (id.startsWith('ticket_rules_')) {
-                    return handleRulesButton(interaction, id.slice('ticket_rules_'.length));
+                    return await handleRulesButton(interaction, id.slice('ticket_rules_'.length));
                 }
                 if (id.startsWith('ticket_escalate_') && !id.startsWith('ticket_escalate_sel_')) {
-                    return handleEscalateButton(interaction, id.slice('ticket_escalate_'.length));
+                    return await handleEscalateButton(interaction, id.slice('ticket_escalate_'.length));
                 }
             }
 
@@ -787,10 +806,10 @@ function registerAfterHandlers(client) {
             if (interaction.isStringSelectMenu()) {
                 const id = interaction.customId;
                 if (id.startsWith('ticket_action_sel_')) {
-                    return handleActionSelect(interaction, id.slice('ticket_action_sel_'.length));
+                    return await handleActionSelect(interaction, id.slice('ticket_action_sel_'.length));
                 }
                 if (id.startsWith('ticket_escalate_sel_')) {
-                    return handleEscalateSelect(interaction);
+                    return await handleEscalateSelect(interaction);
                 }
             }
 
@@ -799,19 +818,21 @@ function registerAfterHandlers(client) {
                 const id = interaction.customId;
 
                 if (id.startsWith('ticket_form_')) {
-                    return handleFormModal(interaction);
+                    return await handleFormModal(interaction);
                 }
                 if (id.startsWith('ticket_close_reason_')) {
-                    return handleCloseReasonModal(interaction);
+                    return await handleCloseReasonModal(interaction);
                 }
                 if (id.startsWith('ticket_adduser_modal_')) {
-                    return handleAddUserModal(interaction);
+                    return await handleAddUserModal(interaction);
                 }
                 if (id.startsWith('ticket_removeuser_modal_')) {
-                    return handleRemoveUserModal(interaction);
+                    return await handleRemoveUserModal(interaction);
                 }
             }
         } catch (err) {
+            // 10062 = Unknown interaction (token expired — nothing we can do)
+            if (err.code === 10062) return;
             console.error('[ticket_after]', err);
             const msg = { content: '❌ An error occurred.', flags: MessageFlags.Ephemeral };
             if (interaction.replied || interaction.deferred) interaction.followUp(msg).catch(() => {});
@@ -1290,11 +1311,11 @@ async function handleEscalateSelect(interaction) {
 // ─────────────────────────────────────────────────────────────────────────────
 async function handleActionSelect(interaction, ticketId) {
     const action = interaction.values[0];
-    if (action === 'close')   return closeTicket(interaction, ticketId);
-    if (action === 'claim')   return claimTicket(interaction, ticketId);
-    if (action === 'unclaim') return unclaimTicket(interaction, ticketId);
-    if (action === 'add')     return handleAddUserButton(interaction, ticketId);
-    if (action === 'remove')  return handleRemoveUserButton(interaction, ticketId);
+    if (action === 'close')   return await closeTicket(interaction, ticketId);
+    if (action === 'claim')   return await claimTicket(interaction, ticketId);
+    if (action === 'unclaim') return await unclaimTicket(interaction, ticketId);
+    if (action === 'add')     return await handleAddUserButton(interaction, ticketId);
+    if (action === 'remove')  return await handleRemoveUserButton(interaction, ticketId);
     return interaction.reply({ content: '❌ Unknown action.', flags: MessageFlags.Ephemeral });
 }
 

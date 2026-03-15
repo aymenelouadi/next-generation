@@ -10,27 +10,38 @@ const http          = require('http');
 const { Server: SocketServer } = require('socket.io');
 
 /* ── settings.json helpers ── */
+let _cfgCache = null, _cfgCacheAt = 0;
+const _cfgTTL = 4000; // 4 s — fast enough for live edits
 function readSettingsCfg() {
+    const now = Date.now();
+    if (_cfgCache && (now - _cfgCacheAt) < _cfgTTL) return _cfgCache;
     try {
         let raw = require('fs').readFileSync(require('path').join(__dirname, '../settings.json'), 'utf8');
         raw = raw.replace(/^\uFEFF/, '');
-        return JSON.parse(raw);
-    } catch (_) { return {}; }
+        _cfgCache   = JSON.parse(raw);
+        _cfgCacheAt = now;
+        return _cfgCache;
+    } catch (_) { return _cfgCache || {}; }
 }
 function writeSettingsCfg(cfg) {
     require('fs').writeFileSync(require('path').join(__dirname, '../settings.json'), JSON.stringify(cfg, null, 4), 'utf8');
+    _cfgCache   = cfg;           // keep cache in sync
+    _cfgCacheAt = Date.now();
 }
 function getIsShip(userId) {
     const cfg   = readSettingsCfg();
     const ships = (cfg.DASHBOARD && Array.isArray(cfg.DASHBOARD.SHIPS)) ? cfg.DASHBOARD.SHIPS : [];
     return ships.includes(String(userId));
 }
+const compression = require('compression');
 const session    = require('express-session');
 const path       = require('path');
 const fs         = require('fs');
 const multer     = require('multer');
 const requestIp  = require('request-ip');
 const geoip      = require('geoip-lite');
+const helmet     = require('helmet');
+const { rateLimit, ipKeyGenerator } = require('express-rate-limit');
 const authRouter = require('./routes/auth');
 const { langMiddleware } = require('./utils/lang');
 const dashLogs = require('./utils/dashboardLogs');
@@ -41,12 +52,18 @@ if (!fs.existsSync(UPLOADS_ROOT)) fs.mkdirSync(UPLOADS_ROOT, { recursive: true }
 
 const app        = express();
 const httpServer = http.createServer(app);
-const io         = new SocketServer(httpServer, {
-    cors: { origin: '*', methods: ['GET', 'POST'] },
-    transports: ['websocket', 'polling'],
-});
 const PORT    = parseInt(process.env.DASHBOARD_PORT, 10) || 2000;
 const IS_PROD = (process.env.QAUTH_LINK || '').startsWith('https://');
+
+// Restrict Socket.io to the dashboard's own origin in production
+const _wsOrigin = IS_PROD
+    ? (() => { try { return new URL(process.env.QAUTH_LINK).origin; } catch (_) { return false; } })()
+    : `http://localhost:${PORT}`;
+
+const io         = new SocketServer(httpServer, {
+    cors: { origin: _wsOrigin, methods: ['GET', 'POST'] },
+    transports: ['websocket', 'polling'],
+});
 
 // ── Socket.io: clients join a room per guildId ────────────────────────────
 io.on('connection', socket => {
@@ -61,12 +78,33 @@ io.on('connection', socket => {
 if (IS_PROD) app.set('trust proxy', 1);
 
 /* ── Middleware ─────────────────────────────────────── */
+// Security headers (X-Frame-Options, X-Content-Type-Options, HSTS, etc.)
+app.use(helmet({
+    contentSecurityPolicy: false, // managed per-page via EJS meta tags
+    crossOriginEmbedderPolicy: false,
+}));
+// Real IP detection (handles X-Forwarded-For safely)
+app.use(requestIp.mw());
+// Gzip / Brotli compression — reduces HTML/JS/CSS size by ~65%
+app.use(compression({ level: 6 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+// Static assets with aggressive browser caching (7 days for JS/CSS/images)
+app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: '7d',
+    etag: true,
+    lastModified: true,
+}));
 
 app.use(session({
-    secret: process.env.SESSION || 'nexus-secret-key',
+    secret: (() => {
+        const s = process.env.SESSION;
+        if (!s) {
+            if (IS_PROD) console.error('\x1b[31m[Security] SESSION env variable is not set! Set a strong random secret in .env to protect user sessions.\x1b[0m');
+            else console.warn('\x1b[33m[Security] SESSION env not set — using insecure fallback. Add SESSION=<random> to .env\x1b[0m');
+        }
+        return s || 'nexus-secret-key';
+    })(),
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -82,6 +120,7 @@ app.use(langMiddleware);
 // ── Serve ApexCharts locally (avoids CDN dependency) ─────────────────────
 try {
     app.get('/apexcharts.js', (_req, res) => {
+        res.set('Cache-Control', 'public, max-age=604800'); // 7 days
         res.sendFile(require.resolve('apexcharts/dist/apexcharts.min.js'));
     });
 } catch (_e) { /* apexcharts not in node_modules, CDN fallback used */ }
@@ -89,6 +128,8 @@ try {
 /* ── View engine ────────────────────────────────────── */
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+// Cache compiled EJS templates (avoids re-parsing on every request)
+app.enable('view cache');
 
 /* ── Routes ─────────────────────────────────────────── */
 app.use('/auth', authRouter);
@@ -130,7 +171,23 @@ app.get('/verify', (req, res) => {
     res.render('verify', { user: req.session.user, error, t: req.t, lang: req.lang, supported: res.locals.supported });
 });
 
-app.post('/verify', (req, res) => {
+// Rate-limit: max 10 code attempts per 15 min per IP
+const _verifyLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => ipKeyGenerator(req.clientIp || req.ip),
+    handler: (_req, res) => res.status(429).render('verify', {
+        user: _req.session?.user || {},
+        error: 'too_many_attempts',
+        t: _req.t,
+        lang: _req.lang,
+        supported: res.locals?.supported,
+    }),
+});
+
+app.post('/verify', _verifyLimiter, (req, res) => {
     if (!req.session?.user) return res.redirect('/?error=unauthorized');
     if (req.session.user.verified) return res.redirect('/dashboard');
     const { code } = req.body;
@@ -339,7 +396,7 @@ app.get('/settings/bot-guilds', require('./middleware/auth'), async (req, res) =
 app.post('/settings/guild-leave', require('./middleware/auth'), express.json(), async (req, res) => {
     if (!getIsShip(req.session.user?.id)) return res.status(403).json({ error: 'Forbidden' });
     const { guildId, deleteData } = req.body;
-    if (!guildId) return res.status(400).json({ error: 'guildId required' });
+    if (!guildId || !/^\d{17,20}$/.test(String(guildId))) return res.status(400).json({ error: 'Invalid guildId' });
     const { getClient } = require('./utils/botClient');
     const botClient = getClient();
     if (!botClient) return res.status(503).json({ error: 'Bot not available' });
@@ -1265,6 +1322,7 @@ app.post('/dashboard/:guildId/tickets/reset', require('./middleware/auth'), (req
     const fs      = require('fs');
     const path    = require('path');
     const { guildId } = req.params;
+    if (!/^\d{17,20}$/.test(guildId)) return res.status(400).json({ error: 'Invalid guildId' });
     if (!req.session.guilds?.find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
     const files = ['tickets','open_tickets','ticket_feedback','ticket_cooldowns'];
     files.forEach(f => {
@@ -1752,6 +1810,32 @@ app.get('/api/user/:userId', require('./middleware/auth'), async (req, res) => {
         if (e.code === 10013) return res.status(404).json({ error: 'User not found' });
         return res.status(500).json({ error: 'Error fetching user' });
     }
+});
+
+/* ── Guild stats API (member count + online count for topbar) ── */
+app.get('/api/guild-stats/:guildId', require('./middleware/auth'), (req, res) => {
+    const { getClient } = require('./utils/botClient');
+    const botClient = getClient();
+    const { guildId } = req.params;
+
+    // Security: user must have access to this guild
+    const raw = req.session.guilds || [];
+    if (!raw.find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
+
+    if (!botClient) return res.json({ memberCount: null, onlineCount: null });
+
+    const guild = botClient.guilds.cache.get(guildId);
+    if (!guild) return res.json({ memberCount: null, onlineCount: null });
+
+    const memberCount = guild.memberCount || 0;
+    // online = members whose presence status is not 'offline' (requires GUILD_PRESENCES intent)
+    let onlineCount = null;
+    try {
+        const presenceCount = guild.presences?.cache?.filter(p => p.status && p.status !== 'offline').size;
+        if (typeof presenceCount === 'number') onlineCount = presenceCount;
+    } catch (_) {}
+
+    return res.json({ memberCount, onlineCount });
 });
 
 /* ── Protection ─────────────────────────────────────── */

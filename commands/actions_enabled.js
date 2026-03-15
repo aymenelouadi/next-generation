@@ -4,7 +4,7 @@
  * https://discord.gg/UvEYbFd2rj
  */
 
-const { SlashCommandBuilder, PermissionFlagsBits, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuOptionBuilder, ContainerBuilder, TextDisplayBuilder, SeparatorBuilder, SeparatorSpacingSize, MessageFlags } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 const logSystem  = require('../systems/log.js');
@@ -36,7 +36,7 @@ module.exports = {
         const commandConfig = settings.actions['actions_enabled'];
 
             const commands = Object.entries(settings.actions)
-                .filter(([key]) => key !== commandName)
+                .filter(([key]) => key !== 'actions_enabled')
                 .map(([key, cmd]) => ({
                     id: key,
                     name: cmd.label || key,
@@ -49,11 +49,11 @@ module.exports = {
                 const moderator = interactionOrMessage.user || interactionOrMessage.author;
                 await logSystem.logCommandUsage({
                     interaction: interactionOrMessage,
-                    commandName: commandName,
+                    commandName: 'actions_enabled',
                     moderator: moderator,
                     target: moderator,
                     reason: 'فتح قائمة تفعيل الاوامر',
-                    action: commandName
+                    action: 'actions_enabled'
                 });
             }
 
@@ -130,22 +130,44 @@ module.exports = {
         const enabledCount = commands.filter(c => c.enabled).length;
         const disabledCount = commands.filter(c => !c.enabled).length;
 
-        const embed = new EmbedBuilder()
-            .setColor('#5865F2')
-            .setTitle('التحكم في تفعيل الاوامر')
-            .setDescription(`اختر الأمر لتغيير حالة التفعيل\n\nمفعل: ${enabledCount}\nمعطل: ${disabledCount}\nاجمالي الاوامر: ${commands.length}`)
-            .setFooter({ text: `الصفحة ${page + 1} من ${totalPages}` });
+        const container = new ContainerBuilder()
+            .setAccentColor(0x5865F2)
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent('## ⚙️ التحكم في تفعيل الأوامر')
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+            )
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(
+                    `✅ **مفعل:** ${enabledCount}   ❌ **معطل:** ${disabledCount}   📊 **الإجمالي:** ${commands.length}`
+                )
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+            );
+
+        for (const row of components) {
+            container.addActionRowComponents(row);
+        }
+
+        container.addTextDisplayComponents(
+            new TextDisplayBuilder().setContent(`-# صفحة ${page + 1} من ${totalPages}`)
+        );
+
+        const cv2Flags = MessageFlags.IsComponentsV2;
+        const cv2EphFlags = MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral;
 
         if (context.isButton?.() || context.isStringSelectMenu?.()) {
-            await context.update({ embeds: [embed], components });
+            await context.update({ components: [container], flags: cv2Flags });
         } else if (isSlash) {
             if (context.replied || context.deferred) {
-                await context.editReply({ embeds: [embed], components });
+                await context.editReply({ components: [container], flags: cv2Flags });
             } else {
-                await context.reply({ embeds: [embed], components, ephemeral: true });
+                await context.reply({ components: [container], flags: cv2EphFlags });
             }
         } else {
-            await context.reply({ embeds: [embed], components });
+            await context.reply({ components: [container], flags: cv2Flags });
         }
     },
 
@@ -155,37 +177,51 @@ module.exports = {
         
         const command = settings.actions[commandId];
         if (!command) {
-            return interaction.update({ content: 'الأمر غير موجود في الإعدادات', embeds: [], components: [] });
+            return interaction.update({ content: 'الأمر غير موجود في الإعدادات', components: [] });
         }
         const currentStatus = command.enabled || false;
 
-        let description = `الحالة الحالية: ${currentStatus ? '✅ مفعل' : '❌ معطل'}\n\nاختر الإجراء المناسب:`;
-        if (statusMessage) description = `${statusMessage}\n\n${description}`;
+        const accentHex = (command.color || '#5865F2').replace('#', '');
+        const accentColor = parseInt(accentHex, 16);
 
-        const embed = new EmbedBuilder()
-            .setColor(command.color || '#5865F2')
-            .setTitle(command.label || commandId)
-            .setDescription(description);
+        const statusLine = currentStatus ? '✅ **الحالة:** مفعل' : '❌ **الحالة:** معطل';
+        const descLines = statusMessage ? `${statusMessage}\n\n${statusLine}` : statusLine;
 
         const row = new ActionRowBuilder()
             .addComponents(
                 new ButtonBuilder()
                     .setCustomId(`enabled_enable_${commandId}`)
-                    .setLabel('تفعيل')
+                    .setLabel('✅ تفعيل')
                     .setStyle(ButtonStyle.Success)
                     .setDisabled(currentStatus === true),
                 new ButtonBuilder()
                     .setCustomId(`enabled_disable_${commandId}`)
-                    .setLabel('تعطيل')
+                    .setLabel('❌ تعطيل')
                     .setStyle(ButtonStyle.Danger)
                     .setDisabled(currentStatus === false),
                 new ButtonBuilder()
                     .setCustomId(`enabled_back`)
-                    .setLabel('رجوع')
+                    .setLabel('↩️ رجوع')
                     .setStyle(ButtonStyle.Secondary)
             );
 
-        await interaction.update({ embeds: [embed], components: [row] });
+        const container = new ContainerBuilder()
+            .setAccentColor(isNaN(accentColor) ? 0x5865F2 : accentColor)
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(`## ${command.label || commandId}`)
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+            )
+            .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(descLines)
+            )
+            .addSeparatorComponents(
+                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small)
+            )
+            .addActionRowComponents(row);
+
+        await interaction.update({ components: [container], flags: MessageFlags.IsComponentsV2 });
     },
 
     async updateCommandStatus(commandId, newStatus) {

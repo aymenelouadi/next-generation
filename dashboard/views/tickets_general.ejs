@@ -6,10 +6,13 @@
 <!DOCTYPE html>
 <html lang="<%= t.lang %>" dir="<%= t.dir %>">
 <head>
+  <%- include('partials/head_theme') %>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= t.tickets.generalTitle %> — <%= guildInfo.name %></title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Tajawal:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -84,8 +87,6 @@
     [dir="rtl"] .nav-sidebar:hover .nav-item { padding: 0 8px 0 12px; }
     .nav-sidebar:hover .nav-item-label { opacity: 1; visibility: visible; pointer-events: auto; }
     .nav-sidebar:hover .nav-status { opacity: 0; }
-    .nav-item:hover .nav-item-icon { box-shadow: 0 0 0 2px rgba(124,58,237,.4); }
-    .nav-item.active .nav-item-icon { box-shadow: 0 0 0 2.5px var(--purple-l), 0 0 16px rgba(124,58,237,.35); }
     .nav-item.active::before { content: ''; position: absolute; left: -8px; top: 50%; transform: translateY(-50%); width: 3px; height: 22px; border-radius: 0 3px 3px 0; background: var(--purple-l); }
 
     /* Mgmt Sidebar */
@@ -224,6 +225,14 @@
       [dir="rtl"] .main { margin-left: 0 !important; margin-right: 0 !important; }
       .save-bar { left: 0 !important; right: 0 !important; padding: 12px 16px; }
       [dir="rtl"] .save-bar { left: 0 !important; right: 0 !important; }
+      .topbar { padding: 0 12px; gap: 8px; }
+      .topbar-brand { display: none; }
+      .guild-meta-id { display: none !important; }
+      .guild-meta-name { max-width: 90px; }
+      .user-chip span { display: none; }
+      .user-chip { padding: 4px 7px; }
+      .topbar-sep { display: none; }
+      .lang-select { display: none; }
     }
     @media (max-width: 600px) {
       .page-header h2 { font-size: 1.2rem; }
@@ -244,8 +253,6 @@
       .save-bar { flex-direction: column; align-items: stretch; gap: 10px; }
       .save-bar-actions { justify-content: flex-end; }
       .btn { padding: 9px 16px; }
-      .topbar-brand span { display: none; }
-      .guild-meta-id { display: none; }
       .esc-select-wrap { max-width: 100%; }
     }
     /* ── Footer dots dropdown ────────────────────────────────── */
@@ -324,322 +331,7 @@
   <canvas id="c"></canvas>
   <div class="glow glow-a"></div>
   <div class="glow glow-b"></div>
-  <div class="nav-overlay" id="nav-overlay"></div>
-
-  <!-- Profile Sidebar backdrop -->
-  <div class="profile-backdrop" id="prof-backdrop"></div>
-
-  <!-- Profile Sidebar -->
-  <aside class="profile-sidebar" id="prof-sidebar" aria-hidden="true">
-    <div class="prof-banner">
-      <% if (user.banner) { %>
-        <img src="https://cdn.discordapp.com/banners/<%= user.id %>/<%= user.banner %>.png?size=480" alt="" style="width:100%;height:100%;object-fit:cover;" />
-      <% } else if (user.bannerColor) { %>
-        <div class="prof-banner-solid" data-bg="<%= user.bannerColor %>"></div>
-      <% } %>
-      <div class="prof-banner-overlay"></div>
-      <button class="prof-close" id="close-profile" aria-label="Close">
-        <i data-lucide="x" style="width:14px;height:14px;stroke:currentColor;"></i>
-      </button>
-    </div>
-    <div class="prof-avatar-wrap">
-      <% if (user.avatar) { %>
-        <img class="prof-avatar" src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=160" alt="<%= user.displayName || user.username %>" />
-      <% } else { %>
-        <div class="prof-avatar-fallback"><%= (user.displayName || user.username).charAt(0).toUpperCase() %></div>
-      <% } %>
-      <div class="prof-online-dot"></div>
-    </div>
-    <div class="prof-body">
-      <div class="prof-names">
-        <div class="prof-display-name"><%= user.displayName || user.username %></div>
-        <div class="prof-username">@<%= user.username %></div>
-      </div>
-      <div class="prof-block">
-        <div class="prof-block-label"><%= t.home.profileId %></div>
-        <div class="prof-id-text" id="prof-copy-id"><%= user.id %></div>
-      </div>
-      <% const flags2 = Number(user.publicFlags || 0); const BADGE_CDN = 'https://cdn.discordapp.com/badge-icons/'; const badges2 = [];
-        if (flags2 & 1)      badges2.push({ label: t.home.badgeStaff,      img: 'staff.png' });
-        if (flags2 & 2)      badges2.push({ label: t.home.badgePartner,    img: 'partner.png' });
-        if (flags2 & 4)      badges2.push({ label: t.home.badgeHsEvents,   img: 'hypesquad.png' });
-        if (flags2 & 8)      badges2.push({ label: t.home.badgeBug1,       img: 'bug_hunter_level_1.png' });
-        if (flags2 & 64)     badges2.push({ label: t.home.badgeBravery,    img: 'hypesquad_house_1.png' });
-        if (flags2 & 128)    badges2.push({ label: t.home.badgeBrilliance, img: 'hypesquad_house_2.png' });
-        if (flags2 & 256)    badges2.push({ label: t.home.badgeBalance,    img: 'hypesquad_house_3.png' });
-        if (flags2 & 512)    badges2.push({ label: t.home.badgeEarlySupp,  img: 'early_supporter.png' });
-        if (flags2 & 16384)  badges2.push({ label: t.home.badgeBug2,       img: 'bug_hunter_level_2.png' });
-        if (flags2 & 131072) badges2.push({ label: t.home.badgeVerifDev,   img: 'verified_bot_developer.png' });
-        if (flags2 & 262144) badges2.push({ label: t.home.badgeModAlumni,  img: 'certified_moderator.png' });
-        if (flags2 & 4194304)badges2.push({ label: t.home.badgeActiveDev,  img: 'active_developer.png' }); %>
-      <% if (badges2.length > 0) { %>
-        <div class="prof-block">
-          <div class="prof-block-label"><%= t.home.profileBadges %></div>
-          <div class="prof-badges">
-            <% badges2.forEach(b => { %>
-              <div class="prof-badge">
-                <img src="<%= BADGE_CDN %><%= b.img %>" alt="<%= b.label %>" onerror="this.closest('.prof-badge').style.display='none'" />
-                <span class="prof-badge-tip"><%= b.label %></span>
-              </div>
-            <% }) %>
-          </div>
-        </div>
-      <% } %>
-    </div>
-    <div class="prof-footer">
-      <% if (typeof isShip !== 'undefined' && isShip) { %>
-      <a href="/settings" class="prof-btn" style="background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);color:var(--purple-l);">
-        <i data-lucide="settings-2" style="width:16px;height:16px;stroke:currentColor;"></i>
-        <%= lang === 'ar' ? 'إعدادات النظام' : 'System Settings' %>
-      </a>
-      <% } %>
-      <a href="https://discord.gg/jfFSmVM5kK" target="_blank" class="prof-btn help">
-        <i data-lucide="help-circle" style="width:16px;height:16px;stroke:currentColor;"></i>
-        <%= t.home.profileHelp %>
-      </a>
-      <a href="/auth/logout" class="prof-btn logout" id="logout-link">
-        <i data-lucide="log-out" style="width:16px;height:16px;stroke:currentColor;"></i>
-        <%= t.home.profileLogout %>
-      </a>
-    </div>
-  </aside>
-
-  <!-- Topbar -->
-  <header class="topbar">
-    <div class="topbar-left">
-      <% if (guildInfo.icon) { %>
-        <img class="guild-icon-top" src="https://cdn.discordapp.com/icons/<%= guildId %>/<%= guildInfo.icon %>.png?size=64" alt="<%= guildInfo.name %>" />
-      <% } else { %>
-        <div class="guild-icon-top-fallback"><%= guildInfo.name.charAt(0).toUpperCase() %></div>
-      <% } %>
-      <div class="guild-meta">
-        <div class="guild-meta-name"><%= guildInfo.name %></div>
-        <div class="guild-meta-id"><%= guildId %></div>
-      </div>
-      <div class="topbar-sep"></div>
-      <a href="/dashboard" class="topbar-brand nav-link">
-        <img src="https://res.cloudinary.com/difucqa9h/image/upload/v1770643265/discord_images/yaix1pbnbdv3srvf12gl.png" alt="CODE NEXUS" />
-        <span>CODE NEXUS</span>
-      </a>
-    </div>
-    <div class="topbar-right">
-      <button class="user-chip" id="open-profile" aria-label="Profile">
-        <% if (user.avatar) { %>
-          <img class="user-chip-av" src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=64" alt="<%= user.displayName || user.username %>" />
-        <% } else { %>
-          <div class="user-chip-av-fallback"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--purple-l)" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
-        <% } %>
-        <span><%= user.displayName || user.username %></span>
-        <i data-lucide="chevron-down" style="width:12px;height:12px;stroke:var(--muted);"></i>
-      </button>
-      <select class="lang-select" id="lang-select" aria-label="Language">
-        <% supported.forEach(code => { %>
-          <option value="<%= code %>" <%= lang === code ? 'selected' : '' %>><%= langFlags[code] %> <%= langLabels[code] %></option>
-        <% }) %>
-      </select>
-      <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation">
-        <i data-lucide="menu" style="width:18px;height:18px;stroke:currentColor;"></i>
-      </button>
-    </div>
-  </header>
-
-  <!-- Nav sidebar -->
-  <aside class="nav-sidebar" aria-label="Server navigation">
-    <a href="/dashboard" class="nav-back nav-link" aria-label="<%= t.guild.backBtn %>">
-      <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
-      <span class="nav-label"><%= t.guild.backBtn %></span>
-    </a>
-    <div class="nav-divider"></div>
-    <% guilds.forEach(g => { %>
-      <a href="/dashboard/<%= g.id %>" class="nav-item <%= g.id === guildId ? 'active' : '' %> nav-link" aria-label="<%= g.name %>">
-        <div class="nav-item-icon">
-          <% if (g.icon) { %>
-            <img src="https://cdn.discordapp.com/icons/<%= g.id %>/<%= g.icon %>.png?size=64" alt="<%= g.name %>" />
-          <% } else { %>
-            <div class="nav-item-fallback"><%= g.name.charAt(0).toUpperCase() %></div>
-          <% } %>
-          <span class="nav-status <%= g.inBot ? 'on' : 'off' %>"></span>
-        </div>
-        <div class="nav-item-label">
-          <span class="nav-item-name"><%= g.name %></span>
-          <span class="nav-item-dot <%= g.inBot ? 'on' : 'off' %>"></span>
-        </div>
-      </a>
-    <% }) %>
-  </aside>
-
-  <!-- Management Sidebar -->
-  <aside class="mgmt-sidebar" id="mgmt-sidebar">
-    <div class="mgmt-header">
-      <div class="mgmt-header-inner">
-        <div class="mgmt-header-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 18 18"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 2C2.00779 2 1 3.00779 1 4.25V5.75C1 6.99221 2.00779 8 3.25 8H14.75C15.9922 8 17 6.99221 17 5.75V4.25C17 3.00779 15.9922 2 14.75 2H3.25ZM3 5C3 5.5522 3.4477 6 4 6C4.5522 6 5 5.5522 5 5C5 4.4478 4.5523 4 4 4C3.4477 4 3 4.4478 3 5ZM6 5C6 5.5522 6.4477 6 7 6C7.5522 6 8 5.5522 8 5C8 4.4478 7.5523 4 7 4C6.4477 4 6 4.4478 6 5Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 10C2.00779 10 1 11.0078 1 12.25V13.75C1 14.9922 2.00779 16 3.25 16H14.75C15.9922 16 17 14.9922 17 13.75V12.25C17 11.0078 15.9922 10 14.75 10H3.25Z" fill="currentColor" fill-opacity="0.4"/></svg>
-        </div>
-        <span class="mgmt-header-title"><%= lang === 'ar' ? 'إدارة السيرفر' : 'Manage Server' %></span>
-      </div>
-      <button class="mgmt-sort-btn" aria-label="sort">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M9.53,2.22c-.293-.293-.768-.293-1.061,0l-3.5,3.5c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l2.97-2.97,2.97,2.97c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-3.5-3.5Z" fill="currentColor"/><path d="M11.97,11.22l-2.97,2.97-2.97-2.97c-.293-.293-.768-.293-1.061,0s-.293,.768,0,1.061l3.5,3.5c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22l3.5-3.5c.293-.293,.293-.768,0-1.061s-.768-.293-1.061,0Z" fill="currentColor" fill-opacity="0.4"/></svg>
-      </button>
-    </div>
-    <div class="mgmt-body">
-      <div class="mgmt-nav">
-        <!-- General -->
-        <div class="mgmt-section">
-          <button class="mgmt-section-btn open">
-            <span><%= lang === 'ar' ? 'عام' : 'General' %></span>
-            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
-          </button>
-          <div class="mgmt-sec-body open">
-            <a href="/dashboard/<%= guildId %>" class="mgmt-item nav-link">
-              <div class="mgmt-item-indicator"></div>
-              <div class="mgmt-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path opacity="0.4" d="M14.25 2H12.75C11.784 2 11 2.784 11 3.75V6.25C11 7.216 11.784 8 12.75 8H14.25C15.216 8 16 7.216 16 6.25V3.75C16 2.784 15.216 2 14.25 2Z" fill="currentColor"/><path opacity="0.4" d="M5.25 10H3.75C2.784 10 2 10.784 2 11.75V14.25C2 15.216 2.784 16 3.75 16H5.25C6.216 16 7 15.216 7 14.25V11.75C7 10.784 6.216 10 5.25 10Z" fill="currentColor"/><path d="M7.75 2H3.75C2.784 2 2 2.784 2 3.75V6.25C2 7.216 2.784 8 3.75 8H7.75C8.716 8 9.5 7.216 9.5 6.25V3.75C9.5 2.784 8.716 2 7.75 2Z" fill="currentColor"/><path d="M14.25 10H10.25C9.284 10 8.5 10.784 8.5 11.75V14.25C8.5 15.216 9.284 16 10.25 16H14.25C15.216 16 16 15.216 16 14.25V11.75C16 10.784 15.216 10 14.25 10Z" fill="currentColor"/></svg></div>
-              <span class="mgmt-item-label"><%= lang === 'ar' ? 'نظرة عامة' : 'Overview' %></span>
-            </a>
-          </div>
-        </div>
-        <!-- Levels -->
-        <div class="mgmt-section">
-          <button class="mgmt-section-btn open">
-            <span><%= lang === 'ar' ? 'المستويات' : 'Levels' %></span>
-            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
-          </button>
-          <div class="mgmt-sec-body open">
-            <a href="/dashboard/<%= guildId %>/levels" class="mgmt-item nav-link">
-              <div class="mgmt-item-indicator"></div>
-              <div class="mgmt-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 6C5.962 6 3.5 8.463 3.5 11.5C3.5 14.537 5.962 17 9 17C12.038 17 14.5 14.537 14.5 11.5C14.5 8.463 12.038 6 9 6Z" fill="currentColor" fill-opacity="0.4"/><path d="M14.283 1C13.842 1 13.437 1.231 13.212 1.606L10.463 6.197C11.932 6.601 13.155 7.6 13.858 8.918L17.44 2.891C17.939 2.058 17.338 1 16.367 1H14.283Z" fill="currentColor"/><path d="M1.633 1C0.662 1 0.061 2.059 0.561 2.892L4.151 8.903C4.854 7.592 6.074 6.599 7.537 6.197L4.789 1.608C4.565 1.234 4.153 1 3.717 1H1.633Z" fill="currentColor"/></svg></div>
-              <span class="mgmt-item-label"><%= lang === 'ar' ? 'إعدادات المستوى' : 'Level Settings' %></span>
-            </a>
-          </div>
-        </div>
-        <!-- Tickets -->
-        <div class="mgmt-section">
-          <button class="mgmt-section-btn open">
-            <span><%= lang === 'ar' ? 'التذاكر' : 'Tickets' %></span>
-            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
-          </button>
-          <div class="mgmt-sec-body open">
-            <a href="/dashboard/<%= guildId %>/tickets" class="mgmt-item nav-link">
-              <div class="mgmt-item-indicator"></div>
-              <div class="mgmt-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path opacity="0.4" d="M14.25 2H12.75C11.784 2 11 2.784 11 3.75V6.25C11 7.216 11.784 8 12.75 8H14.25C15.216 8 16 7.216 16 6.25V3.75C16 2.784 15.216 2 14.25 2Z" fill="currentColor"/><path opacity="0.4" d="M5.25 10H3.75C2.784 10 2 10.784 2 11.75V14.25C2 15.216 2.784 16 3.75 16H5.25C6.216 16 7 15.216 7 14.25V11.75C7 10.784 6.216 10 5.25 10Z" fill="currentColor"/><path d="M7.75 2H3.75C2.784 2 2 2.784 2 3.75V6.25C2 7.216 2.784 8 3.75 8H7.75C8.716 8 9.5 7.216 9.5 6.25V3.75C9.5 2.784 8.716 2 7.75 2Z" fill="currentColor"/><path d="M14.25 10H10.25C9.284 10 8.5 10.784 8.5 11.75V14.25C8.5 15.216 9.284 16 10.25 16H14.25C15.216 16 16 15.216 16 14.25V11.75C16 10.784 15.216 10 14.25 10Z" fill="currentColor"/></svg></div>
-              <span class="mgmt-item-label"><%= lang === 'ar' ? 'نظرة عامة' : 'Overview' %></span>
-            </a>
-            <a href="/dashboard/<%= guildId %>/tickets/general" class="mgmt-item active nav-link">
-              <div class="mgmt-item-indicator"></div>
-              <div class="mgmt-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 11.5C10.3807 11.5 11.5 10.3807 11.5 9C11.5 7.6193 10.3807 6.5 9 6.5C7.6193 6.5 6.5 7.6193 6.5 9C6.5 10.3807 7.6193 11.5 9 11.5Z" fill="currentColor"/><path opacity="0.4" fill-rule="evenodd" clip-rule="evenodd" d="M7.6853 1.5H10.3147C10.7234 1.5 11.0941 1.7443 11.2629 2.1191L11.8071 3.3564C12.3536 3.5819 12.8668 3.8791 13.3352 4.237L14.6429 3.9095C15.0369 3.8108 15.4509 3.9764 15.6553 4.3295L16.9699 6.6705C17.1743 7.0235 17.1014 7.4708 16.7954 7.7392L15.7702 8.636C15.7899 8.757 15.8 8.876 15.8 9C15.8 9.124 15.7899 9.243 15.7702 9.364L16.7954 10.2608C17.1014 10.5292 17.1743 10.9765 16.9699 11.3295L15.6553 13.6705C15.4509 14.0236 15.0369 14.1892 14.6429 14.0905L13.3352 13.763C12.8668 14.1209 12.3536 14.4181 11.8071 14.6436L11.2629 15.8809C11.0941 16.2557 10.7234 16.5 10.3147 16.5H7.6853C7.2766 16.5 6.9059 16.2557 6.7371 15.8809L6.1929 14.6436C5.6464 14.4181 5.1332 14.1209 4.6648 13.763L3.3571 14.0905C2.9631 14.1892 2.5491 14.0236 2.3447 13.6705L1.0301 11.3295C0.8257 10.9765 0.8986 10.5292 1.2046 10.2608L2.2298 9.364C2.2101 9.243 2.2 9.124 2.2 9C2.2 8.876 2.2101 8.757 2.2298 8.636L1.2046 7.7392C0.8986 7.4708 0.8257 7.0235 1.0301 6.6705L2.3447 4.3295C2.5491 3.9764 2.9631 3.8108 3.3571 3.9095L4.6648 4.237C5.1332 3.8791 5.6464 3.5819 6.1929 3.3564L6.7371 2.1191C6.9059 1.7443 7.2766 1.5 7.6853 1.5Z" fill="currentColor"/></svg></div>
-              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الإعدادات العامة' : 'General Settings' %></span>
-            </a>
-            <a href="/dashboard/<%= guildId %>/tickets/panels" class="mgmt-item nav-link">
-              <div class="mgmt-item-indicator"></div>
-              <div class="mgmt-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><rect x="2" y="4" width="14" height="11" rx="1.75" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="1.3"/><path d="M6 8h6M6 11h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M2 7h14" stroke="currentColor" stroke-width="1.3"/></svg></div>
-              <span class="mgmt-item-label"><%= lang === 'ar' ? 'اللوحات' : 'Panels' %></span>
-            </a>
-          </div>
-        </div>
-
-        <!-- ── Section: Utility ── -->
-        <div class="mgmt-section">
-          <button class="mgmt-section-btn open">
-            <span><%= lang === 'ar' ? 'الأدوات' : 'Utility' %></span>
-            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
-          </button>
-          <div class="mgmt-sec-body open">
-            <a href="/dashboard/<%= guildId %>/utility" class="mgmt-item nav-link">
-              <div class="mgmt-item-indicator"></div>
-              <div class="mgmt-item-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M15.573 3.913C15.462 3.642 15.138 3.527 14.881 3.674L12.434 5.076L10.924 3.566L12.326 1.119C12.473 0.862 12.358 0.538 12.087 0.427C10.973 -0.0319999 9.667 0.218 8.808 1.077C7.94 1.945 7.692 3.264 8.169 4.385L1.292 11.262C0.236 12.318 0.236 14.032 1.292 15.088L2.912 16.708C3.968 17.764 5.682 17.764 6.738 16.708L13.615 9.831C14.736 10.308 16.055 10.06 16.923 9.192C17.782 8.333 18.032 7.027 17.573 5.913C17.462 5.642 17.138 5.527 16.881 5.674L14.434 7.076L12.924 5.566L14.326 3.119Z" fill="currentColor" fill-opacity="0.4"/><path fill-rule="evenodd" clip-rule="evenodd" d="M2 13.5C2 12.672 2.672 12 3.5 12C4.328 12 5 12.672 5 13.5C5 14.328 4.328 15 3.5 15C2.672 15 2 14.328 2 13.5Z" fill="currentColor"/></svg>
-              </div>
-              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الأوامر العامة' : 'General Commands' %></span>
-            </a>
-            <a href="/dashboard/<%= guildId %>/moderation" class="mgmt-item nav-link">
-              <div class="mgmt-item-indicator"></div>
-              <div class="mgmt-item-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 1L2 4.5V9c0 4.418 3.083 8.572 7 9.5 3.917-.928 7-5.082 7-9.5V4.5L9 1z" fill="currentColor" fill-opacity="0.4"/><path fill-rule="evenodd" clip-rule="evenodd" d="M6.5 7.5l2.5 2.5 3.5-3.5 1 1-4.5 4.5-3.5-3.5 1-1z" fill="currentColor"/></svg>
-              </div>
-              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الأوامر الإدارية' : 'Moderation' %></span>
-            </a>
-          </div>
-        </div>
-
-        <!-- ── Section: Protection ── -->
-        <div class="mgmt-section">
-          <button class="mgmt-section-btn open">
-            <span><%= lang === 'ar' ? 'الحماية' : 'Protection' %></span>
-            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
-          </button>
-          <div class="mgmt-sec-body open">
-            <a href="/dashboard/<%= guildId %>/protection" class="mgmt-item nav-link">
-              <div class="mgmt-item-indicator"></div>
-              <div class="mgmt-item-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 1L2 4.5V9c0 4.418 3.083 8.572 7 9.5 3.917-.928 7-5.082 7-9.5V4.5L9 1z" fill="currentColor" fill-opacity="0.4"/><path fill-rule="evenodd" clip-rule="evenodd" d="M6.5 7.5l2.5 2.5 3.5-3.5 1 1-4.5 4.5-3.5-3.5 1-1z" fill="currentColor"/></svg>
-              </div>
-              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الأمان' : 'Security' %></span>
-            </a>
-          </div>
-        </div>
-
-        <!-- ── Section: Members ── -->
-        <div class="mgmt-section">
-          <button class="mgmt-section-btn open">
-            <span><%= lang === 'ar' ? 'الأعضاء' : 'Members' %></span>
-            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
-          </button>
-          <div class="mgmt-sec-body open">
-            <a href="/dashboard/<%= guildId %>/auto-roles" class="mgmt-item nav-link">
-              <div class="mgmt-item-indicator"></div>
-              <div class="mgmt-item-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 2a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zm0 9c4 0 6 2 6 3v1H3v-1c0-1 2-3 6-3z" fill="currentColor" fill-opacity="0.4"/><path d="M13.5 8a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm1.5 2c2 0 3 1 3 2v1h-3v-1c0-.6-.2-1.2-.5-1.7.3-.2.7-.3 1-.3l-.5.5z" fill="currentColor"/></svg>
-              </div>
-              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الرتب التلقائية' : 'Auto Roles' %></span>
-            </a>
-          </div>
-        </div>
-
-        <!-- ── Section: Settings ── -->
-        <div class="mgmt-section">
-          <button class="mgmt-section-btn open">
-            <span><%= lang === 'ar' ? 'الإعدادات' : 'Settings' %></span>
-            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18"><path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/></svg>
-          </button>
-          <div class="mgmt-sec-body open">
-            <a href="/dashboard/<%= guildId %>/setting" class="mgmt-item nav-link">
-              <div class="mgmt-item-indicator"></div>
-              <div class="mgmt-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18"><path d="M9 11.5C10.3807 11.5 11.5 10.3807 11.5 9C11.5 7.6193 10.3807 6.5 9 6.5C7.6193 6.5 6.5 7.6193 6.5 9C6.5 10.3807 7.6193 11.5 9 11.5Z" fill="currentColor"/><path opacity="0.4" fill-rule="evenodd" clip-rule="evenodd" d="M7.6853 1.5H10.3147C10.7234 1.5 11.0941 1.7443 11.2629 2.1191L11.8071 3.3564C12.3536 3.5819 12.8668 3.8791 13.3352 4.237L14.6429 3.9095C15.0369 3.8108 15.4509 3.9764 15.6553 4.3295L16.9699 6.6705C17.1743 7.0235 17.1014 7.4708 16.7954 7.7392L15.7702 8.636C15.7899 8.757 15.8 8.876 15.8 9C15.8 9.124 15.7899 9.243 15.7702 9.364L16.7954 10.2608C17.1014 10.5292 17.1743 10.9765 16.9699 11.3295L15.6553 13.6705C15.4509 14.0236 15.0369 14.1892 14.6429 14.0905L13.3352 13.763C12.8668 14.1209 12.3536 14.4181 11.8071 14.6436L11.2629 15.8809C11.0941 16.2557 10.7234 16.5 10.3147 16.5H7.6853C7.2766 16.5 6.9059 16.2557 6.7371 15.8809L6.1929 14.6436C5.6464 14.4181 5.1332 14.1209 4.6648 13.763L3.3571 14.0905C2.9631 14.1892 2.5491 14.0236 2.3447 13.6705L1.0301 11.3295C0.8257 10.9765 0.8986 10.5292 1.2046 10.2608L2.2298 9.364C2.2101 9.243 2.2 9.124 2.2 9C2.2 8.876 2.2101 8.757 2.2298 8.636L1.2046 7.7392C0.8986 7.4708 0.8257 7.0235 1.0301 6.6705L2.3447 4.3295C2.5491 3.9764 2.9631 3.8108 3.3571 3.9095L4.6648 4.237C5.1332 3.8791 5.6464 3.5819 6.1929 3.3564L6.7371 2.1191C6.9059 1.7443 7.2766 1.5 7.6853 1.5Z" fill="currentColor"/></svg></div>
-              <span class="mgmt-item-label"><%= lang === 'ar' ? 'الإعدادات' : 'Settings' %></span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="mgmt-footer">
-      <div class="mgmt-footer-user">
-        <% if (user.avatar) { %>
-          <img class="mgmt-footer-av" src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=64" alt="<%= user.displayName || user.username %>" />
-        <% } else { %>
-          <div class="mgmt-footer-av-fallback"><%= (user.displayName || user.username).charAt(0).toUpperCase() %></div>
-        <% } %>
-        <span class="mgmt-footer-name">@<%= user.username %></span>
-      </div>
-      <button class="mgmt-footer-dots" id="footer-dots-btn" aria-label="User menu">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 18 18"><circle cx="9" cy="9" r="1.25" fill="currentColor"/><circle cx="3.25" cy="9" r="1.25" fill="currentColor"/><circle cx="14.75" cy="9" r="1.25" fill="currentColor"/></svg>
-      </button>
-      <!-- Footer dropdown -->
-      <div class="footer-drop" id="footer-drop">
-        <a href="/dashboard" class="footer-drop-item nav-link">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          <%= lang === 'ar' ? 'الرئيسية' : 'Home' %>
-        </a>
-        <a href="/dashboard/<%= guildId %>" class="footer-drop-item nav-link">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          <%= lang === 'ar' ? 'السيرفر' : 'Server' %>
-        </a>
-        <div class="footer-drop-divider"></div>
-        <a href="/auth/logout" class="footer-drop-item danger" id="logout-link">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          <%= lang === 'ar' ? 'تسجيل خروج' : 'Logout' %>
-        </a>
-      </div>
-    </div>
-  </aside>
+  <%- include('partials/layout', { activePage: 'tickets-general' }) %>
 
   <!-- Main Content -->
   <main class="main">
@@ -690,10 +382,7 @@
             <label class="form-label"><%= t.tickets.allowCloseLabel %></label>
             <p class="form-help"><%= t.tickets.allowCloseHelp %></p>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="ticket-allow-close" <%= ticketSettings.ALLOW_USER_CLOSE ? 'checked' : '' %> />
-            <span class="toggle-slider"></span>
-          </label>
+          <%- include('partials/toggle_switch', { id: 'ticket-allow-close', checked: ticketSettings.ALLOW_USER_CLOSE }) %>
         </div>
 
         <!-- 4. Close Confirmation -->
@@ -702,10 +391,7 @@
             <label class="form-label"><%= t.tickets.confirmLabel %></label>
             <p class="form-help"><%= t.tickets.confirmHelp %></p>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="ticket-close-confirm" <%= ticketSettings.CLOSE_CONFIRMATION ? 'checked' : '' %> />
-            <span class="toggle-slider"></span>
-          </label>
+          <%- include('partials/toggle_switch', { id: 'ticket-close-confirm', checked: ticketSettings.CLOSE_CONFIRMATION }) %>
         </div>
 
         <!-- 5. Enable Feedback -->
@@ -714,10 +400,7 @@
             <label class="form-label"><%= t.tickets.feedbackLabel %></label>
             <p class="form-help"><%= t.tickets.feedbackHelp %></p>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="ticket-feedback" <%= ticketSettings.ENABLE_FEEDBACK ? 'checked' : '' %> />
-            <span class="toggle-slider"></span>
-          </label>
+          <%- include('partials/toggle_switch', { id: 'ticket-feedback', checked: ticketSettings.ENABLE_FEEDBACK }) %>
         </div>
 
         <!-- 6. Anonymise Responses -->
@@ -726,10 +409,7 @@
             <label class="form-label"><%= t.tickets.anonLabel %></label>
             <p class="form-help"><%= t.tickets.anonHelp %></p>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="ticket-anon" <%= ticketSettings.ANONYMISE_RESPONSES ? 'checked' : '' %> />
-            <span class="toggle-slider"></span>
-          </label>
+          <%- include('partials/toggle_switch', { id: 'ticket-anon', checked: ticketSettings.ANONYMISE_RESPONSES }) %>
         </div>
 
         <!-- 7. Thread Mode -->
@@ -738,10 +418,7 @@
             <label class="form-label"><%= t.tickets.threadLabel %></label>
             <p class="form-help"><%= t.tickets.threadHelp %></p>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="ticket-thread" <%= ticketSettings.THREAD_MODE ? 'checked' : '' %> />
-            <span class="toggle-slider"></span>
-          </label>
+          <%- include('partials/toggle_switch', { id: 'ticket-thread', checked: ticketSettings.THREAD_MODE }) %>
         </div>
 
         <!-- 8. Disable /open Command -->
@@ -750,10 +427,7 @@
             <label class="form-label"><%= t.tickets.disableOpenLabel %></label>
             <p class="form-help"><%= t.tickets.disableOpenHelp %></p>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="ticket-disable-open" <%= ticketSettings.DISABLE_OPEN_COMMAND ? 'checked' : '' %> />
-            <span class="toggle-slider"></span>
-          </label>
+          <%- include('partials/toggle_switch', { id: 'ticket-disable-open', checked: ticketSettings.DISABLE_OPEN_COMMAND }) %>
         </div>
 
       </div>
@@ -873,10 +547,7 @@
             <label class="form-label"><%= t.tickets.claimViewLabel %></label>
             <p class="form-help"><%= t.tickets.claimViewHelp %></p>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="ticket-claim-view" <%= ticketSettings.CLAIM_SUPPORT_VIEW !== false ? 'checked' : '' %> />
-            <span class="toggle-slider"></span>
-          </label>
+          <%- include('partials/toggle_switch', { id: 'ticket-claim-view', checked: ticketSettings.CLAIM_SUPPORT_VIEW !== false }) %>
         </div>
 
         <!-- Support can type in claimed -->
@@ -885,10 +556,7 @@
             <label class="form-label"><%= t.tickets.claimTypeLabel %></label>
             <p class="form-help"><%= t.tickets.claimTypeHelp %></p>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="ticket-claim-type" <%= ticketSettings.CLAIM_SUPPORT_TYPE !== false ? 'checked' : '' %> />
-            <span class="toggle-slider"></span>
-          </label>
+          <%- include('partials/toggle_switch', { id: 'ticket-claim-type', checked: ticketSettings.CLAIM_SUPPORT_TYPE !== false }) %>
         </div>
 
       </div>
@@ -913,20 +581,14 @@
             <label class="form-label"><%= t.tickets.acLeaveLabel %></label>
             <p class="form-help"><%= t.tickets.acLeaveHelp %></p>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="ticket-ac-leave" <%= ticketSettings.AUTO_CLOSE_ON_LEAVE ? 'checked' : '' %> />
-            <span class="toggle-slider"></span>
-          </label>
+          <%- include('partials/toggle_switch', { id: 'ticket-ac-leave', checked: ticketSettings.AUTO_CLOSE_ON_LEAVE }) %>
         </div>
 
         <!-- Since open with no response -->
         <div class="form-row ac-row">
           <div class="ac-row-left">
             <div class="ac-row-toggle-line">
-              <label class="toggle-switch">
-                <input type="checkbox" id="ticket-ac-noresponse-enabled" <%= ticketSettings.AC_NO_RESPONSE_ENABLED ? 'checked' : '' %> />
-                <span class="toggle-slider"></span>
-              </label>
+              <%- include('partials/toggle_switch', { id: 'ticket-ac-noresponse-enabled', checked: ticketSettings.AC_NO_RESPONSE_ENABLED }) %>
               <label class="form-label"><%= t.tickets.acNoResponseLabel %></label>
             </div>
             <p class="form-help"><%= t.tickets.acNoResponseHelp %></p>
@@ -951,10 +613,7 @@
         <div class="form-row ac-row">
           <div class="ac-row-left">
             <div class="ac-row-toggle-line">
-              <label class="toggle-switch">
-                <input type="checkbox" id="ticket-ac-lastmsg-enabled" <%= ticketSettings.AC_LAST_MSG_ENABLED ? 'checked' : '' %> />
-                <span class="toggle-slider"></span>
-              </label>
+              <%- include('partials/toggle_switch', { id: 'ticket-ac-lastmsg-enabled', checked: ticketSettings.AC_LAST_MSG_ENABLED }) %>
               <label class="form-label"><%= t.tickets.acLastMsgLabel %></label>
             </div>
             <p class="form-help"><%= t.tickets.acLastMsgHelp %></p>
@@ -1023,10 +682,7 @@
             <label class="form-label"><%= t.tickets.addMsgSenderLabel %></label>
             <p class="form-help"><%= t.tickets.addMsgSenderHelp %></p>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="ticket-add-msg-sender" <%= ticketSettings.ADD_MSG_SENDER ? 'checked' : '' %> />
-            <span class="toggle-slider"></span>
-          </label>
+          <%- include('partials/toggle_switch', { id: 'ticket-add-msg-sender', checked: ticketSettings.ADD_MSG_SENDER }) %>
         </div>
 
         <!-- Ticket Channel Permissions sub-group -->
@@ -1038,10 +694,7 @@
             <label class="form-label"><%= t.tickets.permAttachLabel %></label>
             <p class="form-help"><%= t.tickets.permAttachHelp %></p>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="ticket-perm-attach" <%= ticketSettings.PERM_ATTACH_FILES !== false ? 'checked' : '' %> />
-            <span class="toggle-slider"></span>
-          </label>
+          <%- include('partials/toggle_switch', { id: 'ticket-perm-attach', checked: ticketSettings.PERM_ATTACH_FILES !== false }) %>
         </div>
 
         <!-- Embed Links -->
@@ -1050,10 +703,7 @@
             <label class="form-label"><%= t.tickets.permEmbedLabel %></label>
             <p class="form-help"><%= t.tickets.permEmbedHelp %></p>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="ticket-perm-embed" <%= ticketSettings.PERM_EMBED_LINKS !== false ? 'checked' : '' %> />
-            <span class="toggle-slider"></span>
-          </label>
+          <%- include('partials/toggle_switch', { id: 'ticket-perm-embed', checked: ticketSettings.PERM_EMBED_LINKS !== false }) %>
         </div>
 
         <!-- Add Reactions -->
@@ -1062,10 +712,7 @@
             <label class="form-label"><%= t.tickets.permReactLabel %></label>
             <p class="form-help"><%= t.tickets.permReactHelp %></p>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="ticket-perm-reactions" <%= ticketSettings.PERM_ADD_REACTIONS !== false ? 'checked' : '' %> />
-            <span class="toggle-slider"></span>
-          </label>
+          <%- include('partials/toggle_switch', { id: 'ticket-perm-reactions', checked: ticketSettings.PERM_ADD_REACTIONS !== false }) %>
         </div>
 
       </div>
@@ -1120,10 +767,7 @@
             <label class="form-label"><%= t.tickets.hideCloseLabel %></label>
             <p class="form-help"><%= t.tickets.hideCloseHelp %></p>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="ticket-hide-close" <%= ticketSettings.HIDE_CLOSE_BTN ? 'checked' : '' %> />
-            <span class="toggle-slider"></span>
-          </label>
+          <%- include('partials/toggle_switch', { id: 'ticket-hide-close', checked: ticketSettings.HIDE_CLOSE_BTN }) %>
         </div>
 
         <!-- Hide Close With Reason Button -->
@@ -1132,10 +776,7 @@
             <label class="form-label"><%= t.tickets.hideCloseReasonLabel %></label>
             <p class="form-help"><%= t.tickets.hideCloseReasonHelp %></p>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="ticket-hide-close-reason" <%= ticketSettings.HIDE_CLOSE_REASON_BTN ? 'checked' : '' %> />
-            <span class="toggle-slider"></span>
-          </label>
+          <%- include('partials/toggle_switch', { id: 'ticket-hide-close-reason', checked: ticketSettings.HIDE_CLOSE_REASON_BTN }) %>
         </div>
 
         <!-- Hide Claim Button -->
@@ -1144,10 +785,7 @@
             <label class="form-label"><%= t.tickets.hideClaimLabel %></label>
             <p class="form-help"><%= t.tickets.hideClaimHelp %></p>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="ticket-hide-claim" <%= ticketSettings.HIDE_CLAIM_BTN ? 'checked' : '' %> />
-            <span class="toggle-slider"></span>
-          </label>
+          <%- include('partials/toggle_switch', { id: 'ticket-hide-claim', checked: ticketSettings.HIDE_CLAIM_BTN }) %>
         </div>
 
       </div>
@@ -1175,10 +813,7 @@
             <label class="form-label"><%= lang === 'ar' ? 'تفعيل زر القوانين' : 'Enable Rules Button' %></label>
             <p class="form-help"><%= lang === 'ar' ? 'يظهر زر في رسالة ترحيب التكت، عند الضغط عليه يرى المستخدم نص القوانين.' : 'Adds a Rules button to the ticket welcome message. Clicking it shows the rules text ephemerally.' %></p>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="ticket-rules-enabled" <%= ticketSettings.RULES_BTN_ENABLED ? 'checked' : '' %> />
-            <span class="toggle-slider"></span>
-          </label>
+          <%- include('partials/toggle_switch', { id: 'ticket-rules-enabled', checked: ticketSettings.RULES_BTN_ENABLED }) %>
         </div>
 
         <!-- Rules Text -->
@@ -1259,10 +894,7 @@
             <label class="form-label"><%= lang === 'ar' ? 'تفعيل زر التصعيد' : 'Enable Escalate Button' %></label>
             <p class="form-help"><%= lang === 'ar' ? 'يظهر زر Escalate في رسالة الترحيب بالتكت. عند الضغط يتم نقل التكت إلى كاتيغوري أخرى.' : 'Shows an Escalate button in the ticket welcome message. Clicking it moves the ticket to another category.' %></p>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="ticket-escalate-enabled" <%= ticketSettings.ESCALATE_ENABLED ? 'checked' : '' %> />
-            <span class="toggle-slider"></span>
-          </label>
+          <%- include('partials/toggle_switch', { id: 'ticket-escalate-enabled', checked: ticketSettings.ESCALATE_ENABLED }) %>
         </div>
 
         <!-- Escalation Categories -->
@@ -1301,31 +933,8 @@
     </div>
   </div>
 
-  <!-- Three.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <%- include('partials/bg_stars') %>
   <script>
-    try {
-    (function () {
-      const canvas = document.getElementById('c');
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
-      renderer.setPixelRatio(1); renderer.setSize(innerWidth, innerHeight);
-      renderer.setClearColor(0x040010, 1);
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 500);
-      camera.position.z = 1;
-      const N = 2800, pos = new Float32Array(N * 3);
-      for (let i = 0; i < N * 3; i++) pos[i] = (Math.random() - .5) * 240;
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-      const mat = new THREE.PointsMaterial({ color: 0xb8b0ff, size: 0.24, transparent: true, opacity: 0.45, depthWrite: false });
-      scene.add(new THREE.Points(geo, mat));
-      let mx = 0, t = 0;
-      document.addEventListener('mousemove', e => { mx = (e.clientX / innerWidth - .5) * .25; });
-      window.addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
-      const stars = scene.children[0];
-      (function render() { requestAnimationFrame(render); t += 0.00022; stars.rotation.y = t + mx * .15; renderer.render(scene, camera); })();
-    })();
-    } catch(e) { console.warn('Three.js background failed:', e); }
 
     // Nav links
     document.querySelectorAll('.nav-link').forEach(a => {
@@ -1830,6 +1439,23 @@
   <!-- Lucide -->
   <script src="/js/lucide.min.js"></script>
   <script>lucide.createIcons();</script>
+
+  <!-- Page transition overlay -->
+  <div id="ov" style="position:fixed;inset:0;z-index:9999;background:#040010;animation:pIn .45s cubic-bezier(.4,0,.2,1) forwards;pointer-events:none;"></div>
+  <style>
+    @keyframes pIn  { from { opacity:1 } to { opacity:0 } }
+    @keyframes pOut { from { opacity:0 } to { opacity:1 } }
+    #ov.leave { animation:pOut .35s cubic-bezier(.4,0,.2,1) forwards; pointer-events:all; }
+  </style>
+  <script>
+    (function () {
+      function fadeOut(href) { var ov=document.getElementById('ov'); ov.classList.add('leave'); setTimeout(function(){ window.location.href=href; },360); }
+      document.querySelectorAll('a.nav-link, a#logout-link').forEach(function(a){
+        a.addEventListener('click',function(e){ if(this.target==='_blank') return; e.preventDefault(); fadeOut(this.href); });
+      });
+    })();
+  </script>
+  <%- include('partials/footer') %>
 </body>
 </html>
 
