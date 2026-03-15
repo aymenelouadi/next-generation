@@ -65,7 +65,8 @@
     "badgeVerifDev": "مطور موثق",
     "badgeModAlumni": "خريج المشرفين",
     "badgeActiveDev": "مطور نشط",
-    "badgeNitro":     "نيترو"
+    "badgeNitro":     "نيترو",
+    "badgeQuest":     "أتممت مهمة"
   },
   "guild": {
     "pageTitle":     "لوحة التحكم",

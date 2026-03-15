@@ -65,7 +65,8 @@
     "badgeVerifDev": "Verified Developer",
     "badgeModAlumni": "Moderator Alumni",
     "badgeActiveDev": "Active Developer",
-    "badgeNitro":     "Nitro"
+    "badgeNitro":     "Nitro",
+    "badgeQuest":     "Completed a Quest"
   },
   "guild": {
     "pageTitle":     "Dashboard",
