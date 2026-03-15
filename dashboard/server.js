@@ -543,13 +543,25 @@ app.get('/dashboard/:guildId', require('./middleware/auth'), (req, res) => {
 
     // Module status from DB
     const ticketsData  = guildDb.read(guildId, 'tickets', {});
-    const protData     = guildDb.read(guildId, 'protection', {});
-    const autoRoleData = guildDb.read(guildId, 'auto_role', {});
     const panelCount   = Object.keys((ticketsData && ticketsData.panels) || {}).length;
+
+    // protection lives in dashboard DB (written by both bot system and dashboard)
+    const protData     = guildDb.read(guildId, 'protection', null);
+
+    // auto_role lives in root database/auto_role.json keyed by guildId
+    function readBotDb(filename) {
+        try {
+            const file = path.join(__dirname, '../database', `${filename}.json`);
+            return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {};
+        } catch { return {}; }
+    }
+    const autoRoleAll   = readBotDb('auto_role');
+    const autoRoleEntry = autoRoleAll[guildId] || null;
+
     const moduleStatus = {
-        protection: Object.keys(protData || {}).length > 0,
+        protection: !!(protData && Object.keys(protData).length > 0),
         tickets:    panelCount > 0,
-        autoRoles:  !!(autoRoleData && autoRoleData.enabled),
+        autoRoles:  !!(autoRoleEntry && autoRoleEntry.enabled === true),
         levels:     Object.keys(levelsData).length > 0,
     };
 
