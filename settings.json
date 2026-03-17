@@ -712,7 +712,8 @@
         "WEBHOOK_LOG": {
             "URL": "",
             "COLOR": "#7c3aed"
-        }
+        },
+        "ANYWARE": true 
     },
     "LEVEL_SYSTEM": {
         "ENABLE": true,

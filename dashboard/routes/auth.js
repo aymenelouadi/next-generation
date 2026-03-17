@@ -38,12 +38,14 @@ router.get('/discord/redirect', async (req, res) => {
             return res.redirect('/?error=access_denied');
         }
 
-        const owners = dashboard.OWNERS || [];
-        const ships  = dashboard.SHIPS  || [];
-        const allowed = owners.includes(userInfo.id) || ships.includes(userInfo.id);
-
-        if (!allowed) {
-            return res.redirect('/?error=access_denied');
+        const anyware = dashboard.ANYWARE === true;
+        if (!anyware) {
+            const owners = dashboard.OWNERS || [];
+            const ships  = dashboard.SHIPS  || [];
+            const allowed = owners.includes(userInfo.id) || ships.includes(userInfo.id);
+            if (!allowed) {
+                return res.redirect('/?error=access_denied');
+            }
         }
 
         req.session.user = {
