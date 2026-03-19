@@ -348,13 +348,13 @@ Your support helps us keep building and maintaining free, open-source Discord to
 
 ## 📄 License
 
-This project is licensed under the **MIT License** — see [LICENSE](LICENSE) for details.
+This project is licensed under the **Apache License** — see [LICENSE](LICENSE) for details.
 
 ---
 
 <div align="center">
 
-Made with ❤️ by the **Next Generation Team**  
+Made by the **Next Generation Team**  
 [Discord](https://discord.gg/BhJStSa89s) · [Ko-fi](https://ko-fi.com/code_nexus) · [PayPal](https://www.paypal.com/paypalme/rewebby)
 
 </div>
