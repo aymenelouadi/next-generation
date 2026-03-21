@@ -14,6 +14,7 @@ Protection · Moderation · Tickets · Auto Roles · Levels · Dashboard · and 
 [![discord.js](https://img.shields.io/badge/discord.js-v14-5865F2?style=for-the-badge)](https://discord.js.org)
 
 [![GitHub](https://img.shields.io/badge/Star-GitHub-181717?style=for-the-badge&logo=github)](https://github.com/aymenelouadi/next-generation)
+[![Ko-Fi](https://img.shields.io/badge/Support%20us-Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi)](https://ko-fi.com/next_generation)
 
 </div>
 
@@ -392,6 +393,7 @@ If this project helped you, consider supporting the team:
 
 | Platform | Link |
 |----------|------|
+| ☕ Ko-fi | [ko-fi.com/next_generation](https://ko-fi.com/next_generation) |
 | ⭐ GitHub | [github.com/aymenelouadi/next-generation](https://github.com/aymenelouadi/next-generation) |
 
 Your support helps us keep building and maintaining free, open-source Discord tools. ❤️
@@ -407,6 +409,6 @@ This project is licensed under the **Apache License** — see [LICENSE](LICENSE)
 <div align="center">
 
 Made with ❤️ by the **Next Generation Team**  
-[Discord](https://discord.gg/BhJStSa89s) · [GitHub](https://github.com/aymenelouadi/next-generation)
+[Discord](https://discord.gg/BhJStSa89s) · [Ko-fi](https://ko-fi.com/next_generation) · [GitHub](https://github.com/aymenelouadi/next-generation)
 
 </div>
