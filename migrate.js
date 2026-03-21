@@ -164,13 +164,14 @@ async function migrateJails(M) {
     const ops = [];
     for (const [userId, d] of Object.entries(merged)) {
         if (d.expiresAt && new Date(d.expiresAt) < new Date()) { skip(`Jail ${userId} already expired — skipping`); continue; }
+        const stableCaseId = d.caseId || `LEGACY_${userId}`;
         ops.push({
             updateOne: {
-                filter: { guildId: d.guildId || '_legacy', userId },
+                filter: { guildId: d.guildId || '_legacy', userId, caseId: stableCaseId },
                 update: { $set: {
                     guildId:     d.guildId   || '_legacy',
                     userId,
-                    caseId:      d.caseId    || `LEGACY_${userId}`,
+                    caseId:      stableCaseId,
                     reason:      d.reason    || 'No reason',
                     moderatorId: d.moderatorId || '0',
                     jailRoleId:  d.jailRoleId  || d.roleId || 'LEGACY_UNKNOWN',
