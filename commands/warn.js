@@ -5,11 +5,11 @@
  */
 
 ﻿const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const fs         = require('fs');
-const path       = require('path');
+const db         = require('../systems/schemas');
 const logSystem  = require('../systems/log.js');
 const adminGuard = require('../utils/adminGuard');
 const { t, langOf } = require('../utils/cmdLang');
+const validators     = require('../utils/validators');
 
 /* ── Components V2 ─────────────────────────────────── */
 const CV2 = 1 << 15;
@@ -23,25 +23,7 @@ function genCaseId() {
     return id;
 }
 
-function saveWarning(userId, userData, caseData) {
-    const dbPath = path.join(__dirname, '../database/warning.json');
-    fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-    let db = {};
-    try { db = JSON.parse(fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '') || '{}'); } catch {}
-    if (!db[userId]) db[userId] = { username: userData.username, tag: userData.tag, cases: [] };
-    else { db[userId].username = userData.username; db[userId].tag = userData.tag; }
-    db[userId].cases.push(caseData);
-    try { fs.writeFileSync(dbPath, JSON.stringify(db, null, 2)); return true; }
-    catch { return false; }
-}
 
-function warnCount(userId) {
-    const dbPath = path.join(__dirname, '../database/warning.json');
-    try {
-        const db = JSON.parse(fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '') || '{}');
-        return db[userId]?.cases?.length ?? 0;
-    } catch { return 0; }
-}
 
 /* ── CV2 builders ────────────────────────────────────── */
 function buildSuccess(user, reason, caseId, moderator, totalWarns, lang) {
@@ -124,6 +106,14 @@ module.exports = {
             guild     = ctx.guild;
         }
 
+        /* ── Validate inputs ──────────────────────────── */
+        const vWarn = validators.WarnArgs.safeParse({ userId: user.id, reason });
+        if (!vWarn.success) {
+            const p = buildError(validators.formatError(vWarn.error));
+            return isSlash ? ctx.reply(p) : ctx.channel.send(p);
+        }
+        reason = vWarn.data.reason; // trimmed
+
         /* ── Self-warn check ───────────────────────────── */
         if (user.id === moderator.id) {
             const p = buildError(t(lang, 'warn.self_warn'));
@@ -131,21 +121,14 @@ module.exports = {
         }
 
         /* ── Record ────────────────────────────────────── */
-        const settings = JSON.parse(fs.readFileSync(path.join(__dirname, '../settings.json'), 'utf8'));
+        const settings = require('../utils/settings');
         const caseId   = genCaseId();
         const date     = new Date().toLocaleString('en-US');
 
-        const caseData = {
-            caseId, action: 'WARN', reason,
-            moderatorId: moderator.id,
-            moderator: moderator.username,
-            court: settings.court?.name ?? '',
-            timestamp: date,
-        };
-
-        let saveOk = true;
         if (settings.actions?.warn?.saveRecord) {
-            saveOk = saveWarning(user.id, { username: user.username, tag: user.tag }, caseData);
+            await db.Warning.addCase(guildId, user.id, user.username, {
+                caseId, reason, moderatorId: moderator.id,
+            }).catch(err => console.error('[warn] Warning.addCase error:', err));
         }
 
         /* ── Log ───────────────────────────────────────── */
@@ -161,7 +144,8 @@ module.exports = {
         }
 
         /* ── Reply ─────────────────────────────────────── */
-        const totalWarns = warnCount(user.id);
+        const warnDoc    = await db.Warning.findOne({ guildId, userId: user.id }).lean().catch(() => null);
+        const totalWarns = warnDoc?.totalWarns ?? 0;
         const payload    = buildSuccess(user, reason, caseId, moderator, totalWarns, lang);
 
         let botReply;

@@ -4,21 +4,18 @@
  * https://discord.gg/BhJStSa89s
  */
 
-const fs = require('fs');
-const path = require('path');
 const { PermissionFlagsBits } = require('discord.js');
+const logger = require('../utils/logger');
+const guildDb = require('../dashboard/utils/guildDb');
 
 module.exports = {
     name: 'auto-role-system',
 
     execute(client) {
-        console.log('Loading auto-role system...');
+        logger.info('Loading auto-role system...');
 
         this.client = client;
-        this.dbPath = path.join(__dirname, '../database/auto_role.json');
         this.invitesCache = new Map(); // guildId => Map(code => uses)
-
-        this.loadDatabase();
 
         client.once('ready', async () => {
             for (const guild of client.guilds.cache.values()) {
@@ -49,62 +46,27 @@ module.exports = {
 
         client.on('interactionCreate', async (interaction) => {
             if (interaction.isButton() && interaction.customId.startsWith('autorole_')) {
-                console.log(`Button pressed: ${interaction.customId}`);
+                logger.info(`Button pressed: ${interaction.customId}`);
                 await this.handleButtonInteraction(interaction);
             }
 
             if (interaction.isStringSelectMenu() && interaction.customId.startsWith('autorole_select_')) {
-                console.log(`Select menu used: ${interaction.customId}`);
+                logger.info(`Select menu used: ${interaction.customId}`);
                 await this.handleSelectMenu(interaction);
             }
         });
 
         client.on('guildMemberAdd', async (member) => {
-            console.log(`New member joined: ${member.user.tag} (${member.user.bot ? 'bot' : 'human'})`);
+            logger.info(`New member joined: ${member.user.tag} (${member.user.bot ? 'bot' : 'human'})`);
             await this.assignAutoRoles(member);
         });
 
-        console.log('Auto-role system loaded successfully');
+        logger.info('Auto-role system loaded successfully');
     },
 
-    loadDatabase() {
-        try {
-            console.log(`Loading database from: ${this.dbPath}`);
+    loadDatabase() {}, // no-op — data is now per-guild via guildDb
 
-            if (!fs.existsSync(this.dbPath)) {
-                console.log('Creating new database...');
-                fs.writeFileSync(this.dbPath, JSON.stringify({}, null, 2));
-                this.db = {};
-            } else {
-                const data = fs.readFileSync(this.dbPath, 'utf8').replace(/^\uFEFF/, '');
-                this.db = JSON.parse(data);
-
-                console.log(`Database loaded: ${Object.keys(this.db).length} guilds`);
-            }
-
-            if (typeof this.db !== 'object' || Array.isArray(this.db)) this.db = {};
-            this.migrateLegacySchema();
-
-        } catch (error) {
-            console.error('Error loading database:', error);
-            this.db = {};
-        }
-    },
-
-    migrateLegacySchema() {
-        let changed = false;
-
-        for (const guildId of Object.keys(this.db)) {
-            const raw = this.db[guildId];
-            const normalized = this.normalizeGuildData(guildId, raw);
-            if (JSON.stringify(raw) !== JSON.stringify(normalized)) {
-                this.db[guildId] = normalized;
-                changed = true;
-            }
-        }
-
-        if (changed) this.saveDatabase();
-    },
+    saveDatabase() {},  // no-op — use guildDb.write() directly
 
     normalizeGuildData(guildId, data) {
         const obj = (data && typeof data === 'object' && !Array.isArray(data)) ? data : {};
@@ -131,23 +93,8 @@ module.exports = {
     },
 
     getGuildData(guildId) {
-        if (!this.db[guildId]) {
-            this.db[guildId] = this.normalizeGuildData(guildId, {});
-        } else {
-            this.db[guildId] = this.normalizeGuildData(guildId, this.db[guildId]);
-        }
-        return this.db[guildId];
-    },
-
-    saveDatabase() {
-        try {
-            fs.writeFileSync(this.dbPath, JSON.stringify(this.db, null, 2));
-            console.log('Database saved');
-            return true;
-        } catch (error) {
-            console.error('Error saving database:', error);
-            return false;
-        }
+        const raw = guildDb.read(guildId, 'auto_role', {});
+        return this.normalizeGuildData(guildId, raw);
     },
 
     async cacheGuildInvites(guild) {
@@ -160,7 +107,7 @@ module.exports = {
             invites.forEach(inv => map.set(inv.code, inv.uses || 0));
             this.invitesCache.set(guild.id, map);
         } catch (error) {
-            console.log(`[auto-role] Could not cache invites for guild ${guild?.id}: ${error.message}`);
+            logger.info(`[auto-role] Could not cache invites for guild ${guild?.id}: ${error.message}`);
         }
     },
 
@@ -189,7 +136,7 @@ module.exports = {
             this.invitesCache.set(guild.id, current);
             return usedCode;
         } catch (error) {
-            console.log(`[auto-role] Could not resolve used invite in guild ${guild?.id}: ${error.message}`);
+            logger.info(`[auto-role] Could not resolve used invite in guild ${guild?.id}: ${error.message}`);
             return null;
         }
     },
@@ -204,7 +151,7 @@ module.exports = {
             }
 
             const customId = interaction.customId;
-            console.log(`Processing button: ${customId}`);
+            logger.info(`Processing button: ${customId}`);
 
             if (customId === 'autorole_humans') {
                 await this.showRoleActions(interaction, 'humans');
@@ -224,7 +171,7 @@ module.exports = {
                 await this.showRoleSelection(interaction, type, 'remove');
             }
         } catch (error) {
-            console.error('Error in handleButtonInteraction:', error);
+            logger.error('Error in handleButtonInteraction:', error);
             await interaction.reply({ content: 'An error occurred', ephemeral: true });
         }
     },
@@ -236,7 +183,7 @@ module.exports = {
             const roleId = interaction.values[0];
             const guildId = interaction.guildId;
 
-            console.log(`Processing select menu: type=${type}, action=${action}, roleId=${roleId}`);
+            logger.info(`Processing select menu: type=${type}, action=${action}, roleId=${roleId}`);
 
             const guild = interaction.guild;
             const role = guild.roles.cache.get(roleId);
@@ -259,22 +206,22 @@ module.exports = {
                 if (!guildData[typeKey].includes(roleId)) {
                     guildData[typeKey].push(roleId);
                     guildData[typeKey] = Array.from(new Set(guildData[typeKey]));
-                    this.saveDatabase();
-                    console.log(`Added: ${role.name} to ${type}`);
+                    guildDb.write(guildId, 'auto_role', guildData);
+                    logger.info(`Added: ${role.name} to ${type}`);
                     statusMessage = `✅ Role **${role.name}** added for ${type}`;
                 } else {
-                    console.log(`Role already exists: ${role.name} in ${type}`);
+                    logger.info(`Role already exists: ${role.name} in ${type}`);
                     statusMessage = `⚠️ Role **${role.name}** already exists for ${type}`;
                 }
             } else if (action === 'remove') {
                 const index = guildData[typeKey].indexOf(roleId);
                 if (index !== -1) {
                     guildData[typeKey].splice(index, 1);
-                    this.saveDatabase();
-                    console.log(`Removed: ${role.name} from ${type}`);
+                    guildDb.write(guildId, 'auto_role', guildData);
+                    logger.info(`Removed: ${role.name} from ${type}`);
                     statusMessage = `❌ Role **${role.name}** removed from ${type}`;
                 } else {
-                    console.log(`Role not found: ${role.name} in ${type}`);
+                    logger.info(`Role not found: ${role.name} in ${type}`);
                     statusMessage = `⚠️ Role **${role.name}** not found for ${type}`;
                 }
             }
@@ -282,7 +229,7 @@ module.exports = {
             await this.showRoleActions(interaction, type, statusMessage);
 
         } catch (error) {
-            console.error('Error in handleSelectMenu:', error);
+            logger.error('Error in handleSelectMenu:', error);
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({ content: 'An error occurred', ephemeral: true });
             }
@@ -311,7 +258,7 @@ module.exports = {
                 components: [row]
             });
         } catch (error) {
-            console.error('Error in showMainMenu:', error);
+            logger.error('Error in showMainMenu:', error);
         }
     },
 
@@ -342,7 +289,7 @@ module.exports = {
 
             await interaction.update({ content: header, embeds: [], components: [row] });
         } catch (error) {
-            console.error('Error in showRoleActions:', error);
+            logger.error('Error in showRoleActions:', error);
         }
     },
 
@@ -398,7 +345,7 @@ module.exports = {
                 components: [row1, row2]
             });
         } catch (error) {
-            console.error('Error in showRoleSelection:', error);
+            logger.error('Error in showRoleSelection:', error);
         }
     },
 
@@ -408,7 +355,7 @@ module.exports = {
         const guild = member.guild;
         const botMember = await guild.members.fetch(this.client.user.id).catch(() => null);
         if (!botMember) {
-            console.log('Bot not found in server');
+            logger.info('Bot not found in server');
             return 0;
         }
 
@@ -425,7 +372,7 @@ module.exports = {
                 await member.roles.add(role);
                 rolesAdded++;
             } catch (error) {
-                console.error(`Error adding role ${roleId}:`, error.message);
+                logger.error(`Error adding role ${roleId}:`, error.message);
             }
         }
 
@@ -434,16 +381,14 @@ module.exports = {
 
     async assignAutoRoles(member) {
         try {
-            console.log(`Attempting to assign auto roles to ${member.user.tag}`);
+            logger.info(`Attempting to assign auto roles to ${member.user.tag}`);
 
-            this.loadDatabase();
-
-            const guild = member.guild;
+            const guild   = member.guild;
             const guildId = guild.id;
 
             const guildData = this.getGuildData(guildId);
             if (!guildData.enabled) {
-                console.log(`Auto-role disabled in guild ${guildId}`);
+                logger.info(`Auto-role disabled in guild ${guildId}`);
                 return;
             }
 
@@ -457,28 +402,28 @@ module.exports = {
                     const inviteRule = guildData.inviteRoles.find(x => x.invite === usedInvite);
                     if (inviteRule?.role) {
                         roleSet.add(inviteRule.role);
-                        console.log(`[auto-role] Invite ${usedInvite} matched role ${inviteRule.role}`);
+                        logger.info(`[auto-role] Invite ${usedInvite} matched role ${inviteRule.role}`);
                     }
                 }
             }
 
             const roleIds = Array.from(roleSet);
             if (roleIds.length === 0) {
-                console.log(`No roles configured for member type in guild ${guildId}`);
+                logger.info(`No roles configured for member type in guild ${guildId}`);
                 return;
             }
 
             const rolesAdded = await this.addRolesSafely(member, roleIds);
 
             if (rolesAdded > 0) {
-                console.log(`Added ${rolesAdded} auto roles to ${member.user.tag}`);
+                logger.info(`Added ${rolesAdded} auto roles to ${member.user.tag}`);
             } else {
-                console.log(`No roles added to ${member.user.tag}`);
+                logger.info(`No roles added to ${member.user.tag}`);
             }
 
         } catch (error) {
-            console.error('Error in assignAutoRoles:', error);
-            console.error('Stack:', error.stack);
+            logger.error('Error in assignAutoRoles:', error);
+            logger.error('Stack:', error.stack);
         }
     }
 };

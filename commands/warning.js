@@ -5,8 +5,7 @@
  */
 
 ﻿const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const fs         = require('fs');
-const path       = require('path');
+const db         = require('../systems/schemas');
 const logSystem  = require('../systems/log.js');
 const adminGuard = require('../utils/adminGuard');
 const { t, langOf } = require('../utils/cmdLang');
@@ -15,15 +14,7 @@ const { t, langOf } = require('../utils/cmdLang');
 const CV2 = 1 << 15;
 const C   = { Container: 17, Text: 10, Sep: 14 };
 
-/* ── Helpers ─────────────────────────────────────────── */
-function getWarnings(userId) {
-    const dbPath = path.join(__dirname, '../database/warning.json');
-    if (!fs.existsSync(dbPath)) return null;
-    try {
-        const db = JSON.parse(fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '') || '{}');
-        return db[userId] || null;
-    } catch { return null; }
-}
+
 
 function timeAgo(ts) {
     const ms   = Date.now() - new Date(ts).getTime();
@@ -154,7 +145,7 @@ module.exports = {
         }
 
         /* ── Fetch data ────────────────────────────────── */
-        const data = getWarnings(user.id);
+        const data    = await db.Warning.findOne({ guildId, userId: user.id }).lean().catch(() => null);
         const payload = (!data || !data.cases?.length)
             ? buildEmpty(user, lang)
             : buildWarnings(user, data, lang);

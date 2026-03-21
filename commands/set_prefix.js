@@ -8,7 +8,8 @@ const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const path       = require('path');
 const adminGuard = require('../utils/adminGuard.js');
 const { langOf, t } = require('../utils/cmdLang.js');
-const logSystem  = require('../systems/log.js');
+const logSystem      = require('../systems/log.js');
+const validators     = require('../utils/validators');
 
 const CV2 = 1 << 15;
 const C   = { Container: 17, Text: 10, Sep: 14 };
@@ -52,11 +53,14 @@ module.exports = {
             prefix = args[0];
         }
 
-        if (!prefix || prefix.length > 3) {
-            const err = buildCard(0xef4444, [`❌  ${t(lang,'set_prefix.too_long')}`]);
+        /* ── Validate ──────────────────────────────── */
+        const vPfx = validators.PrefixArgs.safeParse({ prefix });
+        if (!vPfx.success) {
+            const err = buildCard(0xef4444, [`❌  ${validators.formatError(vPfx.error)}`]);
             if (isSlash) return ctx.reply({ ...err, ephemeral: true });
             const m = await ctx.channel.send(err); setTimeout(() => m.delete().catch(() => {}), 8000); return;
         }
+        prefix = vPfx.data.prefix; // trimmed
 
         /* persist */
         const settingsPath = require('path').join(__dirname, '../settings.json');

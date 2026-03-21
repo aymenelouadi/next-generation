@@ -8,20 +8,17 @@ const fs = require('fs');
 const path = require('path');
 const { Client, Collection, GatewayIntentBits, REST, Routes } = require('discord.js');
 require('dotenv').config();
+const logger       = require('./utils/logger');
 const settingsUtil = require('./utils/settings');
 const guildSystem  = require('./utils/guildSystem');
 const cmdLang      = require('./utils/cmdLang');
+const dbSchemas    = require('./systems/schemas');
+const guildDb      = require('./dashboard/utils/guildDb');
 
 // ── Dashboard ──────────────────────────────────────────
 require('./dashboard/server').start();
 
-process.on('unhandledRejection', error => {
-    console.error('Unhandled promise rejection:', error);
-});
-
-process.on('uncaughtException', error => {
-    console.error('Uncaught exception:', error);
-});
+// Unhandled errors are caught by logger.js process handlers
 
 const client = new Client({
     intents: [
@@ -43,14 +40,14 @@ client.textCommands = new Collection();
 
 const loadFiles = (directory, callback) => {
     const dirPath = path.join(__dirname, directory);
-    if (!fs.existsSync(dirPath)) return console.warn(`[Warning] Directory not found: ${directory}`);
+    if (!fs.existsSync(dirPath)) return logger.warn(`Directory not found: ${directory}`, { category: 'loader' });
     fs.readdirSync(dirPath).filter(file => file.endsWith('.js')).forEach(file => {
         const filePath = path.join(dirPath, file);
         try {
             const loadedFile = require(filePath);
             callback(file, loadedFile);
         } catch (err) {
-            console.error(`[Error] Failed to load file: ${filePath}`, err);
+            logger.error(`Failed to load file: ${filePath}`, { category: 'loader', error: err.message, stack: err.stack });
         }
     });
 };
@@ -60,7 +57,7 @@ loadFiles('commands', (file, command) => {
     command._actionKey = actionKey;
     if (command.data && typeof command.execute === 'function') {
         client.commands.set(command.data.name, command);
-        console.log(`[command] Loaded: ${command.data.name}`);
+            logger.discord(`Command loaded: ${command.data.name}`, { category: 'loader' });
     }
     if (command.textCommand) {
         client.textCommands.set(command.textCommand.name, command);
@@ -81,7 +78,7 @@ loadFiles('systems', (file, system) => {
     if (system.name && typeof system.execute === 'function') {
         system.execute(client);
         client.systems.set(system.name, system);
-        console.log(`[system] Loaded: ${system.name}`);
+        logger.discord(`System loaded: ${system.name}`, { category: 'loader' });
     }
 });
 
@@ -92,9 +89,9 @@ const updateSlashCommands = async () => {
     try {
         await new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN)
             .put(Routes.applicationCommands(process.env.CLIENT_ID), { body: commands });
-        console.log('Slash commands updated successfully');
+        logger.discord('Slash commands updated successfully');
     } catch (error) {
-        console.error('Failed to update commands:', error);
+        logger.error('Failed to update slash commands', { category: 'discord', error: error.message, stack: error.stack });
     }
 };
 
@@ -105,7 +102,7 @@ client.once('ready', async () => {
     const developerName = 'Shaad You';
     const developerId = '756947441592303707';
     const poweredBy = 'Next Generation';
-    const discordLink = 'https://discord.gg/mFEehCPKEW';
+    const discordLink = 'https://discord.gg/BhJStSa89s';
     const loginTime = new Date().toLocaleString();
 
     console.log(`
@@ -128,9 +125,9 @@ Logged in at     : ${loginTime}
     require('./dashboard/utils/botClient').setClient(client);
     // Initialise per-guild commands.json for every guild the bot is already in
     client.guilds.cache.forEach(guild => {
-        try { guildCmds.init(guild.id); } catch (e) { console.error('[guildCmds.init]', guild.id, e); }
+        try { guildCmds.init(guild.id); } catch (e) { logger.error('guildCmds.init failed', { category: 'discord', guildId: guild.id, error: e.message }); }
     });
-    console.log(`[guildCmds] Initialised commands.json for ${client.guilds.cache.size} guild(s).`);
+    logger.discord(`guildCmds initialised for ${client.guilds.cache.size} guild(s)`);
 
     // ── Auto-Leave sweep on startup ─────────────────────────────────────────
     const srvCfg = settingsUtil.get()?.DASHBOARD?.SERVERS || {};
@@ -139,8 +136,8 @@ Logged in at     : ${loginTime}
         if (allowed.length > 0) {
             for (const [, guild] of client.guilds.cache) {
                 if (!allowed.includes(guild.id)) {
-                    console.log(`[Auto-Leave] Startup sweep — leaving disallowed guild: ${guild.name} (${guild.id})`);
-                    try { await guild.leave(); } catch (e) { console.error('[Auto-Leave] Failed to leave guild:', e); }
+                    logger.discord(`Auto-Leave startup sweep — leaving disallowed guild: ${guild.name}`, { guildId: guild.id });
+                    try { await guild.leave(); } catch (e) { logger.error('Auto-Leave failed to leave guild', { guildId: guild.id, error: e.message }); }
                 }
             }
         }
@@ -165,7 +162,14 @@ client.on('interactionCreate', async (interaction) => {
     try {
         await command.execute(client, interaction);
     } catch (error) {
-        console.error('Error handling command:', error);
+        logger.error('Error handling slash command', {
+            category: 'discord',
+            command:  interaction.commandName,
+            userId:   interaction.user?.id,
+            guildId,
+            error:    error.message,
+            stack:    error.stack,
+        });
         try {
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({ content: cmdLang.t(lang, 'system.error'), flags: 64 });
@@ -173,7 +177,7 @@ client.on('interactionCreate', async (interaction) => {
                 await interaction.followUp({ content: cmdLang.t(lang, 'system.error'), flags: 64 });
             }
         } catch (replyError) {
-            if (replyError.code !== 10062) console.error('Failed to send error reply:', replyError);
+            if (replyError.code !== 10062) logger.error('Failed to send error reply', { category: 'discord', error: replyError.message });
         }
     }
 });
@@ -185,14 +189,14 @@ client.on('guildCreate', async (guild) => {
     if (srvCfg.LEAVE_AUTO) {
         const allowed = Array.isArray(srvCfg.SERVER_ALLOWED) ? srvCfg.SERVER_ALLOWED : [];
         if (allowed.length > 0 && !allowed.includes(guild.id)) {
-            console.log(`[Auto-Leave] Leaving disallowed guild: ${guild.name} (${guild.id})`);
-            try { await guild.leave(); } catch (e) { console.error('[Auto-Leave] Failed to leave guild:', e); }
+            logger.discord(`Auto-Leave — leaving disallowed guild: ${guild.name}`, { guildId: guild.id });
+            try { await guild.leave(); } catch (e) { logger.error('Auto-Leave failed to leave guild', { guildId: guild.id, error: e.message }); }
             return;
         }
     }
 
     // Initialise an isolated commands.json for this guild immediately
-    try { guildCmds.init(guild.id); } catch (e) { console.error('[guildCmds.init]', guild.id, e); }
+    try { guildCmds.init(guild.id); } catch (e) { logger.error('guildCmds.init failed', { category: 'discord', guildId: guild.id, error: e.message }); }
     try {
         const dashLogs = require('./dashboard/utils/dashboardLogs');
         dashLogs.addEntry({
@@ -225,7 +229,7 @@ client.on('messageCreate', async (message) => {
     if (!message.guild) return;
     try { require('./dashboard/utils/activityTracker').increment(message.guild.id, 'messages'); } catch (_) {}
 
-    const afkData = getAFKUser(message.author.id);
+    const afkData = await getAFKUser(message.author.id);
     if (afkData) {
         await removeAFKFromDatabase(message.author.id);
         
@@ -238,7 +242,7 @@ client.on('messageCreate', async (message) => {
     if (message.reference && message.reference.messageId) {
         try {
             const repliedMessage = await message.channel.messages.fetch(message.reference.messageId);
-            const repliedUserAFK = getAFKUser(repliedMessage.author.id);
+            const repliedUserAFK = await getAFKUser(repliedMessage.author.id);
             
             if (repliedUserAFK && repliedMessage.author.id !== message.author.id) {
                 const response = `<@${repliedMessage.author.id}> is AFK: **${repliedUserAFK.reason}**`;
@@ -247,7 +251,7 @@ client.on('messageCreate', async (message) => {
                     .catch(() => {});
             }
         } catch (error) {
-            if (error.code !== 10008) console.error('Error fetching replied message:', error);
+            if (error.code !== 10008) logger.error('Error fetching replied message', { category: 'discord', error: error.message });
         }
     }
     
@@ -256,7 +260,7 @@ client.on('messageCreate', async (message) => {
         for (const [userId, user] of mentions) {
             if (userId === message.author.id) continue;
             
-            const mentionedUserAFK = getAFKUser(userId);
+            const mentionedUserAFK = await getAFKUser(userId);
             if (mentionedUserAFK) {
                 const response = `<@${userId}> is AFK: **${mentionedUserAFK.reason}**`;
                 await message.reply(response)
@@ -310,52 +314,32 @@ client.on('messageCreate', async (message) => {
     try {
         await command.execute(client, message, args);
     } catch (error) {
-        console.error('Error handling text command:', error);
+        logger.error('Error handling text command', {
+            category: 'discord',
+            command:  commandName,
+            userId:   message.author?.id,
+            guildId:  message.guild?.id,
+            error:    error.message,
+            stack:    error.stack,
+        });
         message.reply(cmdLang.t(lang, 'system.error')).catch(() => {});
     }
     
 });
 
-const getAFKUser = (userId) => {
-    const dbPath = path.join(__dirname, './database/afk.json');
-    
-    if (!fs.existsSync(dbPath)) {
-        return null;
-    }
-    
+const getAFKUser = async (userId) => {
     try {
-        const fileContent = fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '');
-        const database = JSON.parse(fileContent);
-        return database[userId] || null;
-    } catch (error) {
-        console.error('Error reading AFK database:', error);
+        return await dbSchemas.AFK.findOne({ userId }).lean();
+    } catch {
         return null;
     }
 };
 
-const removeAFKFromDatabase = (userId) => {
-    const dbPath = path.join(__dirname, './database/afk.json');
-    
-    if (!fs.existsSync(dbPath)) {
-        return { success: false, error: 'Database not found' };
-    }
-    
+const removeAFKFromDatabase = async (userId) => {
     try {
-        const fileContent = fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '');
-        const database = JSON.parse(fileContent);
-        
-        if (!database[userId]) {
-            return { success: false, error: 'User not found in database' };
-        }
-        
-        const afkData = database[userId];
-        delete database[userId];
-        
-        fs.writeFileSync(dbPath, JSON.stringify(database, null, 2));
-        return { success: true, afkData };
-    } catch (error) {
-        console.error('Error removing AFK from database:', error);
-        return { success: false, error: error.message };
+        return await dbSchemas.AFK.findOneAndDelete({ userId }).lean();
+    } catch {
+        return null;
     }
 };
 
@@ -374,7 +358,16 @@ function formatTimeSince(timestamp) {
     return `${seconds} second${seconds > 1 ? 's' : ''}`;
 }
 
-client.login(process.env.DISCORD_TOKEN);
+// ── Bootstrap: connect MongoDB → warm cache → login ──────────────────────────
+(async () => {
+    try {
+        await dbSchemas.connect();
+        await guildDb.loadFromMongoDB();
+    } catch (e) {
+        logger.error('MongoDB bootstrap error', { category: 'db', error: e.message, stack: e.stack });
+    }
+    client.login(process.env.DISCORD_TOKEN);
+})();
 
 /*
  * This project was programmed by the Next Generation team.

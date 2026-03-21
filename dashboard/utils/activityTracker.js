@@ -1,31 +1,17 @@
 /*
  * Guild activity tracker — records hourly events per guild.
- * Data stored at dashboard/database/<guildId>/activity.json
+ * Data stored via guildDb (syncs to MongoDB)
  * Tracks: joins, leaves, messages, voice (new connection)
  */
 
-const path = require('path');
-const fs   = require('fs');
-
-const DB_BASE = path.join(__dirname, '../database');
-
-function getFilePath(guildId) {
-    return path.join(DB_BASE, guildId, 'activity.json');
-}
+const guildDb = require('./guildDb');
 
 function readData(guildId) {
-    try {
-        const f = getFilePath(guildId);
-        return fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : {};
-    } catch { return {}; }
+    return guildDb.read(guildId, 'activity', {});
 }
 
 function writeData(guildId, data) {
-    try {
-        const dir = path.join(DB_BASE, guildId);
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        fs.writeFileSync(getFilePath(guildId), JSON.stringify(data));
-    } catch (_) {}
+    guildDb.write(guildId, 'activity', data);
 }
 
 function getKey() {

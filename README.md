@@ -3,7 +3,7 @@
 <img src="media/login.png" alt="Bot Discord Dashboard Banner" width="800"/>
 
 # 🤖 Bot Discord Dashboard ALL-IN-ONE
-### Next Generation — v5.1.1
+### Next Generation — v5.3.3 Beta
 
 **A full-featured Discord bot with an integrated web dashboard built for modern Discord servers.**  
 Protection · Moderation · Tickets · Auto Roles · Levels · Dashboard · and more.
@@ -13,28 +13,16 @@ Protection · Moderation · Tickets · Auto Roles · Levels · Dashboard · and 
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?style=for-the-badge&logo=node.js)](https://nodejs.org)
 [![discord.js](https://img.shields.io/badge/discord.js-v14-5865F2?style=for-the-badge)](https://discord.js.org)
 
-[![Ko-Fi](https://img.shields.io/badge/Support%20us-Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi)](https://ko-fi.com/code_nexus)
-[![PayPal](https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal)](https://www.paypal.com/paypalme/rewebby)
-
-[![Live Demo](https://img.shields.io/badge/🌐%20Live%20Demo-v5.codnex.xyz-7c3aed?style=for-the-badge)](https://v5.codnex.xyz/)
+[![GitHub](https://img.shields.io/badge/Star-GitHub-181717?style=for-the-badge&logo=github)](https://github.com/aymenelouadi/next-generation)
 
 </div>
 
 ---
 
-## 🌐 Live Demo
-
-Try the dashboard live before setting up your own instance:
-
-**[https://v5.codnex.xyz/](https://v5.codnex.xyz/)**
-
-> The demo runs the latest v5.1.1 build with `ANYWARE` mode enabled — log in with any Discord account to explore the dashboard.
-
 ---
 
 ## 📋 Table of Contents
 
-- [Live Demo](#-live-demo)
 - [Features](#-features)
 - [Requirements](#-requirements)
 - [Quick Start — Local (VS Code)](#-quick-start--local-vs-code)
@@ -339,8 +327,7 @@ If this project helped you, consider supporting the team:
 
 | Platform | Link |
 |----------|------|
-| ☕ Ko-fi | [ko-fi.com/code_nexus](https://ko-fi.com/code_nexus) |
-| 💳 PayPal | [paypal.me/rewebby](https://www.paypal.com/paypalme/rewebby) |
+| ⭐ GitHub | [github.com/aymenelouadi/next-generation](https://github.com/aymenelouadi/next-generation) |
 
 Your support helps us keep building and maintaining free, open-source Discord tools. ❤️
 
@@ -354,7 +341,7 @@ This project is licensed under the **Apache License** — see [LICENSE](LICENSE)
 
 <div align="center">
 
-Made by the **Next Generation Team**  
-[Discord](https://discord.gg/BhJStSa89s) · [Ko-fi](https://ko-fi.com/code_nexus) · [PayPal](https://www.paypal.com/paypalme/rewebby)
+Made with ❤️ by the **Next Generation Team**  
+[Discord](https://discord.gg/BhJStSa89s) · [GitHub](https://github.com/aymenelouadi/next-generation)
 
 </div>

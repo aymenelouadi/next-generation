@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 ﻿/*
  * This project was programmed by the Next Generation team.
  * If you encounter any problems, open an Issue or log into the Discord server:
@@ -87,7 +88,7 @@ module.exports = {
                 }
 
             } catch (error) {
-                console.error('[Actions System] interactionCreate error:', error);
+                logger.error('[Actions System] interactionCreate error:', error);
                 try {
                     if (!interaction.replied && !interaction.deferred) {
                         await interaction.reply({ content: 'حدث خطأ في تنفيذ الطلب', ephemeral: true });
@@ -96,7 +97,7 @@ module.exports = {
             }
         });
 
-        console.log('[system] Actions system loaded');
+        logger.info('[system] Actions system loaded');
     }
 };
 

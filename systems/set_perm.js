@@ -5,13 +5,14 @@
  */
 
 const fs = require('fs');
+const logger = require('../utils/logger');
 const path = require('path');
 
 module.exports = {
     name: 'set-perm-system',
     
     execute(client) {
-        console.log('Permission Management System has been loaded');
+        logger.info('Permission Management System has been loaded');
         
         client.on('interactionCreate', async (interaction) => {
             if (interaction.isButton()) {

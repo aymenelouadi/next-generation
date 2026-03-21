@@ -13,6 +13,7 @@
 'use strict';
 
 const fs   = require('fs');
+const logger = require('../utils/logger');
 const path = require('path');
 
 const {
@@ -315,7 +316,7 @@ module.exports = {
                     return;
                 }
             } catch (err) {
-                console.error('[Tickets]', err);
+                logger.error('[Tickets]', err);
                 const msg = { content: '❌ An error occurred. Please try again.', flags: MessageFlags.Ephemeral };
                 if (interaction.replied || interaction.deferred)
                     await interaction.followUp(msg).catch(() => {});
@@ -324,7 +325,7 @@ module.exports = {
             }
         });
 
-        console.log('[Tickets] System loaded — listening for panel interactions');
+        logger.info('[Tickets] System loaded — listening for panel interactions');
     },
 
     // ── Open a ticket ──────────────────────────────────────────────────────

@@ -4,94 +4,61 @@
  * https://discord.gg/BhJStSa89s
  */
 
-const fs = require('fs');
-const path = require('path');
+'use strict';
 
+const db = require('../systems/schemas');
+
+const logger = require('../utils/logger');
 module.exports = {
     name: 'temp-role-system',
-    
+
     execute(client) {
         this.client = client;
-        this.dbPath = path.join(__dirname, '../database/temp_role.json');
         this.checkExpiredRoles();
-        
+
         setInterval(() => {
             this.checkExpiredRoles();
-        }, 30000);
-        
-        console.log('Temporary Role System has been loaded');
+        }, 30_000);
+
+        logger.info('Temporary Role System has been loaded');
     },
-    
-    loadDatabase() {
-        try {
-            if (!fs.existsSync(this.dbPath)) {
-                fs.writeFileSync(this.dbPath, JSON.stringify({}, null, 2));
-                return {};
-            } else {
-                const data = fs.readFileSync(this.dbPath, 'utf8').replace(/^\uFEFF/, '');
-                return JSON.parse(data);
-            }
-        } catch (error) {
-            console.error('Error loading temporary roles database:', error);
-            return {};
-        }
-    },
-    
-    saveDatabase(db) {
-        try {
-            fs.writeFileSync(this.dbPath, JSON.stringify(db, null, 2));
-            return true;
-        } catch (error) {
-            console.error('Error saving temporary roles database:', error);
-            return false;
-        }
-    },
-    
+
     async checkExpiredRoles() {
         try {
-            const db = this.loadDatabase();
-            const now = Date.now();
-            let changed = false;
-            
-            for (const [key, data] of Object.entries(db)) {
-                if (data.expireAt <= now) {
-                    try {
-                        const guild = await this.client.guilds.fetch(data.guildId).catch(() => null);
-                        if (!guild) continue;
-                        
-                        const member = await guild.members.fetch(data.userId).catch(() => null);
-                        if (!member) continue;
-                        
-                        const role = guild.roles.cache.get(data.roleId);
-                        if (!role) continue;
-                        
-                        if (member.roles.cache.has(data.roleId)) {
-                            await member.roles.remove(role);
-                            
-                            try {
-                                await member.send(`⚠️ انتهت مدة الرتبة المؤقتة\nتم إزالة رتبة **${data.roleName}** من سيرفر **${guild.name}**`);
-                            } catch (dmError) {}
-                            
-                            console.log(`Temporary role ${data.roleName} removed from ${member.user.tag}`);
-                        }
-                        
-                        delete db[key];
-                        changed = true;
-                        
-                    } catch (error) {
-                        console.error(`Error removing temporary role ${key}:`, error.message);
+            const mongoose = require('mongoose');
+            if (mongoose.connection.readyState < 1) return;
+
+            const expired = await db.TempRole.find({
+                active: true,
+                expiresAt: { $lte: new Date() },
+            }).lean();
+
+            for (const record of expired) {
+                try {
+                    const guild = await this.client.guilds.fetch(record.guildId).catch(() => null);
+                    if (!guild) { await db.TempRole.findByIdAndUpdate(record._id, { active: false }); continue; }
+
+                    const member = await guild.members.fetch(record.userId).catch(() => null);
+                    if (member && member.roles.cache.has(record.roleId)) {
+                        await member.roles.remove(record.roleId, 'Temp role expired').catch(() => {});
+                        try {
+                            const role = guild.roles.cache.get(record.roleId);
+                            await member.send(
+                                `⚠️ انتهت مدة الرتبة المؤقتة\nتم إزالة رتبة **${role?.name || record.roleId}** من سيرفر **${guild.name}**`
+                            );
+                        } catch (_) {}
+                        logger.info(`[TempRole] Removed role ${record.roleId} from ${record.userId} in ${record.guildId}`);
                     }
+
+                    await db.TempRole.findByIdAndUpdate(record._id, { active: false });
+                } catch (e) {
+                    logger.error(`[TempRole] Error processing record ${record._id}:`, e.message);
                 }
             }
-            
-            if (changed) {
-                this.saveDatabase(db);
-            }
-            
-        } catch (error) {
-            console.error('Error in checkExpiredRoles:', error);
+        } catch (e) {
+            logger.error('[TempRole] checkExpiredRoles error:', e.message);
         }
-    }
+    },
 };
 
 /*

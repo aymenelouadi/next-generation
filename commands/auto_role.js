@@ -5,8 +5,7 @@
  */
 
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const fs = require('fs');
-const path = require('path');
+const guildDb   = require('../dashboard/utils/guildDb');
 const logSystem = require('../systems/log.js');
 
 module.exports = {
@@ -24,13 +23,10 @@ module.exports = {
         const isSlash = interactionOrMessage.isCommand?.();
         
         try {
-            const settingsPath = path.join(__dirname, '../settings.json');
-            const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+            const settings = require('../utils/settings');
+            const commandConfig = settings.actions?.auto_role;
             
-            const commandName = 'auto_role';
-            const commandConfig = settings.actions[commandName];
-            
-            if (!commandConfig.enabled) {
+            if (commandConfig && !commandConfig.enabled) {
                 return this.sendResponse(interactionOrMessage, 'This command is currently disabled', isSlash);
             }
             
@@ -98,27 +94,17 @@ module.exports = {
 
     async handleTextCommand(message, args, client, commandConfig) {
         try {
-            const dbPath = path.join(__dirname, '../database/auto_role.json');
-            let db = {};
             const guildId = message.guild.id;
-            
-            if (fs.existsSync(dbPath)) {
-                try {
-                    const data = fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '');
-                    db = JSON.parse(data);
-                } catch (error) {
-                    console.error('Error reading database:', error);
-                }
-            }
-            
-            if (!args || args.length === 0) {
-                return await this.showTextHelp(message);
+            const guildData = guildDb.read(guildId, 'auto_role', {});
+            // Ensure per-guild structure
+            if (!guildData[guildId] || typeof guildData[guildId] !== 'object') {
+                guildData[guildId] = { guildId, enabled: true, memberRoles: [], botRoles: [], inviteRoles: [] };
             }
             
             const action = args[0].toLowerCase();
             
             if (action === 'list') {
-                return await this.showRoleList(message, db);
+                return await this.showRoleList(message, guildData);
             }
             
             if (args.length < 3) {
@@ -134,9 +120,9 @@ module.exports = {
                 db[guildId] = { guildId, enabled: true, memberRoles: [], botRoles: [], inviteRoles: [] };
             }
 
-            const guildData = db[guildId];
-            if (!Array.isArray(guildData.memberRoles)) guildData.memberRoles = Array.isArray(guildData.humans) ? guildData.humans : [];
-            if (!Array.isArray(guildData.botRoles)) guildData.botRoles = Array.isArray(guildData.bots) ? guildData.bots : [];
+            const guildEntry = db[guildId];
+            if (!Array.isArray(guildEntry.memberRoles)) guildEntry.memberRoles = Array.isArray(guildEntry.humans) ? guildEntry.humans : [];
+            if (!Array.isArray(guildEntry.botRoles)) guildEntry.botRoles = Array.isArray(guildEntry.bots) ? guildEntry.bots : [];
 
             const key = type === 'humans' ? 'memberRoles' : 'botRoles';
             
@@ -146,10 +132,10 @@ module.exports = {
             }
             
             if (action === 'add') {
-                if (!guildData[key].includes(roleMention.id)) {
-                    guildData[key].push(roleMention.id);
-                    guildData[key] = Array.from(new Set(guildData[key].map(String)));
-                    fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
+                if (!guildEntry[key].includes(roleMention.id)) {
+                    guildEntry[key].push(roleMention.id);
+                    guildEntry[key] = Array.from(new Set(guildEntry[key].map(String)));
+                    guildDb.write(guildId, 'auto_role', guildData);
                     
                     if (commandConfig.log) {
                         await logSystem.logCommandUsage({
@@ -169,10 +155,10 @@ module.exports = {
             }
             
             if (action === 'remove') {
-                const index = guildData[key].indexOf(roleMention.id);
+                const index = guildEntry[key].indexOf(roleMention.id);
                 if (index !== -1) {
-                    guildData[key].splice(index, 1);
-                    fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
+                    guildEntry[key].splice(index, 1);
+                    guildDb.write(guildId, 'auto_role', guildData);
                     
                     if (commandConfig.log) {
                         await logSystem.logCommandUsage({

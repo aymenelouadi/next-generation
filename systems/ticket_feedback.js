@@ -38,6 +38,7 @@ const {
 
 const guildDb = require('../dashboard/utils/guildDb');
 
+const logger = require('../utils/logger');
 // ── Notify dashboard via socket.io ───────────────────────────────────────
 function _emitFeedbackUpdate(guildId) {
     try {
@@ -119,7 +120,7 @@ async function sendFeedbackPrompt(interaction, guildId, ticket, panel, dmUser = 
             const dmChannel = await dmUser.createDM();
             await dmChannel.send(dmPayload);
         } catch (err) {
-            console.error('[ticket_feedback] Failed to DM feedback prompt to opener:', err.message);
+            logger.error('[ticket_feedback] Failed to DM feedback prompt to opener:', err.message);
         }
     }
 }
@@ -225,7 +226,7 @@ async function handleFeedbackButton(interaction, client) {
                 try { await sentBtn.startThread({ name: `${s.threadName} — ${ticketId}` }); } catch (_) {}
             }
         } catch (err) {
-            console.error('[ticket_feedback] Failed to post result to channel:', err.message);
+            logger.error('[ticket_feedback] Failed to post result to channel:', err.message);
         }
     }
 }
@@ -328,13 +329,13 @@ async function handleFeedbackModal(interaction, client) {
                 });
                 try { await sentModal.startThread({ name: `${s.threadName} — ${ticketId}` }); } catch (_) {}
             } else {
-                console.warn('[ticket_feedback] feedbackChannel not found:', panel.feedbackChannel);
+                logger.warn('[ticket_feedback] feedbackChannel not found:', panel.feedbackChannel);
             }
         } catch (err) {
-            console.error('[ticket_feedback] Failed to post result to channel:', err.message);
+            logger.error('[ticket_feedback] Failed to post result to channel:', err.message);
         }
     } else if (!panel?.feedbackChannel) {
-        console.log(`[ticket_feedback] No feedbackChannel set for panel ${panelId} — saved locally only.`);
+        logger.info(`[ticket_feedback] No feedbackChannel set for panel ${panelId} — saved locally only.`);
     }
 }
 
@@ -396,11 +397,11 @@ function registerFeedbackHandlers(client) {
                 return;
             }
         } catch (err) {
-            console.error('[ticket_feedback]', err);
+            logger.error('[ticket_feedback]', err);
         }
     });
 
-    console.log('[Tickets] Feedback handlers registered');
+    logger.info('[Tickets] Feedback handlers registered');
 }
 
 module.exports = {

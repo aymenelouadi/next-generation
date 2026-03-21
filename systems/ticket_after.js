@@ -52,6 +52,7 @@ const {
 } = require('discord.js');
 
 const guildDb     = require('../dashboard/utils/guildDb');
+const logger = require('../utils/logger');
 const ticketLog   = require('./ticket_log');
 const ticketStats = require('./ticket_stats');
 
@@ -307,7 +308,7 @@ async function closeTicket(interaction, ticketId, reason = '') {
         otDb.tickets[idx].transcriptChannelMsgId   = result.transcriptChannelMsgId;
         guildDb.write(guildId, 'open_tickets', otDb);
     } catch (err) {
-        console.error('[ticket_after/close] Transcript error:', err.message);
+        logger.error('[ticket_after/close] Transcript error:', err.message);
     }
 
     // ─ Log (rich close card + transcript file) ──────────────────────────────
@@ -318,7 +319,7 @@ async function closeTicket(interaction, ticketId, reason = '') {
         actor:          interaction.user,
         reason,
         transcriptPath: otDb.tickets[idx].transcriptPath ?? null,
-    }).catch(err => console.error('[ticket_after/close] log error:', err.message));
+    }).catch(err => logger.error('[ticket_after/close] log error:', err.message));
 
     // ─ Feedback prompt (always goes to the ticket OPENER, not the closer) ──
     try {
@@ -326,7 +327,7 @@ async function closeTicket(interaction, ticketId, reason = '') {
         const openerUser = await interaction.client.users.fetch(updatedTicket.userId).catch(() => null);
         await sendFeedbackPrompt(interaction, guildId, updatedTicket, panel, openerUser, ticketData);
     } catch (err) {
-        console.error('[ticket_after/close] Feedback error:', err.message);
+        logger.error('[ticket_after/close] Feedback error:', err.message);
     }
 
     // ─ Channel: post close notice and delete after delay ──────────────────
@@ -496,7 +497,7 @@ async function handleAddUserModal(interaction) {
             ReadMessageHistory: true,
         });
     } catch (err) {
-        console.error('[ticket_after/addUser] permissionOverwrites error:', err.message);
+        logger.error('[ticket_after/addUser] permissionOverwrites error:', err.message);
         return interaction.reply({ content: '❌ Failed to update channel permissions.', flags: MessageFlags.Ephemeral });
     }
 
@@ -833,14 +834,14 @@ function registerAfterHandlers(client) {
         } catch (err) {
             // 10062 = Unknown interaction (token expired — nothing we can do)
             if (err.code === 10062) return;
-            console.error('[ticket_after]', err);
+            logger.error('[ticket_after]', err);
             const msg = { content: '❌ An error occurred.', flags: MessageFlags.Ephemeral };
             if (interaction.replied || interaction.deferred) interaction.followUp(msg).catch(() => {});
             else interaction.reply(msg).catch(() => {});
         }
     });
 
-    console.log('[Tickets] After-open handlers registered');
+    logger.info('[Tickets] After-open handlers registered');
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -900,8 +901,8 @@ function _isStaff(member, panel, ticketData) {
     if (globalRoles.length === 0 && panelRoles.length === 0) {
         if (member.permissions?.has(PermissionFlagsBits.ManageGuild)) return true;
     }
-    if (globalRoles.some(r => member.roles.cache.has(r))) return true;
-    if (panelRoles.some(r => member.roles.cache.has(r)))  return true;
+    if (globalRoles.some(r => member.roles?.cache?.has(r))) return true;
+    if (panelRoles.some(r => member.roles?.cache?.has(r)))  return true;
     return false;
 }
 
@@ -1019,7 +1020,7 @@ async function _createChannel(guild, panel, name, user, ticketData) {
             topic:                `Ticket for ${user.tag} | Opened: ${new Date().toUTCString()}`,
         });
     } catch (err) {
-        console.error('[ticket_after] Channel create error:', err.message);
+        logger.error('[ticket_after] Channel create error:', err.message);
         return null;
     }
 }
@@ -1038,7 +1039,7 @@ async function _createThread(guild, panel, name, user) {
         await thread.members.add(user.id).catch(() => {});
         return thread;
     } catch (err) {
-        console.error('[ticket_after] Thread create error:', err.message);
+        logger.error('[ticket_after] Thread create error:', err.message);
         return null;
     }
 }
@@ -1296,7 +1297,7 @@ async function handleEscalateSelect(interaction) {
             flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
         });
     } catch (err) {
-        console.error('[Escalate]', err);
+        logger.error('[Escalate]', err);
         await interaction.reply({
             content: '❌ Failed to move the ticket. Make sure the bot has **Manage Channels** permission.',
             flags: MessageFlags.Ephemeral,

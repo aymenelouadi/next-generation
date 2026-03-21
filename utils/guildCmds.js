@@ -1,10 +1,4 @@
-﻿/*
- * This project was programmed by the Next Generation team.
- * If you encounter any problems, open an Issue or log into the Discord server:
- * https://discord.gg/BhJStSa89s
- */
-
-/**
+﻿/**
  * Per-guild command config manager.
  *
  * Each guild gets its own file: database/guilds/{guildId}/commands.json
@@ -152,10 +146,3 @@ function resolveAllAdmin(guildId) {
 }
 
 module.exports = { get, set, init, resolve, resolveAllPublic, resolveAllAdmin };
-
-
-/*
- * This project was programmed by the Next Generation team.
- * If you encounter any problems, open an Issue or log into the Discord server:
- * https://discord.gg/BhJStSa89s
- */

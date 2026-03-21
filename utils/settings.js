@@ -18,8 +18,10 @@
  *   settingsUtil.save(settings);
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs         = require('fs');
+const logger = require('./logger');
+const path       = require('path');
+const validators = require('./validators');
 
 const SETTINGS_PATH = path.join(__dirname, '../settings.json');
 
@@ -34,8 +36,12 @@ function load() {
         // Strip UTF-8 BOM if present
         if (raw[0] === 0xEF && raw[1] === 0xBB && raw[2] === 0xBF) raw = raw.slice(3);
         cache = JSON.parse(raw.toString('utf8'));
+        // Warn on schema mismatch — never reject, to support old/extended configs
+        const vLoad = validators.SettingsSchema.safeParse(cache);
+        if (!vLoad.success)
+            logger.warn('[Settings] Schema warning on load:', validators.formatError(vLoad.error));
     } catch (e) {
-        console.error('[Settings] Failed to load settings.json:', e.message);
+        logger.error('[Settings] Failed to load settings.json:', e.message);
         if (!cache) cache = {};
     }
     return cache;
@@ -56,10 +62,14 @@ function get() {
  */
 function save(newSettings) {
     try {
+        // Warn before persisting if schema is violated
+        const vSave = validators.SettingsSchema.safeParse(newSettings);
+        if (!vSave.success)
+            logger.warn('[Settings] Schema warning on save:', validators.formatError(vSave.error));
         fs.writeFileSync(SETTINGS_PATH, JSON.stringify(newSettings, null, 4), 'utf8');
         cache = newSettings;
     } catch (e) {
-        console.error('[Settings] Failed to save settings.json:', e.message);
+        logger.error('[Settings] Failed to save settings.json:', e.message);
         throw e;
     }
 }
@@ -74,7 +84,7 @@ function reload() {
 
 // Watch file for external changes (e.g. manual edits) and auto-reload cache.
 fs.watchFile(SETTINGS_PATH, { interval: 2000 }, () => {
-    console.log('[Settings] settings.json changed on disk — reloading cache...');
+    logger.info('[Settings] settings.json changed on disk — reloading cache...');
     reload();
 });
 

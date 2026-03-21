@@ -5,8 +5,6 @@
  */
 
 ﻿const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const fs         = require('fs');
-const path       = require('path');
 const logSystem  = require('../systems/log.js');
 const adminGuard = require('../utils/adminGuard');
 const { t, langOf } = require('../utils/cmdLang');
@@ -23,17 +21,6 @@ function genCaseId() {
     return id;
 }
 
-function saveRecord(userId, userData, caseData) {
-    const dbPath = path.join(__dirname, '../database/records.json');
-    fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-    let db = {};
-    try { db = JSON.parse(fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '') || '{}'); } catch {}
-    if (!db[userId]) db[userId] = { username: userData.username, tag: userData.tag, cases: [] };
-    else { db[userId].username = userData.username; db[userId].tag = userData.tag; }
-    db[userId].cases.push(caseData);
-    try { fs.writeFileSync(dbPath, JSON.stringify(db, null, 2)); return true; }
-    catch { return false; }
-}
 
 /* ── CV2 builders ────────────────────────────────────── */
 function buildSuccess(user, reason, caseId, moderator, lang) {
@@ -152,21 +139,9 @@ module.exports = {
         }
 
         /* ── Record & log ──────────────────────────────── */
-        const settings = JSON.parse(fs.readFileSync(path.join(__dirname, '../settings.json'), 'utf8'));
+        const settings = require('../utils/settings');
         const caseId   = genCaseId();
         const date     = new Date().toLocaleString('en-US');
-
-        const caseData = {
-            caseId, action: 'KICK', reason,
-            moderatorId: moderator.id,
-            moderator: moderator.username,
-            court: settings.court?.name ?? '',
-            timestamp: date,
-        };
-
-        if (settings.actions?.kick?.saveRecord) {
-            saveRecord(user.id, { username: user.username, tag: user.tag }, caseData);
-        }
 
         if (g.cfg.log) {
             await logSystem.logCommandUsage({

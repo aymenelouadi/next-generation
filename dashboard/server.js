@@ -8,6 +8,7 @@ require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const express       = require('express');
 const http          = require('http');
 const { Server: SocketServer } = require('socket.io');
+const logger        = require('../utils/logger');
 
 /* ── settings.json helpers ── */
 let _cfgCache = null, _cfgCacheAt = 0;
@@ -100,8 +101,8 @@ app.use(session({
     secret: (() => {
         const s = process.env.SESSION;
         if (!s) {
-            if (IS_PROD) console.error('\x1b[31m[Security] SESSION env variable is not set! Set a strong random secret in .env to protect user sessions.\x1b[0m');
-            else console.warn('\x1b[33m[Security] SESSION env not set — using insecure fallback. Add SESSION=<random> to .env\x1b[0m');
+            if (IS_PROD) logger.error('SESSION env variable is not set — sessions are unprotected!', { category: 'security' });
+            else logger.warn('SESSION env not set — using insecure fallback. Add SESSION=<random> to .env', { category: 'security' });
         }
         return s || 'nexus-secret-key';
     })(),
@@ -585,20 +586,10 @@ app.get('/dashboard/:guildId', require('./middleware/auth'), (req, res) => {
     // protection lives in dashboard DB (written by both bot system and dashboard)
     const protData     = guildDb.read(guildId, 'protection', null);
 
-    // auto_role lives in root database/auto_role.json keyed by guildId
-    function readBotDb(filename) {
-        try {
-            const file = path.join(__dirname, '../database', `${filename}.json`);
-            return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {};
-        } catch { return {}; }
-    }
-    const autoRoleAll   = readBotDb('auto_role');
-    const autoRoleEntry = autoRoleAll[guildId] || null;
-
-    const autoResponderAll  = readBotDb('auto_responder');
-    const autoResponderEntry = autoResponderAll[guildId] || null;
-    const suggestionsAll    = readBotDb('suggestions');
-    const suggestionsEntry  = suggestionsAll[guildId] || null;
+    // Read module configs via guildDb (syncs to MongoDB)
+    const autoRoleEntry      = guildDb.read(guildId, 'auto_role', null);
+    const autoResponderEntry = guildDb.read(guildId, 'auto_responder', null);
+    const suggestionsEntry   = guildDb.read(guildId, 'suggestions_config', null);
     const staffPointsData    = guildDb.read(guildId, 'staff_points', null);
     const interactionPtsData = guildDb.read(guildId, 'interaction_points', null);
 
@@ -770,7 +761,7 @@ app.post('/dashboard/:guildId/setting/save', require('./middleware/auth'), (req,
 
         res.json({ success: true });
     } catch (err) {
-        console.error('[setting/save]', err);
+        logger.error('setting/save failed', { category: 'dashboard', error: err.message, stack: err.stack });
         res.status(500).json({ error: err.message });
     }
 });
@@ -787,7 +778,7 @@ app.post('/dashboard/:guildId/setting/bot-description', require('./middleware/au
         if (botClient.application) await botClient.application.fetch();
         res.json({ success: true, description });
     } catch (err) {
-        console.error('[setting/bot-description]', err);
+        logger.error('setting/bot-description failed', { category: 'dashboard', error: err.message, stack: err.stack });
         res.status(500).json({ error: err.message });
     }
 });
@@ -806,7 +797,7 @@ app.post('/dashboard/:guildId/setting/bot-username', require('./middleware/auth'
         await botClient.user.setUsername(username);
         res.json({ success: true, username: botClient.user.username });
     } catch (err) {
-        console.error('[setting/bot-username]', err);
+        logger.error('setting/bot-username failed', { category: 'dashboard', error: err.message, stack: err.stack });
         res.status(500).json({ error: err.message });
     }
 });
@@ -825,7 +816,7 @@ app.post('/dashboard/:guildId/setting/bot-avatar', require('./middleware/auth'),
         const avatar = u.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=256` : null;
         res.json({ success: true, avatar });
     } catch (err) {
-        console.error('[setting/bot-avatar]', err);
+        logger.error('setting/bot-avatar failed', { category: 'dashboard', error: err.message, stack: err.stack });
         res.status(500).json({ error: err.message });
     }
 });
@@ -844,7 +835,15 @@ app.post('/dashboard/:guildId/setting/bot-banner', require('./middleware/auth'),
         const banner = u.banner ? `https://cdn.discordapp.com/banners/${u.id}/${u.banner}.png?size=480` : null;
         res.json({ success: true, banner });
     } catch (err) {
-        console.error('[setting/bot-banner]', err);
+        if (err.code === 50035 && err.rawError?.errors?.banner) {
+            const bannerErr = err.rawError.errors.banner;
+            const isRateLimit = JSON.stringify(bannerErr).includes('BANNER_RATE_LIMIT');
+            if (isRateLimit) {
+                logger.warn('setting/bot-banner rate-limited by Discord', { category: 'dashboard' });
+                return res.status(429).json({ error: 'You are changing the banner too fast. Please wait a moment and try again.' });
+            }
+        }
+        logger.error('setting/bot-banner failed', { category: 'dashboard', error: err.message, stack: err.stack });
         res.status(500).json({ error: err.message });
     }
 });
@@ -1306,7 +1305,7 @@ app.post('/dashboard/:guildId/tickets/panels/send', require('./middleware/auth')
         guildDb.write(guildId, 'tickets', ticketData);
         res.json({ success: true, messageId: newMessageId });
     } catch (err) {
-        console.error('[/tickets/panels/send]', err);
+        logger.error('tickets/panels/send failed', { category: 'dashboard', error: err.message, stack: err.stack });
         res.status(500).json({ error: err.message || 'Send failed' });
     }
 });
@@ -1355,7 +1354,7 @@ app.post('/dashboard/:guildId/tickets/multi-panels/send', require('./middleware/
         guildDb.write(guildId, 'tickets', ticketData);
         res.json({ success: true, messageId: newMessageId });
     } catch (err) {
-        console.error('[/tickets/multi-panels/send]', err);
+        logger.error('tickets/multi-panels/send failed', { category: 'dashboard', error: err.message, stack: err.stack });
         res.status(500).json({ error: err.message || 'Send failed' });
     }
 });
@@ -1405,13 +1404,13 @@ app.post('/dashboard/:guildId/tickets/reset', require('./middleware/auth'), (req
         try {
             const fp = path.join(__dirname, 'database', guildId, `${f}.json`);
             if (fs.existsSync(fp)) fs.unlinkSync(fp);
-        } catch (e) { console.warn(`[reset] Could not delete ${f}.json:`, e.message); }
+        } catch (e) { logger.warn(`tickets reset: could not delete ${f}.json`, { category: 'dashboard', guildId, error: e.message }); }
     });
     // Also clear transcripts folder if exists
     try {
         const tDir = path.join(__dirname, 'database', guildId, 'transcripts');
         if (fs.existsSync(tDir)) fs.rmSync(tDir, { recursive: true, force: true });
-    } catch (e) { console.warn('[reset] Could not delete transcripts:', e.message); }
+    } catch (e) { logger.warn('tickets reset: could not delete transcripts', { category: 'dashboard', guildId, error: e.message }); }
     res.json({ success: true });
 });
 
@@ -1430,7 +1429,7 @@ app.post('/dashboard/:guildId/tickets/panels/reset', require('./middleware/auth'
         try {
             const fp = path.join(__dirname, 'database', guildId, `${f}.json`);
             if (fs.existsSync(fp)) fs.unlinkSync(fp);
-        } catch (e) { console.warn(`[panels/reset] Could not delete ${f}.json:`, e.message); }
+        } catch (e) { logger.warn(`panels/reset: could not delete ${f}.json`, { category: 'dashboard', guildId, error: e.message }); }
     });
     res.json({ success: true });
 });
@@ -1741,7 +1740,7 @@ app.post('/dashboard/:guildId/utility/save', require('./middleware/auth'), (req,
         });
         return res.json({ ok: true });
     } catch (err) {
-        console.error('[utility/save]', err);
+        logger.error('utility/save failed', { category: 'dashboard', error: err.message, stack: err.stack });
         return res.status(500).json({ error: 'Server error' });
     }
 });
@@ -1835,7 +1834,7 @@ app.post('/dashboard/:guildId/moderation/save', require('./middleware/auth'), (r
         });
         return res.json({ ok: true });
     } catch (err) {
-        console.error('[moderation/save]', err);
+        logger.error('moderation/save failed', { category: 'dashboard', error: err.message, stack: err.stack });
         return res.status(500).json({ error: 'Server error' });
     }
 });
@@ -2099,8 +2098,7 @@ app.delete('/api/:guildId/protection/perms/:uid', require('./middleware/auth'), 
 
 /* ── Auto Roles ───────────────────────────────────────── */
 app.get('/dashboard/:guildId/auto-roles', require('./middleware/auth'), (req, res) => {
-    const fs   = require('fs');
-    const path = require('path');
+    const guildDb = require('./utils/guildDb');
     const { getClient } = require('./utils/botClient');
     const getUnicodeFlagIcon = require('country-flag-icons/unicode').default;
 
@@ -2127,24 +2125,20 @@ app.get('/dashboard/:guildId/auto-roles', require('./middleware/auth'), (req, re
 
     // Read auto_role DB (supports both legacy and new schema)
     let autoRoles = { enabled: false, humans: [], bots: [], inviteRoles: [] };
-    try {
-        const dbPath = path.join(__dirname, '../database/auto_role.json');
-        const raw2   = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
-        const gData  = raw2[guildId];
-        if (gData) {
-            const memberRoles = Array.isArray(gData.memberRoles) ? gData.memberRoles : (Array.isArray(gData.humans) ? gData.humans : []);
-            const botRoles    = Array.isArray(gData.botRoles)    ? gData.botRoles    : (Array.isArray(gData.bots)   ? gData.bots   : []);
-            const inviteRoles = Array.isArray(gData.inviteRoles) ? gData.inviteRoles : [];
+    const gData = guildDb.read(guildId, 'auto_role', null);
+    if (gData) {
+        const memberRoles = Array.isArray(gData.memberRoles) ? gData.memberRoles : (Array.isArray(gData.humans) ? gData.humans : []);
+        const botRoles    = Array.isArray(gData.botRoles)    ? gData.botRoles    : (Array.isArray(gData.bots)   ? gData.bots   : []);
+        const inviteRoles = Array.isArray(gData.inviteRoles) ? gData.inviteRoles : [];
 
-            autoRoles.humans  = memberRoles.map(String);
-            autoRoles.bots    = botRoles.map(String);
-            autoRoles.inviteRoles = inviteRoles
-                .filter(x => x && typeof x === 'object')
-                .map(x => ({ invite: String(x.invite || '').trim(), role: String(x.role || '').trim() }))
-                .filter(x => x.invite && x.role);
-            autoRoles.enabled = gData.enabled !== false; // default true if key exists
-        }
-    } catch (_) { /* no file yet – use defaults */ }
+        autoRoles.humans  = memberRoles.map(String);
+        autoRoles.bots    = botRoles.map(String);
+        autoRoles.inviteRoles = inviteRoles
+            .filter(x => x && typeof x === 'object')
+            .map(x => ({ invite: String(x.invite || '').trim(), role: String(x.role || '').trim() }))
+            .filter(x => x.invite && x.role);
+        autoRoles.enabled = gData.enabled !== false; // default true if key exists
+    }
 
 
     res.render('auto_roles', {
@@ -2161,8 +2155,7 @@ app.get('/dashboard/:guildId/auto-roles', require('./middleware/auth'), (req, re
 });
 
 app.post('/dashboard/:guildId/auto-roles/save', require('./middleware/auth'), (req, res) => {
-    const fs   = require('fs');
-    const path = require('path');
+    const guildDb = require('./utils/guildDb');
 
     const { guildId } = req.params;
     const raw = req.session.guilds || [];
@@ -2171,10 +2164,6 @@ app.post('/dashboard/:guildId/auto-roles/save', require('./middleware/auth'), (r
     const { enabled, humans, bots, memberRoles, botRoles, inviteRoles } = req.body || {};
 
     try {
-        const dbPath = path.join(__dirname, '../database/auto_role.json');
-        let db = {};
-        try { db = JSON.parse(fs.readFileSync(dbPath, 'utf8')); } catch (_) {}
-
         const normalizeRoleList = (arr) => Array.from(new Set((Array.isArray(arr) ? arr : []).map(String).filter(Boolean)));
 
         const normalizedMemberRoles = normalizeRoleList(Array.isArray(memberRoles) ? memberRoles : humans);
@@ -2189,7 +2178,7 @@ app.post('/dashboard/:guildId/auto-roles/save', require('./middleware/auth'), (r
                 .filter(x => x.invite && x.role)
             : [];
 
-        db[guildId] = {
+        const data = {
             guildId,
             enabled: enabled !== false && enabled !== 'false',
             memberRoles: normalizedMemberRoles,
@@ -2197,16 +2186,17 @@ app.post('/dashboard/:guildId/auto-roles/save', require('./middleware/auth'), (r
             inviteRoles: normalizedInviteRoles
         };
 
-        fs.writeFileSync(dbPath, JSON.stringify(db, null, 2), 'utf8');
+        guildDb.write(guildId, 'auto_role', data);
         res.json({ ok: true });
     } catch (err) {
-        console.error('[auto-roles/save]', err);
+        logger.error('auto-roles/save failed', { category: 'dashboard', error: err.message, stack: err.stack });
         res.status(500).json({ error: 'Failed to save' });
     }
 });
 
 /* ── Suggestions ─────────────────────────────────────── */
 app.get('/dashboard/:guildId/suggestions', require('./middleware/auth'), (req, res) => {
+    const guildDb = require('./utils/guildDb');
     const { getClient } = require('./utils/botClient');
     const botClient = getClient();
     const { guildId } = req.params;
@@ -2249,12 +2239,7 @@ app.get('/dashboard/:guildId/suggestions', require('./middleware/auth'), (req, r
         statusTags: { accepted: 'Accepted', rejected: 'Rejected', considered: 'Under Review' }
     };
 
-    let suggestions = { ...defaultSettings };
-    try {
-        const dbPath = path.join(__dirname, '../database/suggestions.json');
-        const rawDb  = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
-        if (rawDb[guildId]) suggestions = Object.assign({}, defaultSettings, rawDb[guildId]);
-    } catch (_) {}
+    const suggestions = Object.assign({}, defaultSettings, guildDb.read(guildId, 'suggestions_config', null) || {});
 
     res.render('suggestions', {
         user:         req.session.user,
@@ -2335,20 +2320,18 @@ app.post('/dashboard/:guildId/suggestions/save', require('./middleware/auth'), (
             }
         };
 
-        const dbPath = path.join(__dirname, '../database/suggestions.json');
-        let db = {};
-        try { db = JSON.parse(fs.readFileSync(dbPath, 'utf8')); } catch (_) {}
-        db[guildId] = data;
-        fs.writeFileSync(dbPath, JSON.stringify(db, null, 2), 'utf8');
+        const guildDb = require('./utils/guildDb');
+        guildDb.write(guildId, 'suggestions_config', data);
         res.json({ ok: true });
     } catch (err) {
-        console.error('[suggestions/save]', err);
+        logger.error('suggestions/save failed', { category: 'dashboard', error: err.message, stack: err.stack });
         res.status(500).json({ error: 'Failed to save' });
     }
 });
 
 /* ── Auto Responder ──────────────────────────────────── */
 app.get('/dashboard/:guildId/auto-responder', require('./middleware/auth'), (req, res) => {
+    const guildDb = require('./utils/guildDb');
     const { getClient } = require('./utils/botClient');
     const botClient = getClient();
     const { guildId } = req.params;
@@ -2376,12 +2359,7 @@ app.get('/dashboard/:guildId/auto-responder', require('./middleware/auth'), (req
     }
 
     const defaultAR = { enabled: false, responses: [] };
-    let autoResponder = { ...defaultAR };
-    try {
-        const dbPath = path.join(__dirname, '../database/auto_responder.json');
-        const raw2   = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
-        if (raw2[guildId]) autoResponder = Object.assign({}, defaultAR, raw2[guildId]);
-    } catch (_) {}
+    const autoResponder = Object.assign({}, defaultAR, guildDb.read(guildId, 'auto_responder', null) || {});
 
     res.render('auto_responder', {
         user:     req.session.user,
@@ -2426,14 +2404,11 @@ app.post('/dashboard/:guildId/auto-responder/save', require('./middleware/auth')
         })).slice(0, 50);
 
         const data = { enabled: toBool(body.enabled), responses };
-        const dbPath = path.join(__dirname, '../database/auto_responder.json');
-        let db = {};
-        try { db = JSON.parse(fs.readFileSync(dbPath, 'utf8')); } catch (_) {}
-        db[guildId] = data;
-        fs.writeFileSync(dbPath, JSON.stringify(db, null, 2), 'utf8');
+        const guildDb = require('./utils/guildDb');
+        guildDb.write(guildId, 'auto_responder', data);
         res.json({ ok: true });
     } catch (err) {
-        console.error('[auto-responder/save]', err);
+        logger.error('auto-responder/save failed', { category: 'dashboard', error: err.message, stack: err.stack });
         res.status(500).json({ error: 'Failed to save' });
     }
 });
@@ -2570,7 +2545,7 @@ app.post('/dashboard/:guildId/points/tickets/save', require('./middleware/auth')
         guildDb.write(guildId, 'staff_points', newConfig);
         res.json({ ok: true });
     } catch (err) {
-        console.error('[points/tickets/save]', err);
+        logger.error('points/tickets/save failed', { category: 'dashboard', error: err.message, stack: err.stack });
         res.status(500).json({ error: 'Failed to save' });
     }
 });
@@ -2674,7 +2649,7 @@ app.post('/dashboard/:guildId/points/interactions/save', require('./middleware/a
         guildDb.write(guildId, 'interaction_points', newConfig);
         res.json({ ok: true });
     } catch (err) {
-        console.error('[points/interactions/save]', err);
+        logger.error('points/interactions/save failed', { category: 'dashboard', error: err.message, stack: err.stack });
         res.status(500).json({ error: 'Failed to save' });
     }
 });
@@ -2690,7 +2665,7 @@ function start() {
         ? new URL(process.env.QAUTH_LINK).origin
         : `http://localhost:${PORT}`;
     httpServer.listen(PORT, () => {
-        console.log(`\x1b[35m[Dashboard]\x1b[0m Running → ${publicURL}  (port ${PORT})`);
+        logger.discord(`Dashboard running at ${publicURL}  (port ${PORT})`, { category: 'dashboard' });
     });
 }
 

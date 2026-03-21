@@ -5,6 +5,7 @@
  */
 
 const path = require('path');
+const logger = require('../../utils/logger');
 const fs   = require('fs');
 
 const DEFAULT   = 'ar';
@@ -21,11 +22,23 @@ const cache = {};
 function load(lang) {
     if (cache[lang]) return cache[lang];
     const file = path.join(LANG_DIR, `${lang}.json`);
-    if (!fs.existsSync(file)) return load(DEFAULT);
+    if (!fs.existsSync(file)) {
+        // Prevent infinite recursion: if already trying default, return empty object
+        if (lang === DEFAULT) {
+            logger.warn(`[lang] Default language file not found: ${file}`);
+            return {};
+        }
+        return load(DEFAULT);
+    }
     try {
-        cache[lang] = JSON.parse(fs.readFileSync(file, 'utf8'));
+        // Remove BOM (Byte Order Mark) if present
+        const raw = fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '');
+        cache[lang] = JSON.parse(raw);
         return cache[lang];
-    } catch {
+    } catch (err) {
+        logger.error(`[lang] Failed to parse ${file}:`, err.message);
+        // Prevent infinite recursion: if already trying default, return empty object
+        if (lang === DEFAULT) return {};
         return load(DEFAULT);
     }
 }

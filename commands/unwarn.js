@@ -5,8 +5,7 @@
  */
 
 ﻿const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const fs         = require('fs');
-const path       = require('path');
+const db         = require('../systems/schemas');
 const logSystem  = require('../systems/log.js');
 const adminGuard = require('../utils/adminGuard');
 const { t, langOf } = require('../utils/cmdLang');
@@ -23,53 +22,7 @@ function genCaseId() {
     return id;
 }
 
-/**
- * Finds and "soft-deletes" a WARN case by caseId.
- * Adds an UNWARN entry to the same user's record to keep audit trail.
- * Returns { ok, userId, removedCase, unwarnCaseId } or { ok: false, reason }
- */
-function removeWarning(caseId, moderator) {
-    const dbPath = path.join(__dirname, '../database/warning.json');
-    if (!fs.existsSync(dbPath)) return { ok: false, reason: 'no_db' };
 
-    let db = {};
-    try { db = JSON.parse(fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '') || '{}'); } catch { return { ok: false, reason: 'parse_error' }; }
-
-    let userId = null;
-    let removedCase = null;
-
-    for (const [id, data] of Object.entries(db)) {
-        const idx = data.cases?.findIndex(c => c.caseId === caseId && c.action !== 'UNWARN');
-        if (idx !== undefined && idx !== -1) {
-            userId      = id;
-            removedCase = data.cases[idx];
-            // Remove the WARN entry
-            data.cases.splice(idx, 1);
-            break;
-        }
-    }
-
-    if (!userId || !removedCase) return { ok: false, reason: 'not_found' };
-
-    // Append UNWARN audit entry
-    const settings = JSON.parse(fs.readFileSync(path.join(__dirname, '../settings.json'), 'utf8'));
-    const unwarnCaseId = genCaseId();
-    db[userId].cases.push({
-        caseId:         unwarnCaseId,
-        action:         'UNWARN',
-        reason:         `Removed warning: ${removedCase.reason}`,
-        moderatorId:    moderator.id,
-        moderator:      moderator.username,
-        court:          settings.court?.name ?? '',
-        timestamp:      new Date().toLocaleString('en-US'),
-        originalCaseId: caseId,
-    });
-
-    try {
-        fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
-        return { ok: true, userId, removedCase, unwarnCaseId };
-    } catch { return { ok: false, reason: 'write_error' }; }
-}
 
 /* ── CV2 builders ────────────────────────────────────── */
 function buildSuccess(user, removedReason, originalCaseId, unwarnCaseId, moderator, lang) {
@@ -152,7 +105,25 @@ module.exports = {
         }
 
         /* ── Remove warning ────────────────────────────── */
-        const result = removeWarning(caseId, moderator);
+        // Find the document that contains this caseId
+        const warnDoc = await db.Warning.findOne({ 'cases.caseId': caseId }).catch(() => null);
+        if (!warnDoc) {
+            const p = buildError(t(lang, 'unwarn.case_not_found', { id: caseId }));
+            return isSlash ? ctx.reply(p) : ctx.channel.send(p);
+        }
+
+        const removedCase = warnDoc.cases.find(c => c.caseId === caseId);
+        if (!removedCase) {
+            const p = buildError(t(lang, 'unwarn.case_not_found', { id: caseId }));
+            return isSlash ? ctx.reply(p) : ctx.channel.send(p);
+        }
+
+        const unwarnCaseId = genCaseId();
+        // Remove the original case from MongoDB
+        await db.Warning.removeCase(warnDoc.guildId, warnDoc.userId, caseId)
+            .catch(err => console.error('[unwarn] removeCase error:', err));
+
+        const result = { ok: true, userId: warnDoc.userId, removedCase, unwarnCaseId };
 
         if (!result.ok) {
             const msg = result.reason === 'not_found'
@@ -183,7 +154,7 @@ module.exports = {
         await adminGuard.cleanup(g.cfg, isSlash ? null : ctx, botReply);
 
         /* ── DM ────────────────────────────────────────── */
-        const settings = JSON.parse(fs.readFileSync(path.join(__dirname, '../settings.json'), 'utf8'));
+        const settings = require('../utils/settings');
         if (settings.actions?.unwarn?.dm && user) {
             user.send(t(lang, 'unwarn.dm_msg', {
                 guild: guild.name, case: caseId, mod: moderator.id,

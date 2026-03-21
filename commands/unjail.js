@@ -5,8 +5,7 @@
  */
 
 const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
-const fs = require('fs');
-const path = require('path');
+const db      = require('../systems/schemas');
 const logSystem = require('../systems/log.js');
 
 const generateCaseId = () => {
@@ -16,75 +15,6 @@ const generateCaseId = () => {
         result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return result;
-};
-
-const saveToDatabase = (userId, userData, caseData) => {
-    const dbPath = path.join(__dirname, '../database/records.json');
-    
-    const dbDir = path.dirname(dbPath);
-    if (!fs.existsSync(dbDir)) {
-        fs.mkdirSync(dbDir, { recursive: true });
-    }
-    
-    let database = {};
-    if (fs.existsSync(dbPath)) {
-        try {
-            const fileContent = fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '');
-            if (fileContent.trim()) {
-                database = JSON.parse(fileContent);
-            }
-        } catch (error) {
-            console.error('Error reading database:', error);
-            database = {};
-        }
-    }
-    
-    if (!database[userId]) {
-        database[userId] = {
-            username: userData.username,
-            tag: userData.tag,
-            cases: []
-        };
-    } else {
-        database[userId].username = userData.username;
-        database[userId].tag = userData.tag;
-    }
-    
-    database[userId].cases.push(caseData);
-    
-    try {
-        fs.writeFileSync(dbPath, JSON.stringify(database, null, 2));
-        return true;
-    } catch (error) {
-        console.error('Error saving to database:', error);
-        return false;
-    }
-};
-
-const removeJailFromDatabase = (userId) => {
-    const dbPath = path.join(__dirname, '../database/jailed.json');
-    
-    if (!fs.existsSync(dbPath)) {
-        return { success: false, error: 'Database not found' };
-    }
-    
-    try {
-        const fileContent = fs.readFileSync(dbPath, 'utf8');
-        const database = JSON.parse(fileContent);
-        
-        if (!database[userId]) {
-            return { success: false, error: 'User not found in database' };
-        }
-        
-        const jailData = database[userId];
-        delete database[userId];
-        
-        fs.writeFileSync(dbPath, JSON.stringify(database, null, 2));
-        return { success: true, jailData };
-    } catch (error) {
-        console.error('Error removing from database:', error);
-        return { success: false, error: error.message };
-    }
 };
 
 const restoreChannelPermissions = async (guild, userId) => {
@@ -105,52 +35,33 @@ const restoreChannelPermissions = async (guild, userId) => {
 };
 
 const autoUnjail = async (client, guild, userId, reason) => {
-    const settings = JSON.parse(fs.readFileSync(path.join(__dirname, '../settings.json'), 'utf8'));
-    
-    const jailResult = removeJailFromDatabase(userId);
-    if (!jailResult.success) {
-        return { success: false, error: jailResult.error };
+    const settings = require('../utils/settings');
+
+    const jailRecord = await db.Jail.findOneAndUpdate(
+        { guildId: guild.id, userId, active: true },
+        { $set: { active: false } },
+        { new: false }
+    ).lean().catch(() => null);
+
+    if (!jailRecord) {
+        return { success: false, error: 'User not found in jail database' };
     }
-    
-    const jailData = jailResult.jailData;
-    const jailRoleId = settings.actions.jail.addRole;
-    
+
+    const jailRoleId = settings.actions?.jail?.addRole;
+
     try {
         const member = await guild.members.fetch(userId).catch(() => null);
         if (member) {
-            await member.roles.remove(jailRoleId);
-            
-            if (jailData.originalRoles && jailData.originalRoles.length > 0) {
-                await member.roles.add(jailData.originalRoles);
+            if (jailRoleId) await member.roles.remove(jailRoleId).catch(() => {});
+
+            if (jailRecord.savedRoles && jailRecord.savedRoles.length > 0) {
+                await member.roles.add(jailRecord.savedRoles).catch(() => {});
             }
-            
+
             await restoreChannelPermissions(guild, userId);
         }
-        
-        const caseId = generateCaseId();
-        const date = new Date().toLocaleString('en-US');
-        
-        const caseData = {
-            caseId: caseId,
-            action: 'UNJAIL_AUTO',
-            reason: reason,
-            moderatorId: client.user.id,
-            moderator: client.user.username,
-            court: settings.court.name,
-            timestamp: date,
-            originalJailCaseId: jailData.caseId
-        };
-        
-        const userData = {
-            username: jailData.username || 'Unknown',
-            tag: jailData.tag || 'Unknown#0000'
-        };
-        
-        if (settings.actions.unjail && settings.actions.unjail.saveRecord) {
-            saveToDatabase(userId, userData, caseData);
-        }
-        
-        return { success: true, jailData, caseData };
+
+        return { success: true, jailData: jailRecord };
     } catch (error) {
         console.error('Error auto unjailing:', error);
         return { success: false, error: error.message };
@@ -181,13 +92,10 @@ module.exports = {
         let user, reason, moderator, guild;
         
         try {
-            const settingsPath = path.join(__dirname, '../settings.json');
-            const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
-            
-            const commandName = 'unjail';
-            const commandConfig = settings.actions[commandName];
-            
-            if (!commandConfig.enabled) {
+            const settings = require('../utils/settings');
+            const commandConfig = settings.actions?.unjail;
+
+            if (commandConfig && !commandConfig.enabled) {
                 return this.sendResponse(interactionOrMessage, 'هذا الأمر معطل حاليا', isSlash);
             }
             
@@ -196,10 +104,9 @@ module.exports = {
                 reason = interactionOrMessage.options.getString('reason');
                 moderator = interactionOrMessage.user;
                 guild = interactionOrMessage.guild;
-                
-                const member = await guild.members.fetch(moderator.id).catch(() => null);
+
                 const hasPermission = await this.checkPermissions(interactionOrMessage, commandConfig);
-                if (!member || !hasPermission) {
+                if (!hasPermission) {
                     return this.sendResponse(interactionOrMessage, 'لا تملك الصلاحية لاستخدام هذا الأمر', isSlash);
                 }
             } else {
@@ -208,14 +115,9 @@ module.exports = {
                     return message.reply('الاستخدام الصحيح: !unjail @المستخدم السبب');
                 }
                 
-                const userMention = args[0];
                 user = message.mentions.users.first();
                 if (!user) {
-                    try {
-                        user = await client.users.fetch(userMention.replace(/[<@!>]/g, ''));
-                    } catch {
-                        user = null;
-                    }
+                    try { user = await client.users.fetch(args[0].replace(/[<@!>]/g, '')); } catch { user = null; }
                 }
                 
                 if (!user) {
@@ -225,10 +127,9 @@ module.exports = {
                 reason = args.slice(1).join(' ');
                 moderator = message.author;
                 guild = message.guild;
-                
-                const member = await guild.members.fetch(moderator.id).catch(() => null);
+
                 const hasPermission = await this.checkPermissions(interactionOrMessage, commandConfig);
-                if (!member || !hasPermission) {
+                if (!hasPermission) {
                     return message.reply('لا تملك الصلاحية لاستخدام هذا الأمر');
                 }
             }
@@ -237,29 +138,32 @@ module.exports = {
             if (!targetMember) {
                 return this.sendResponse(interactionOrMessage, 'المستخدم ليس في السيرفر', isSlash);
             }
-            
-            const jailResult = removeJailFromDatabase(user.id);
-            if (!jailResult.success) {
+
+            // Fetch active jail record from MongoDB
+            const jailRecord = await db.Jail.findOneAndUpdate(
+                { guildId: guild.id, userId: user.id, active: true },
+                { $set: { active: false } },
+                { new: false }
+            ).lean().catch(() => null);
+
+            if (!jailRecord) {
                 return this.sendResponse(interactionOrMessage, 'هذا المستخدم ليس مسجونا', isSlash);
             }
-            
-            const jailData = jailResult.jailData;
-            const jailRoleId = settings.actions.jail.addRole;
-            
-            if (!targetMember.roles.cache.has(jailRoleId)) {
+
+            const jailRoleId = settings.actions?.jail?.addRole ?? jailRecord.jailRoleId;
+
+            if (jailRoleId && !targetMember.roles.cache.has(jailRoleId)) {
                 return this.sendResponse(interactionOrMessage, 'هذا المستخدم ليس لديه رتبة السجن', isSlash);
             }
             
-            const action = 'UNJAIL';
-            const courtName = settings.court.name;
             const date = new Date().toLocaleString('en-US');
             const caseId = generateCaseId();
             
             try {
-                await targetMember.roles.remove(jailRoleId);
+                if (jailRoleId) await targetMember.roles.remove(jailRoleId).catch(() => {});
                 
-                if (jailData.originalRoles && jailData.originalRoles.length > 0) {
-                    await targetMember.roles.add(jailData.originalRoles);
+                if (jailRecord.savedRoles && jailRecord.savedRoles.length > 0) {
+                    await targetMember.roles.add(jailRecord.savedRoles).catch(() => {});
                 }
                 
                 await restoreChannelPermissions(guild, user.id);
@@ -267,71 +171,37 @@ module.exports = {
             } catch (error) {
                 console.error('Error unjailing user:', error);
                 let errorMessage = 'فشل في اطلاق سراح المستخدم';
-                
-                if (error.code === 50013) {
-                    errorMessage = 'ليس لدي صلاحية ادارة الرتب او القنوات';
-                } else if (error.code === 50001) {
-                    errorMessage = 'ليس لدي صلاحية الوصول الى هذا المستخدم';
-                } else if (error.message.includes('permissions')) {
-                    errorMessage = 'تأكد من ان البوت لديه صلاحية Manage Roles و Manage Channels';
-                }
-                
+                if (error.code === 50013) errorMessage = 'ليس لدي صلاحية ادارة الرتب او القنوات';
+                else if (error.code === 50001) errorMessage = 'ليس لدي صلاحية الوصول الى هذا المستخدم';
                 return this.sendResponse(interactionOrMessage, errorMessage, isSlash);
             }
             
-            const caseData = {
-                caseId: caseId,
-                action: action,
-                reason: reason,
-                moderatorId: moderator.id,
-                moderator: moderator.username,
-                court: courtName,
-                timestamp: date,
-                originalJailCaseId: jailData.caseId
-            };
-            
-            const userData = {
-                username: user.username,
-                tag: user.tag
-            };
-            
-            let saveSuccess = true;
-            if (settings.actions.unjail && settings.actions.unjail.saveRecord) {
-                saveSuccess = saveToDatabase(user.id, userData, caseData);
-            }
-            
-            if (commandConfig.log) {
+            if (commandConfig?.log) {
                 await logSystem.logCommandUsage({
                     interaction: interactionOrMessage,
-                    commandName: commandName,
-                    moderator: moderator,
+                    commandName: 'unjail',
+                    moderator,
                     target: user,
-                    reason: reason,
-                    action: action
-                });
+                    reason,
+                    action: 'UNJAIL'
+                }).catch(() => {});
             }
             
             let replyMessage = `تم اطلاق سراح <@${user.id}> (Case ID: \`${caseId}\`)\n`;
             replyMessage += `السبب: ${reason}\n`;
-            replyMessage += `سجن سابق: \`${jailData.caseId}\`\n`;
-            replyMessage += `تم استعادة: ${jailData.originalRoles?.length || 0} رتبة`;
-            
-            if (!saveSuccess) {
-                replyMessage += '\nحدث خطأ في حفظ السجل في قاعدة البيانات';
-            }
+            replyMessage += `سجن سابق: \`${jailRecord.caseId}\`\n`;
+            replyMessage += `تم استعادة: ${jailRecord.savedRoles?.length || 0} رتبة`;
             
             await this.sendResponse(interactionOrMessage, replyMessage, isSlash, false);
             
-            if (settings.actions.unjail && settings.actions.unjail.dm) {
+            if (commandConfig?.dm) {
                 try {
                     await user.send(`تم اطلاق سراحك من السجن في ${guild.name}\nCase ID: \`${caseId}\`\nالسبب: ${reason}\nبواسطة: <@${moderator.id}>\nالتاريخ: ${date}`);
-                } catch (error) {
-                    console.log('Could not send DM to user');
-                }
+                } catch { /* DM blocked */ }
             }
             
         } catch (error) {
-            console.error(`Error in unjail:`, error);
+            console.error('Error in unjail:', error);
             return this.sendResponse(interactionOrMessage, 'حدث خطأ', isSlash);
         }
     },

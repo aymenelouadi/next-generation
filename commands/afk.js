@@ -5,30 +5,29 @@
  */
 
 ﻿const { SlashCommandBuilder } = require('discord.js');
-const fs   = require('fs');
-const path = require('path');
 const guard = require('../utils/cmdGuard');
+const db    = require('../systems/schemas');
 
 /* ── Components V2 ── */
 const CV2 = 1 << 15;
 const C   = { Container: 17, Text: 10, Sep: 14 };
 
-/* ── Database helpers ─────────────────────────────────── */
-const DB = path.join(__dirname, '../database/afk.json');
-
-function readDB() {
-    if (!fs.existsSync(DB)) return {};
-    try { return JSON.parse(fs.readFileSync(DB, 'utf8')); } catch { return {}; }
+/* ── Database helpers (MongoDB) ───────────────────────── */
+async function getAFK(userId) {
+    return db.AFK.findOne({ userId }).lean();
 }
 
-function writeDB(data) {
-    fs.mkdirSync(path.dirname(DB), { recursive: true });
-    fs.writeFileSync(DB, JSON.stringify(data, null, 2));
+async function saveAFK(userId, entry) {
+    await db.AFK.findOneAndUpdate(
+        { userId },
+        { $set: entry },
+        { upsert: true, new: true }
+    );
 }
 
-function getAFK(userId)             { return readDB()[userId] || null; }
-function saveAFK(userId, entry)     { const d = readDB(); d[userId] = entry; writeDB(d); }
-function removeAFK(userId)          { const d = readDB(); const e = d[userId]; delete d[userId]; writeDB(d); return e; }
+async function removeAFK(userId) {
+    return db.AFK.findOneAndDelete({ userId }).lean();
+}
 
 /* ── Duration formatter ───────────────────────────────── */
 function fmtDuration(ms) {
@@ -95,9 +94,9 @@ module.exports = {
         if (!g.ok) return guard.deny(ctx, g.reason);
 
         /* ── Toggle AFK off if already set ── */
-        const current = getAFK(user.id);
+        const current = await getAFK(user.id);
         if (current) {
-            removeAFK(user.id);
+            await removeAFK(user.id);
             const duration = fmtDuration(Date.now() - current.timestamp);
             const msg = buildRemoved(duration);
 
@@ -122,7 +121,7 @@ module.exports = {
         const now  = Date.now();
         const date = new Date(now).toLocaleString('en-US', { timeStyle: 'short', dateStyle: 'medium' });
 
-        saveAFK(user.id, { userId: user.id, username: user.username, reason, timestamp: now, date, guildId });
+        await saveAFK(user.id, { userId: user.id, username: user.username, reason, timestamp: new Date(now), guildId });
 
         const msgSet = buildSet(reason, date);
 

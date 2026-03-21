@@ -1,10 +1,4 @@
-﻿/*
- * This project was programmed by the Next Generation team.
- * If you encounter any problems, open an Issue or log into the Discord server:
- * https://discord.gg/BhJStSa89s
- */
-
-/**
+﻿/**
  * ── LEVEL SYSTEM ──────────────────────────────────────────────
  *  Tracks text messages (XP or count) and voice time (XP or minutes).
  *  Assigns reward roles when thresholds are reached.
@@ -13,14 +7,9 @@
 
 'use strict';
 
-const fs   = require('fs');
-const path = require('path');
+const guildDb = require('../dashboard/utils/guildDb');
 
-const GUILD_DB_DIR = path.join(__dirname, '../dashboard/database');
-
-function dbPath(guildId)  { return path.join(GUILD_DB_DIR, guildId, 'levels.json'); }
-function cfgPath(guildId) { return path.join(GUILD_DB_DIR, guildId, 'settings.json'); }
-
+const logger = require('../utils/logger');
 // ── XP Algorithm ────────────────────────────────────────────────
 // XP required to advance FROM level n  →  level n+1
 function xpForLevel(level) {
@@ -57,32 +46,12 @@ function levelFromMinutes(minutes) {
 }
 
 // ── Database helpers ─────────────────────────────────────────────
-function readJson(filePath) {
-    let raw = fs.readFileSync(filePath);
-    // Strip UTF-8 BOM if present
-    if (raw[0] === 0xEF && raw[1] === 0xBB && raw[2] === 0xBF) raw = raw.slice(3);
-    return JSON.parse(raw.toString('utf8'));
-}
-
 function readDb(guildId) {
-    try {
-        const p = dbPath(guildId);
-        if (!fs.existsSync(p)) return {};
-        return readJson(p);
-    } catch (e) {
-        console.error('[Levels] readDb error:', e.message);
-        return {};
-    }
+    return guildDb.read(guildId, 'levels', {});
 }
 
 function writeDb(guildId, data) {
-    try {
-        const p = dbPath(guildId);
-        fs.mkdirSync(path.dirname(p), { recursive: true });
-        fs.writeFileSync(p, JSON.stringify(data, null, 2));
-    } catch (e) {
-        console.error('[Levels] writeDb error:', e.message);
-    }
+    guildDb.write(guildId, 'levels', data);
 }
 
 function getUser(db, userId) {
@@ -108,14 +77,11 @@ const DEFAULT_LEVEL_SETTINGS = {
 
 function getSettings(guildId) {
     try {
-        const p = cfgPath(guildId);
-        if (!fs.existsSync(p)) return { LEVEL_SYSTEM: DEFAULT_LEVEL_SETTINGS };
-        const parsed = readJson(p);
-        // Ensure LEVEL_SYSTEM key exists (merge with defaults)
-        if (!parsed.LEVEL_SYSTEM) parsed.LEVEL_SYSTEM = DEFAULT_LEVEL_SETTINGS;
-        return parsed;
+        const settings = guildDb.read(guildId, 'settings', {});
+        if (!settings.LEVEL_SYSTEM) settings.LEVEL_SYSTEM = DEFAULT_LEVEL_SETTINGS;
+        return settings;
     } catch (e) {
-        console.error('[Levels] getSettings error for guild', guildId, ':', e.message);
+        logger.error('[Levels] getSettings error for guild', guildId, ':', e.message);
         return { LEVEL_SYSTEM: DEFAULT_LEVEL_SETTINGS };
     }
 }
@@ -494,13 +460,6 @@ module.exports = {
             }
         }, 60_000);
 
-        console.log('[Levels] System loaded — tracking text & voice activity');
+        logger.info('[Levels] System loaded — tracking text & voice activity');
     }
 };
-
-
-/*
- * This project was programmed by the Next Generation team.
- * If you encounter any problems, open an Issue or log into the Discord server:
- * https://discord.gg/BhJStSa89s
- */

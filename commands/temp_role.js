@@ -5,7 +5,7 @@
  */
 
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const path       = require('path');
+const db         = require('../systems/schemas');
 const adminGuard = require('../utils/adminGuard.js');
 const { langOf, t } = require('../utils/cmdLang.js');
 const logSystem  = require('../systems/log.js');
@@ -117,26 +117,25 @@ module.exports = {
         await targetMember.roles.add(targetRole);
 
         /* persist to db */
-        const dbPath = require('path').join(__dirname, '../database/temp_role.json');
-        let db = {};
-        try { db = JSON.parse(require('fs').readFileSync(dbPath, 'utf8')); } catch {}
-        const key = `${guild.id}_${targetUser.id}_${targetRole.id}`;
-        db[key] = {
-            guildId: guild.id, userId: targetUser.id, roleId: targetRole.id,
-            roleName: targetRole.name, expireAt: Date.now() + timeMs,
-            givenBy: author.id, givenAt: Date.now()
-        };
-        require('fs').writeFileSync(dbPath, JSON.stringify(db, null, 2));
+        await db.TempRole.findOneAndUpdate(
+            { guildId: guild.id, userId: targetUser.id, roleId: targetRole.id },
+            { $set: {
+                guildId: guild.id, userId: targetUser.id, roleId: targetRole.id,
+                assignedBy: author.id, assignedAt: new Date(),
+                expiresAt: new Date(Date.now() + timeMs), active: true
+            }},
+            { upsert: true }
+        ).catch(() => null);
 
         /* auto-remove after timeout */
         setTimeout(async () => {
             try {
                 const m = await guild.members.fetch(targetUser.id);
                 if (m && m.roles.cache.has(targetRole.id)) await m.roles.remove(targetRole);
-                let dbs = {};
-                try { dbs = JSON.parse(require('fs').readFileSync(dbPath, 'utf8')); } catch {}
-                delete dbs[key];
-                require('fs').writeFileSync(dbPath, JSON.stringify(dbs, null, 2));
+                await db.TempRole.findOneAndUpdate(
+                    { guildId: guild.id, userId: targetUser.id, roleId: targetRole.id },
+                    { $set: { active: false } }
+                ).catch(() => null);
             } catch {}
         }, timeMs);
 

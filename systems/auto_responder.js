@@ -6,23 +6,9 @@
 
 'use strict';
 
-const fs   = require('fs');
-const path = require('path');
+const guildDb = require('../dashboard/utils/guildDb');
 
-const DB_PATH = path.join(__dirname, '../database/auto_responder.json');
-
-// ── JSON helpers ─────────────────────────────────────────────
-
-function readDb() {
-    try {
-        if (!fs.existsSync(DB_PATH)) return {};
-        const raw = fs.readFileSync(DB_PATH, 'utf8').replace(/^\uFEFF/, '');
-        return JSON.parse(raw);
-    } catch {
-        return {};
-    }
-}
-
+const logger = require('../utils/logger');
 // ── Variable replacement ──────────────────────────────────────
 
 function resolveVars(text, message) {
@@ -56,7 +42,7 @@ module.exports = {
     name: 'auto-responder',
 
     execute(client) {
-        console.log('[system] Auto Responder system loaded');
+        logger.info('[system] Auto Responder system loaded');
 
         // Track bot reply → original message mapping for deleteOnAuthorDelete
         // Map<botMessageId, { originalMessageId, channelId, autoDeleteTimeout }>
@@ -76,8 +62,7 @@ module.exports = {
         if (message.author?.bot || message.system) return;
         if (!message.guild) return;
 
-        const db       = readDb();
-        const guildCfg = db[message.guild.id];
+        const guildCfg = guildDb.read(message.guild.id, 'auto_responder', null);
 
         // Guild not configured or system disabled
         if (!guildCfg || !guildCfg.enabled) return;
@@ -170,7 +155,7 @@ module.exports = {
                         break;
                 }
             } catch (err) {
-                console.error('[AutoResponder] Failed to send reply:', err.message);
+                logger.error('[AutoResponder] Failed to send reply:', err.message);
                 continue;
             }
 

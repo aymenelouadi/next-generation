@@ -20,6 +20,7 @@
 
 const path = require('path');
 
+const logger = require('../utils/logger');
 const {
     ContainerBuilder,
     TextDisplayBuilder,
@@ -115,7 +116,7 @@ async function logEvent(client, guildId, event, data = {}) {
             flags:      MessageFlags.IsComponentsV2,
         });
     } catch (err) {
-        console.error('[ticket_log] Failed to post close log:', err.message);
+        logger.error('[ticket_log] Failed to post close log:', err.message);
         return;
     }
 
@@ -128,7 +129,7 @@ async function logEvent(client, guildId, event, data = {}) {
                 files: [new AttachmentBuilder(transcriptPath, { name: fileName })],
             });
         } catch (err) {
-            console.error('[ticket_log] Failed to send transcript file:', err.message);
+            logger.error('[ticket_log] Failed to send transcript file:', err.message);
         }
     }
 }

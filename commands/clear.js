@@ -5,8 +5,6 @@
  */
 
 ﻿const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const fs         = require('fs');
-const path       = require('path');
 const logSystem  = require('../systems/log.js');
 const adminGuard = require('../utils/adminGuard');
 const { t, langOf } = require('../utils/cmdLang');
@@ -18,14 +16,6 @@ const C   = { Container: 17, Text: 10 };
 /* ── Helpers ─────────────────────────────────────────── */
 const MAX_AGE_MS = 14 * 24 * 60 * 60 * 1000;   // 14 days (Discord bulk-delete limit)
 
-function saveLog(logData) {
-    const dbPath = path.join(__dirname, '../database/clear-logs.json');
-    fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-    let db = [];
-    try { db = JSON.parse(fs.readFileSync(dbPath, 'utf8') || '[]'); } catch {}
-    db.push(logData);
-    try { fs.writeFileSync(dbPath, JSON.stringify(db, null, 2)); } catch {}
-}
 
 /* ── CV2 builders ────────────────────────────────────── */
 function buildSuccess(deleted, channel, targetUser, reason, moderator, lang) {
@@ -157,7 +147,7 @@ module.exports = {
         }
 
         /* ── Log ───────────────────────────────────────── */
-        const settings = JSON.parse(fs.readFileSync(path.join(__dirname, '../settings.json'), 'utf8'));
+
         const date     = new Date().toLocaleString('en-US');
 
         if (g.cfg.log) {
@@ -169,13 +159,6 @@ module.exports = {
             }).catch(() => {});
         }
 
-        saveLog({
-            moderatorId: moderator.id, moderatorUsername: moderator.username,
-            channelId: channel.id, channelName: channel.name,
-            amount, deletedCount: deleted,
-            targetUserId: targetUser?.id ?? null, targetUsername: targetUser?.username ?? null,
-            reason, date, timestamp: Date.now(),
-        });
 
         /* ── Reply (auto-delete after 5 s) ─────────────── */
         const payload  = buildSuccess(deleted, channel, targetUser, reason, moderator, lang);

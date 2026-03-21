@@ -5,11 +5,11 @@
  */
 
 const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
-const fs   = require('fs');
-const path = require('path');
+const db = require('../systems/schemas');
 const adminGuard = require('../utils/adminGuard.js');
 const { langOf, t } = require('../utils/cmdLang.js');
-const logSystem  = require('../systems/log.js');
+const logSystem      = require('../systems/log.js');
+const validators     = require('../utils/validators');
 
 const CV2 = 1 << 15;
 const C   = { Container: 17, Text: 10, Sep: 14 };
@@ -48,14 +48,6 @@ async function setupChannelPerms(guild, userId, jailRoleId, allowedIds) {
     }
 }
 
-function saveJail(userId, data) {
-    const dbPath = path.join(__dirname, '../database/jailed.json');
-    fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-    let db = {};
-    try { db = JSON.parse(fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '')); } catch {}
-    db[userId] = data;
-    try { fs.writeFileSync(dbPath, JSON.stringify(db, null, 2)); return true; } catch { return false; }
-}
 
 function buildCard(color, lines) {
     return {
@@ -112,6 +104,16 @@ module.exports = {
             rawDuration = args[1];
             reason      = args.slice(2).join(' ');
         }
+
+        /* ── Validate inputs ──────────────────────────── */
+        const vJail = validators.JailArgs.safeParse({ userId: targetUser.id, duration: rawDuration, reason });
+        if (!vJail.success) {
+            const err = buildCard(0xef4444, [`❌  ${validators.formatError(vJail.error)}`]);
+            if (isSlash) return ctx.reply({ ...err, ephemeral: true });
+            const m = await ctx.channel.send(err); setTimeout(() => m.delete().catch(() => {}), 8000); return;
+        }
+        rawDuration = vJail.data.duration; // normalised
+        reason      = vJail.data.reason;   // trimmed
 
         if (targetUser.id === author.id) {
             const err = buildCard(0xef4444, [`❌  ${t(lang,'jail.self')}`]);
@@ -175,15 +177,18 @@ module.exports = {
         const endTime = dur.ms ? new Date(Date.now() + dur.ms) : null;
         const date    = new Date().toLocaleString('en-US');
 
-        const jailData = {
-            caseId, action: 'JAIL', reason,
-            duration: dur.text, durationMs: dur.ms,
-            endTime: endTime ? endTime.toLocaleString('en-US') : 'permanent',
-            moderatorId: author.id, moderator: author.username,
-            timestamp: date, originalRoles, jailRoleId,
-            userId: targetUser.id, username: targetUser.username
-        };
-        saveJail(targetUser.id, jailData);
+        // Save jail record to MongoDB
+        await new db.Jail({
+            guildId: guild.id,
+            userId: targetUser.id,
+            caseId,
+            reason,
+            moderatorId: author.id,
+            jailRoleId,
+            savedRoles: originalRoles,
+            expiresAt: endTime,
+            active: true,
+        }).save().catch(err => console.error('[jail] Jail.save error:', err));
 
         /* ── auto unjail ── */
         if (dur.ms) {

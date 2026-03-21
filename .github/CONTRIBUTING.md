@@ -51,8 +51,8 @@ This project and everyone participating in it is governed by our [Code of Conduc
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/aymenelouadi/Bot-Discord-Dashboard-ALL-IN-ONE---Next-Generation.git
-cd Bot-Discord-Dashboard-ALL-IN-ONE---Next-Generation
+git clone https://github.com/aymenelouadi/next-generation.git
+cd next-generation
 
 # 2. Install dependencies
 npm install

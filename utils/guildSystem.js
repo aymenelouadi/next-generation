@@ -1,10 +1,4 @@
-﻿/*
- * This project was programmed by the Next Generation team.
- * If you encounter any problems, open an Issue or log into the Discord server:
- * https://discord.gg/BhJStSa89s
- */
-
-/**
+﻿/**
  * Per-guild system config manager.
  *
  * Each guild can override the global settings.json→system block.
@@ -89,10 +83,3 @@ function set(guildId, updates) {
 }
 
 module.exports = { resolve, set };
-
-
-/*
- * This project was programmed by the Next Generation team.
- * If you encounter any problems, open an Issue or log into the Discord server:
- * https://discord.gg/BhJStSa89s
- */

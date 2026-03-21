@@ -6,57 +6,33 @@
 
 'use strict';
 
-const fs   = require('fs');
-const path = require('path');
 const {
     ContainerBuilder, TextDisplayBuilder, SeparatorBuilder, SectionBuilder, ThumbnailBuilder,
     ActionRowBuilder, ButtonBuilder, ButtonStyle, SeparatorSpacingSize,
     MessageFlags, PermissionFlagsBits
 } = require('discord.js');
 
-const SETTINGS_PATH = path.join(__dirname, '../database/suggestions.json');
-const DATA_PATH     = path.join(__dirname, '../database/suggestions_data.json');
-const LEVELS_DB_DIR = path.join(__dirname, '../dashboard/database');
+const guildDb = require('../dashboard/utils/guildDb');
 
-// ── JSON helpers ──────────────────────────────────────────────
-
-function readJson(filePath) {
-    try {
-        if (!fs.existsSync(filePath)) return {};
-        const raw = fs.readFileSync(filePath, 'utf8').replace(/^\uFEFF/, '');
-        return JSON.parse(raw);
-    } catch {
-        return {};
-    }
-}
-
-function writeJson(filePath, data) {
-    try {
-        fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
-    } catch (e) {
-        console.error('[Suggestions] writeJson error:', e.message);
-    }
-}
-
+const logger = require('../utils/logger');
 // ── Settings helpers ──────────────────────────────────────────
 
 function getSettings(guildId) {
-    const db = readJson(SETTINGS_PATH);
-    return db[guildId] || null;
+    // Read from per-guild guildDb (backed by Guild.suggestionsConfig in MongoDB)
+    return guildDb.read(guildId, 'suggestions_config', null);
 }
 
 // ── Data (per-guild suggestion records + cooldowns) ───────────
 
 function getData(guildId) {
-    const db = readJson(DATA_PATH);
-    if (!db[guildId]) {
-        db[guildId] = { suggestions: {}, userCooldowns: {}, nextId: 1, _pendingRejects: {} };
-    }
-    return { db, guild: db[guildId] };
+    const defaultData = { suggestions: {}, userCooldowns: {}, nextId: 1, _pendingRejects: {} };
+    const guild = guildDb.read(guildId, 'suggestions_data', defaultData);
+    return { guildId, guild };
 }
 
-function saveData(db) {
-    writeJson(DATA_PATH, db);
+function saveData(context) {
+    const { guildId, guild } = context;
+    guildDb.write(guildId, 'suggestions_data', guild);
 }
 
 // ── Emoji utilities ───────────────────────────────────────────
@@ -73,9 +49,7 @@ function emojiKey(emoji) {
 
 function getUserLevel(guildId, userId) {
     try {
-        const p = path.join(LEVELS_DB_DIR, guildId, 'levels.json');
-        if (!fs.existsSync(p)) return 0;
-        const data = readJson(p);
+        const data = guildDb.read(guildId, 'levels', {});
         const user = data[userId];
         if (!user) return 0;
         return Math.max(user.textLevel || 0, user.voiceLevel || 0);
@@ -274,7 +248,7 @@ async function postPending(guild, suggestion, cfg) {
     try {
         return await ch.send(buildPendingCard(suggestion));
     } catch (e) {
-        console.error('[Suggestions] postPending error:', e.message);
+        logger.error('[Suggestions] postPending error:', e.message);
         return null;
     }
 }
@@ -297,7 +271,7 @@ async function postActive(guild, suggestion, cfg) {
         }
         return msg;
     } catch (e) {
-        console.error('[Suggestions] postActive error:', e.message);
+        logger.error('[Suggestions] postActive error:', e.message);
         return null;
     }
 }
@@ -308,13 +282,13 @@ async function refreshCard(message, suggestion, cfg) {
     try {
         await message.edit(buildCard(suggestion, cfg));
     } catch (e) {
-        console.error('[Suggestions] refreshCard error:', e.message);
+        logger.error('[Suggestions] refreshCard error:', e.message);
     }
 }
 
 // ── Auto-threshold check ─────────────────────────────────────
 
-async function checkAutoThreshold(message, suggestion, cfg, db) {
+async function checkAutoThreshold(message, suggestion, cfg, context) {
     const at = cfg.autoThreshold;
     if (!at?.enabled || suggestion.status !== 'active') return;
 
@@ -325,7 +299,7 @@ async function checkAutoThreshold(message, suggestion, cfg, db) {
 
     suggestion.status        = newStatus;
     suggestion.autoModerated = true;
-    writeJson(DATA_PATH, db);
+    saveData(context);
     await refreshCard(message, suggestion, cfg);
 }
 
@@ -347,7 +321,7 @@ module.exports = {
 
     execute(client) {
         this.client = client;
-        console.log('[system] Suggestions system loaded');
+        logger.info('[system] Suggestions system loaded');
 
         // ── messageCreate — capture suggestions ─────────────
         client.on('messageCreate', async (message) => {
@@ -395,7 +369,8 @@ module.exports = {
 
             // ── Spam checks ──────────────────────────────────
             const spam = cfg.spam || {};
-            const { db, guild: gData } = getData(message.guild.id);
+            const context = getData(message.guild.id);
+            const gData = context.guild;
             if (!gData.userCooldowns)   gData.userCooldowns   = {};
             if (!gData._pendingRejects) gData._pendingRejects = {};
 
@@ -446,14 +421,14 @@ module.exports = {
                 todayCount:     cd.todayDate === today ? cd.todayCount + 1 : 1,
                 todayDate:      today
             };
-            saveData(db);
+            saveData(context);
 
             // ── Route: pending review or post directly ───────
             if (cfg.moderation?.requireApproval) {
                 const pendingMsg = await postPending(message.guild, suggestion, cfg);
                 if (pendingMsg) {
                     gData.suggestions[id].pendingMessageId = pendingMsg.id;
-                    saveData(db);
+                    saveData(context);
                 }
                 await tryDm(message.author, `✅ Your suggestion has been submitted to **${message.guild.name}** and is pending admin review!`);
             } else {
@@ -461,7 +436,7 @@ module.exports = {
                 if (posted) {
                     gData.suggestions[id].messageId = posted.id;
                     if (posted.thread) gData.suggestions[id].threadId = posted.thread.id;
-                    saveData(db);
+                    saveData(context);
                 }
                 await tryDm(message.author, `✅ Your suggestion **#${id}** has been posted in **${message.guild.name}**!`);
             }
@@ -481,7 +456,8 @@ module.exports = {
             if (!cfg || !cfg.enabled || !cfg.voting?.enabled) return;
             if (cfg.voting.type === 'buttons') return;
 
-            const { db, guild: gData } = getData(guildId);
+            const context = getData(guildId);
+            const gData = context.guild;
             const suggestion = this._findByMessageId(gData, reaction.message.id);
             if (!suggestion || suggestion.status !== 'active') return;
 
@@ -523,9 +499,9 @@ module.exports = {
                 if (!suggestion.reactions[key].includes(user.id)) suggestion.reactions[key].push(user.id);
             }
 
-            saveData(db);
+            saveData(context);
             await refreshCard(reaction.message, suggestion, cfg);
-            await checkAutoThreshold(reaction.message, suggestion, cfg, db);
+            await checkAutoThreshold(reaction.message, suggestion, cfg, context);
         });
 
         // ── messageReactionRemove — reaction voting ──────────
@@ -542,7 +518,8 @@ module.exports = {
             if (!cfg || !cfg.enabled || !cfg.voting?.enabled) return;
             if (cfg.voting.type === 'buttons') return;
 
-            const { db, guild: gData } = getData(guildId);
+            const context = getData(guildId);
+            const gData = context.guild;
             const suggestion = this._findByMessageId(gData, reaction.message.id);
             if (!suggestion || suggestion.status !== 'active') return;
 
@@ -564,7 +541,7 @@ module.exports = {
                 suggestion.reactions[key] = suggestion.reactions[key].filter(uid => uid !== user.id);
             }
 
-            saveData(db);
+            saveData(context);
             await refreshCard(reaction.message, suggestion, cfg);
         });
 
@@ -597,7 +574,8 @@ module.exports = {
         const suggId = parseInt(parts[parts.length - 1]);
         if (isNaN(suggId)) return;
 
-        const { db, guild: gData } = getData(guildId);
+        const context = getData(guildId);
+        const gData = context.guild;
         const suggestion = gData.suggestions?.[suggId];
         if (!suggestion || suggestion.status !== 'active') {
             return interaction.reply({ content: '❌ This suggestion is no longer active.', ephemeral: true });
@@ -631,10 +609,10 @@ module.exports = {
             }
         }
 
-        saveData(db);
+        saveData(context);
         try {
             await refreshCard(interaction.message, suggestion, cfg);
-            await checkAutoThreshold(interaction.message, suggestion, cfg, db);
+            await checkAutoThreshold(interaction.message, suggestion, cfg, context);
         } catch {}
     },
 
@@ -654,7 +632,8 @@ module.exports = {
         const suggId = parseInt(parts[parts.length - 1]);
         if (isNaN(suggId)) return;
 
-        const { db, guild: gData } = getData(guildId);
+        const context = getData(guildId);
+        const gData = context.guild;
         const suggestion = gData.suggestions?.[suggId];
         if (!suggestion) {
             return interaction.reply({ content: '❌ Suggestion not found.', ephemeral: true });
@@ -666,20 +645,20 @@ module.exports = {
             const collected = await interaction.channel.awaitMessages({ filter, max: 1, time: 60_000, errors: [] });
             const reason    = collected.first()?.content?.trim() || '';
             try { await collected.first()?.delete(); } catch {}
-            await this._applyMod(interaction, suggestion, cfg, db, gData, 'rejected', reason);
+            await this._applyMod(interaction, suggestion, cfg, context, gData, 'rejected', reason);
         } else {
             await interaction.deferUpdate();
             const newStatus = action === 'approve' ? 'accepted' : 'considered';
-            await this._applyMod(interaction, suggestion, cfg, db, gData, newStatus, '');
+            await this._applyMod(interaction, suggestion, cfg, context, gData, newStatus, '');
         }
     },
 
     // ── Internal: apply moderation decision ──────────────────
-    async _applyMod(interaction, suggestion, cfg, db, gData, newStatus, reason) {
+    async _applyMod(interaction, suggestion, cfg, context, gData, newStatus, reason) {
         suggestion.status      = newStatus;
         suggestion.moderator   = interaction.user.tag || interaction.user.username;
         suggestion.rejectReason = reason || null;
-        writeJson(DATA_PATH, db);
+        saveData(context);
 
         const modTag = interaction.user.tag || interaction.user.username;
 
@@ -694,7 +673,7 @@ module.exports = {
             if (posted) {
                 suggestion.messageId = posted.id;
                 if (posted.thread) suggestion.threadId = posted.thread.id;
-                writeJson(DATA_PATH, db);
+                saveData(context);
             }
         }
 

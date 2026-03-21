@@ -5,6 +5,7 @@
  */
 
 const { EmbedBuilder } = require('discord.js');
+const logger = require('../utils/logger');
 const fs = require('fs');
 const path = require('path');
 const settingsPath = path.join(__dirname, '../settings.json');
@@ -17,7 +18,7 @@ module.exports = {
     name: 'log',
     
     execute(client) {
-        console.log('[system] Log system loaded');
+        logger.info('[system] Log system loaded');
     },
     
     createLogEmbed({ action, target, reason, moderator, color, emoji, courtName, date }) {
@@ -82,7 +83,7 @@ module.exports = {
 
             await logChannel.send({ embeds: [embed] });
         } catch (error) {
-            console.error('Error logging command usage:', error);
+            logger.error('Error logging command usage:', error);
         }
     }
 };

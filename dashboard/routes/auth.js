@@ -6,6 +6,7 @@
 
 require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
 const express      = require('express');
+const logger = require('../../utils/logger');
 const router       = express.Router();
 const discord      = require('../utils/discord');
 const settingsUtil = require('../../utils/settings');
@@ -93,7 +94,7 @@ router.get('/discord/redirect', async (req, res) => {
             res.redirect(redirectTo);
         });
     } catch (err) {
-        console.error('[Auth] OAuth error:', err.message);
+        logger.error('[Auth] OAuth error:', err.message);
         res.redirect('/?error=oauth_failed');
     }
 });

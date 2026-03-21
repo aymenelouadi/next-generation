@@ -5,8 +5,9 @@
  */
 
 const { AuditLogEvent } = require('discord.js');
+const logger       = require('../utils/logger');
 const settingsUtil = require('../utils/settings');
-const guildDb = require('../dashboard/utils/guildDb');
+const guildDb      = require('../dashboard/utils/guildDb');
 
 // Track action counts per user per event type within a time window
 const actionTrackers = new Map();
@@ -32,7 +33,7 @@ module.exports = {
                     await ban.guild.bans.remove(ban.user.id, 'Anti-ban: auto-unban').catch(() => {});
                 });
             } catch (e) {
-                console.error('[Protection] guildBanAdd error:', e.message);
+                logger.error('Protection guildBanAdd error', { category: 'protection', error: e.message, stack: e.stack });
             }
         });
 
@@ -50,7 +51,7 @@ module.exports = {
 
                 await this.handleEvent(member.guild, entry.executor, 'anti_kick', null);
             } catch (e) {
-                console.error('[Protection] guildMemberRemove error:', e.message);
+                logger.error('Protection guildMemberRemove error', { category: 'protection', error: e.message, stack: e.stack });
             }
         });
 
@@ -69,7 +70,7 @@ module.exports = {
                     await channel.delete('Anti-channel-create: auto-delete').catch(() => {});
                 });
             } catch (e) {
-                console.error('[Protection] channelCreate error:', e.message);
+                logger.error('Protection channelCreate error', { category: 'protection', error: e.message, stack: e.stack });
             }
         });
 
@@ -86,7 +87,7 @@ module.exports = {
 
                 await this.handleEvent(channel.guild, entry.executor, 'anti_channel_delete', null);
             } catch (e) {
-                console.error('[Protection] channelDelete error:', e.message);
+                logger.error('Protection channelDelete error', { category: 'protection', error: e.message, stack: e.stack });
             }
         });
 
@@ -104,7 +105,7 @@ module.exports = {
                     await role.delete('Anti-role-create: auto-delete').catch(() => {});
                 });
             } catch (e) {
-                console.error('[Protection] roleCreate error:', e.message);
+                logger.error('Protection roleCreate error', { category: 'protection', error: e.message, stack: e.stack });
             }
         });
 
@@ -120,7 +121,7 @@ module.exports = {
 
                 await this.handleEvent(role.guild, entry.executor, 'anti_role_delete', null);
             } catch (e) {
-                console.error('[Protection] roleDelete error:', e.message);
+                logger.error('Protection roleDelete error', { category: 'protection', error: e.message, stack: e.stack });
             }
         });
 
@@ -147,9 +148,12 @@ module.exports = {
 
                 // Punish who added it
                 await this.applyAction(member.guild, executor, protection.anti_bots.action, 'Anti-bot: added unauthorized bot');
-                console.log(`[Protection] Anti-bot: ${executor.user.tag} tried to add bot ${member.user.tag} in guild ${member.guild.id}`);
+                logger.protection('Anti-bot: unauthorized bot addition', {
+                    executor: executor.user.tag, executorId: executor.id,
+                    bot: member.user.tag, botId: member.id, guildId: member.guild.id,
+                });
             } catch (e) {
-                console.error('[Protection] guildMemberAdd (bots) error:', e.message);
+                logger.error('Protection guildMemberAdd (bots) error', { category: 'protection', error: e.message, stack: e.stack });
             }
         });
 
@@ -178,13 +182,15 @@ module.exports = {
                 }
 
                 await this.applyAction(channel.guild, executor, protection.anti_webhooks.action, 'Anti-webhook: unauthorized webhook created');
-                console.log(`[Protection] Anti-webhook: ${executor.user.tag} tried to create a webhook in guild ${channel.guild.id}`);
+                logger.protection('Anti-webhook: unauthorized webhook creation', {
+                    executor: executor.user.tag, executorId: executor.id, guildId: channel.guild.id,
+                });
             } catch (e) {
-                console.error('[Protection] webhookUpdate error:', e.message);
+                logger.error('Protection webhookUpdate error', { category: 'protection', error: e.message, stack: e.stack });
             }
         });
 
-        console.log('[system] Protection system loaded');
+        logger.discord('Protection system loaded');
     },
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -263,10 +269,13 @@ module.exports = {
                 }
 
                 await this.applyAction(guild, member, config.action, `Protection: ${protectionKey} limit exceeded (${count}/${limit})`);
-                console.log(`[Protection] ${protectionKey} triggered on ${executorUser.tag} in guild ${guild.id} (${count}/${limit})`);
+                logger.protection(`${protectionKey} triggered`, {
+                    executor: executorUser.tag, executorId: executorUser.id,
+                    guildId: guild.id, count, limit,
+                });
             }
         } catch (e) {
-            console.error(`[Protection] handleEvent (${protectionKey}) error:`, e.message);
+            logger.error(`Protection handleEvent (${protectionKey}) error`, { category: 'protection', error: e.message, stack: e.stack });
         }
     },
 
@@ -275,21 +284,21 @@ module.exports = {
             switch (String(action)) {
                 case '1': // Kick
                     await member.kick(reason).catch(() => {});
-                    console.log(`[Protection] Kicked ${member.user.tag}: ${reason}`);
+                    logger.protection(`Kicked ${member.user.tag}`, { userId: member.id, guildId: guild.id, reason });
                     break;
                 case '2': // Remove all roles
                     await member.roles.set([], reason).catch(() => {});
-                    console.log(`[Protection] Removed roles from ${member.user.tag}: ${reason}`);
+                    logger.protection(`Removed all roles from ${member.user.tag}`, { userId: member.id, guildId: guild.id, reason });
                     break;
                 case '3': // Ban
                     await guild.bans.create(member.id, { reason }).catch(() => {});
-                    console.log(`[Protection] Banned ${member.user.tag}: ${reason}`);
+                    logger.protection(`Banned ${member.user.tag}`, { userId: member.id, guildId: guild.id, reason });
                     break;
                 default:
-                    console.warn(`[Protection] Unknown action: ${action}`);
+                    logger.warn(`Protection: unknown action value: ${action}`, { category: 'protection', guildId: guild.id });
             }
         } catch (e) {
-            console.error('[Protection] applyAction error:', e.message);
+            logger.error('Protection applyAction error', { category: 'protection', error: e.message, stack: e.stack });
         }
     }
 };

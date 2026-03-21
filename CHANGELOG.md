@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v5.3.3 Beta] — 2026-03-21 🔧 Credits & Branding Update
+
+### Changed
+- Updated all project credits to **Next Generation team** throughout the entire codebase
+- Fixed all Discord invite links to `https://discord.gg/BhJStSa89s`
+- Replaced Ko-Fi / PayPal donation links with GitHub repository link
+- Removed outdated Live Demo badge and section (codnex.xyz)
+- Updated community links in dashboard (guild.ejs, promo_card.ejs) — removed Trustpilot/Ko-fi references
+- Updated clone URL in CONTRIBUTING.md to `https://github.com/aymenelouadi/next-generation.git`
+- Version bumped to **5.3.3 Beta** across package.json, Dockerfile, and dashboard views
+
+---
+
 ## [v5.1.1] — 2026-03-17 ✨ New Systems & Improvements
 
 ### ✨ New Systems

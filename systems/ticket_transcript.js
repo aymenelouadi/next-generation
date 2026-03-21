@@ -20,6 +20,7 @@
 'use strict';
 
 const fs   = require('fs');
+const logger = require('../utils/logger');
 const path = require('path');
 
 const {
@@ -55,7 +56,7 @@ async function generateTranscript(client, guildId, ticket, panel, ticketData, dm
         : null;
 
     if (!channel) {
-        console.warn('[ticket_transcript] Channel not found for ticket', ticket.id);
+        logger.warn('[ticket_transcript] Channel not found for ticket', ticket.id);
         return { filePath: null, transcriptChannelMsgId: null };
     }
 
@@ -72,7 +73,7 @@ async function generateTranscript(client, guildId, ticket, panel, ticketData, dm
             poweredBy:  false,
         });
     } catch (err) {
-        console.error('[ticket_transcript] createTranscript error:', err.message);
+        logger.error('[ticket_transcript] createTranscript error:', err.message);
         return { filePath: null, transcriptChannelMsgId: null };
     }
 
@@ -140,7 +141,7 @@ async function _postToChannel(channel, ticket, panel, filePath, fileName) {
         const fileMsg = await channel.send({ files: [file] });
         return fileMsg.id;
     } catch (err) {
-        console.error('[ticket_transcript] Failed to post to transcript channel:', err.message);
+        logger.error('[ticket_transcript] Failed to post to transcript channel:', err.message);
         return null;
     }
 }
@@ -175,7 +176,7 @@ async function _dmToUser(user, ticket, panel, filePath, fileName) {
         });
     } catch (err) {
         // DMs can fail if the user has them disabled — not fatal
-        console.warn('[ticket_transcript] Could not DM transcript to user:', err.message);
+        logger.warn('[ticket_transcript] Could not DM transcript to user:', err.message);
     }
 }
 

@@ -5,11 +5,10 @@
  */
 
 ﻿const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
-const fs        = require('fs');
-const path      = require('path');
 const logSystem = require('../systems/log.js');
 const adminGuard = require('../utils/adminGuard');
 const { t, langOf } = require('../utils/cmdLang');
+const validators     = require('../utils/validators');
 
 /* ── Components V2 ─────────────────────────────────── */
 const CV2 = 1 << 15;
@@ -36,17 +35,6 @@ function parseDurationLabel(raw, lang) {
     return `${n} ${unit}`;
 }
 
-function saveRecord(userId, userData, caseData) {
-    const dbPath = path.join(__dirname, '../database/records.json');
-    fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-    let db = {};
-    try { db = JSON.parse(fs.readFileSync(dbPath, 'utf8').replace(/^\uFEFF/, '') || '{}'); } catch {}
-    if (!db[userId]) db[userId] = { username: userData.username, tag: userData.tag, cases: [] };
-    else { db[userId].username = userData.username; db[userId].tag = userData.tag; }
-    db[userId].cases.push(caseData);
-    try { fs.writeFileSync(dbPath, JSON.stringify(db, null, 2)); return true; }
-    catch { return false; }
-}
 
 /* ── CV2 card builders ────────────────────────────────── */
 function buildSuccess(user, reason, durationLabel, caseId, moderator, lang) {
@@ -140,6 +128,15 @@ module.exports = {
             guild     = ctx.guild;
         }
 
+        /* ── Validate inputs ──────────────────────────── */
+        const vBan = validators.BanArgs.safeParse({ userId: user.id, reason, duration: rawDuration });
+        if (!vBan.success) {
+            const p = buildError(validators.formatError(vBan.error));
+            return isSlash ? ctx.reply(p) : ctx.channel.send(p);
+        }
+        reason      = vBan.data.reason;      // trimmed
+        rawDuration = vBan.data.duration;    // normalised to lowercase
+
         /* ── Self-ban check ────────────────────────────── */
         if (user.id === moderator.id) {
             const p = buildError(t(lang, 'ban.self_ban'));
@@ -155,7 +152,7 @@ module.exports = {
         }
 
         /* ── Execute ban ───────────────────────────────── */
-        const settings = JSON.parse(fs.readFileSync(path.join(__dirname, '../settings.json'), 'utf8'));
+        const settings = require('../utils/settings');
         const deleteSecs = settings.actions?.ban?.deleteMessageSeconds ?? 604800;
 
         try {
@@ -178,19 +175,7 @@ module.exports = {
         const caseId  = genCaseId();
         const date    = new Date().toLocaleString('en-US');
         const durationLabel = parseDurationLabel(rawDuration, lang);
-
-        const caseData = {
-            caseId, action: 'BAN', reason,
-            duration: rawDuration,
-            moderatorId: moderator.id,
-            moderator: moderator.username,
-            court: settings.court?.name ?? '',
-            timestamp: date,
-        };
-
-        if (settings.actions?.ban?.saveRecord) {
-            saveRecord(user.id, { username: user.username, tag: user.tag }, caseData);
-        }
+        // saveRecord for ban is handled via logSystem below
 
         if (g.cfg.log) {
             await logSystem.logCommandUsage({
