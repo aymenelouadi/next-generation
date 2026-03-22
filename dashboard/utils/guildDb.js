@@ -193,7 +193,6 @@ async function _writeToMongo(guildId, filename, data) {
                             createdAt: t.openedAt ? new Date(t.openedAt) : new Date(),
                         },
                     },
-                    },
                     upsert: true,
                 },
             }));
