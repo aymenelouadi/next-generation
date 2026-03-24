@@ -107,6 +107,11 @@
         <span class="ttb-label"><%= lang === 'ar' ? 'الوضع النهاري' : 'Light Mode' %></span>
         <span class="ttb-badge"><%= lang === 'ar' ? 'داكن' : 'Dark' %></span>
       </button>
+      <button class="motion-toggle-btn theme-toggle-btn" aria-label="Toggle motion">
+        <i data-lucide="play-circle" style="width:16px;height:16px;stroke:currentColor;flex-shrink:0;"></i>
+        <span class="ttb-label"><%= lang === 'ar' ? 'تفعيل الحركة' : 'Enable Motion' %></span>
+        <span class="ttb-badge"><%= lang === 'ar' ? 'متوقف' : 'Off' %></span>
+      </button>
       <a href="https://discord.gg/BhJStSa89s" target="_blank" class="prof-btn help">
         <i data-lucide="help-circle" style="width:16px;height:16px;stroke:currentColor;"></i>
         <%= t.home.profileHelp %>
@@ -239,24 +244,208 @@
     <% }); %>
   </aside>
 
+  <!-- Server Card CSS -->
+  <style>
+    /* ── Server Card ──────────────────────────────────────── */
+    .mgmt-server-card {
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    /* Banner / blurred-icon hero */
+    .mgmt-sc-hero {
+      height: 72px;
+      position: relative;
+      overflow: hidden;
+      background: #09011a;
+    }
+    .mgmt-sc-banner {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: center 30%;
+    }
+    .mgmt-sc-bg-icon {
+      position: absolute; inset: -15%;
+      width: 130%; height: 130%;
+      object-fit: cover;
+      filter: blur(24px) saturate(1.6) brightness(.48);
+      pointer-events: none;
+    }
+    /* Clean gradient fade — banner dissolves into sidebar bg */
+    .mgmt-sc-hero::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom,
+        rgba(6,2,20,0)   0%,
+        rgba(6,2,20,.35) 55%,
+        rgba(6,2,20,.92) 100%);
+      z-index: 1; pointer-events: none;
+    }
+
+    /* Sort button — minimal glass chip, top-right in hero */
+    .mgmt-sc-sort {
+      position: absolute;
+      top: 8px; right: 8px;
+      z-index: 3;
+      width: 26px; height: 26px;
+      border-radius: 7px;
+      background: rgba(0,0,0,.35);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,.1);
+      color: rgba(255,255,255,.7);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s;
+      flex-shrink: 0; padding: 0;
+    }
+    .mgmt-sc-sort:hover {
+      background: rgba(124,58,237,.55);
+      border-color: rgba(124,58,237,.45);
+      color: #fff;
+    }
+    [dir="rtl"] .mgmt-sc-sort { right: auto; left: 8px; }
+
+    /* Meta row — floats up with negative margin to straddle hero boundary */
+    .mgmt-sc-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: -16px;          /* pull up → avatar straddles hero/content line */
+      padding: 0 11px 13px 12px;
+      position: relative; z-index: 2;
+    }
+
+    /* Server avatar — circular, floating */
+    .mgmt-sc-avatar,
+    .mgmt-sc-avatar-fallback {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 2.5px solid rgba(6,2,20,.97);
+      box-shadow:
+        0 0 0 1.5px rgba(255,255,255,.13),
+        0 4px 16px rgba(0,0,0,.7);
+    }
+    .mgmt-sc-avatar {
+      object-fit: cover; display: block;
+      background: #150528;
+    }
+    .mgmt-sc-avatar-fallback {
+      background: var(--purple);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .95rem; font-weight: 800; color: #fff;
+    }
+
+    /* Info block */
+    .mgmt-sc-info { flex: 1; min-width: 0; }
+    .mgmt-sc-name {
+      font-size: .82rem; font-weight: 700; letter-spacing: .01em;
+      color: var(--white);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      line-height: 1.3;
+    }
+    .mgmt-sc-counts {
+      display: flex; align-items: center; gap: 9px;
+      margin-top: 3px;
+    }
+    .mgmt-sc-count {
+      display: flex; align-items: center; gap: 4px;
+      font-size: .67rem; font-weight: 500;
+      color: var(--muted); white-space: nowrap;
+    }
+    .mgmt-sc-dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    }
+    .mgmt-sc-dot--online { background: #22c55e; box-shadow: 0 0 5px rgba(34,197,94,.6); }
+    .mgmt-sc-dot--total  { background: rgba(203,194,255,.35); }
+
+    /* ── Light mode ── */
+    html[data-theme="light"] .mgmt-sc-hero { background: #cbb8ff; }
+    html[data-theme="light"] .mgmt-sc-bg-icon {
+      filter: blur(24px) saturate(1.2) brightness(.8);
+    }
+    html[data-theme="light"] .mgmt-sc-hero::after {
+      background: linear-gradient(to bottom,
+        rgba(240,234,255,0)   0%,
+        rgba(240,234,255,.4)  55%,
+        rgba(240,234,255,.95) 100%);
+    }
+    html[data-theme="light"] .mgmt-sc-avatar,
+    html[data-theme="light"] .mgmt-sc-avatar-fallback {
+      border-color: rgba(240,234,255,.98);
+      box-shadow: 0 0 0 1.5px rgba(124,58,237,.18), 0 4px 16px rgba(0,0,0,.15);
+    }
+    html[data-theme="light"] .mgmt-sc-sort {
+      background: rgba(255,255,255,.5);
+      border-color: rgba(124,58,237,.18);
+      color: rgba(80,40,160,.8);
+    }
+    html[data-theme="light"] .mgmt-sc-name   { color: #16063b; }
+    html[data-theme="light"] .mgmt-sc-count  { color: rgba(80,40,160,.65); }
+    html[data-theme="light"] .mgmt-sc-dot--total { background: rgba(80,40,160,.32); }
+  </style>
+
   <!-- Management Sidebar -->
   <aside class="mgmt-sidebar" id="mgmt-sidebar">
-    <div class="mgmt-header">
-      <div class="mgmt-header-inner">
-        <div class="mgmt-header-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 18 18">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 2C2.00779 2 1 3.00779 1 4.25V5.75C1 6.99221 2.00779 8 3.25 8H14.75C15.9922 8 17 6.99221 17 5.75V4.25C17 3.00779 15.9922 2 14.75 2H3.25ZM3 5C3 5.5522 3.4477 6 4 6C4.5522 6 5 5.5522 5 5C5 4.4478 4.5523 4 4 4C3.4477 4 3 4.4478 3 5ZM6 5C6 5.5522 6.4477 6 7 6C7.5522 6 8 5.5522 8 5C8 4.4478 7.5523 4 7 4C6.4477 4 6 4.4478 6 5Z" fill="currentColor"/>
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 10C2.00779 10 1 11.0078 1 12.25V13.75C1 14.9922 2.00779 16 3.25 16H14.75C15.9922 16 17 14.9922 17 13.75V12.25C17 11.0078 15.9922 10 14.75 10H3.25ZM3 13C3 13.5522 3.4477 14 4 14C4.5522 14 5 13.5522 5 13C5 12.4478 4.5523 12 4 12C3.4477 12 3 12.4478 3 13ZM6 13C6 13.5522 6.4477 14 7 14C7.5522 14 8 13.5522 8 13C8 12.4478 7.5523 12 7 12C6.4477 12 6 12.4478 6 13Z" fill="currentColor" fill-opacity="0.4"/>
+
+    <!-- Server Card -->
+    <%
+      var _hasBanner = typeof guildBanner !== 'undefined' && guildBanner;
+      var _hasIcon   = guildInfo && guildInfo.icon;
+    %>
+    <div class="mgmt-server-card">
+
+      <!-- Hero: banner or blurred icon -->
+      <div class="mgmt-sc-hero">
+        <% if (_hasBanner) { %>
+          <img class="mgmt-sc-banner"
+            src="https://cdn.discordapp.com/banners/<%= guildId %>/<%= guildBanner %>.png?size=512"
+            alt="">
+        <% } else if (_hasIcon) { %>
+          <img class="mgmt-sc-bg-icon"
+            src="https://cdn.discordapp.com/icons/<%= guildId %>/<%= guildInfo.icon %>.png?size=256"
+            alt="">
+        <% } %>
+
+        <button class="mgmt-sort-btn mgmt-sc-sort" aria-label="sort">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 18 18">
+            <path d="M9.53,2.22c-.293-.293-.768-.293-1.061,0l-3.5,3.5c-.293,.293,0,1.061.293,1.061s.768,.293,1.061,0l2.97-2.97,2.97,2.97c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-3.5-3.5Z" fill="currentColor"/>
+            <path d="M11.97,11.22l-2.97,2.97-2.97-2.97c-.293-.293-.768-.293-1.061,0s-.293,.768,0,1.061l3.5,3.5c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22l3.5-3.5c.293-.293,.293-.768,0-1.061s-.768-.293-1.061,0Z" fill="currentColor" fill-opacity="0.5"/>
           </svg>
-        </div>
-        <span class="mgmt-header-title"><%= lang === 'ar' ? 'إدارة السيرفر' : 'Manage Server' %></span>
+        </button>
       </div>
-      <button class="mgmt-sort-btn" aria-label="sort">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
-          <path d="M9.53,2.22c-.293-.293-.768-.293-1.061,0l-3.5,3.5c-.293,.293,.293,.768,0,1.061s.768,.293,1.061,0l2.97-2.97,2.97,2.97c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-3.5-3.5Z" fill="currentColor"/>
-          <path d="M11.97,11.22l-2.97,2.97-2.97-2.97c-.293-.293-.768-.293-1.061,0s-.293,.768,0,1.061l3.5,3.5c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22l3.5-3.5c.293-.293,.293-.768,0-1.061s-.768-.293-1.061,0Z" fill="currentColor" fill-opacity="0.4"/>
-        </svg>
-      </button>
+
+      <!-- Meta: avatar floats on hero/content boundary -->
+      <div class="mgmt-sc-meta">
+        <% if (_hasIcon) { %>
+          <img class="mgmt-sc-avatar"
+            src="https://cdn.discordapp.com/icons/<%= guildId %>/<%= guildInfo.icon %>.png?size=128"
+            alt="<%= guildInfo.name %>">
+        <% } else { %>
+          <div class="mgmt-sc-avatar-fallback">
+            <%= guildInfo.name.charAt(0).toUpperCase() %>
+          </div>
+        <% } %>
+        <div class="mgmt-sc-info">
+          <div class="mgmt-sc-name" title="<%= guildInfo.name %>"><%= guildInfo.name %></div>
+          <div class="mgmt-sc-counts">
+            <% if (typeof memberCount !== 'undefined' && memberCount) { %>
+              <span class="mgmt-sc-count">
+                <span class="mgmt-sc-dot mgmt-sc-dot--total"></span>
+                <%= memberCount.toLocaleString() %>
+              </span>
+            <% } %>
+            <% if (typeof onlineCount !== 'undefined' && onlineCount) { %>
+              <span class="mgmt-sc-count">
+                <span class="mgmt-sc-dot mgmt-sc-dot--online"></span>
+                <%= onlineCount %>
+              </span>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <div class="mgmt-body">
@@ -296,6 +485,35 @@
               <span class="mgmt-item-label"><%= lang === 'ar' ? 'إدارة الاشتراكات' : 'Manage Subscriptions' %></span>
               <span class="mgmt-badge"><%= lang === 'ar' ? 'مجاني' : 'Free' %></span>
             </div>
+          </div>
+        </div>
+
+        <!-- ── Section: Messaging & Embeds ── -->
+        <div class="mgmt-section">
+          <button class="mgmt-section-btn open">
+            <span><%= lang === 'ar' ? 'الرسائل والـ Embeds' : 'Messaging & Embeds' %></span>
+            <svg class="mgmt-sec-chevron" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 18 18">
+              <path d="M9.53,4.72c-.293-.293-.768-.293-1.061,0L2.22,10.97c-.293,.293-.293,.768,0,1.061s.768,.293,1.061,0l5.72-5.72,5.72,5.72c.146,.146,.338,.22,.53,.22s.384-.073,.53-.22c.293-.293,.293-.768,0-1.061l-6.25-6.25Z" fill="currentColor"/>
+            </svg>
+          </button>
+          <div class="mgmt-sec-body open">
+            <!-- Embed Messages -->
+            <a href="/dashboard/<%= guildId %>/embeds" class="mgmt-item <%= _ac('embeds') %>nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <i data-lucide="file-code-2" style="width:22px;height:22px;stroke:currentColor;fill:none;pointer-events:none;"></i>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'رسائل الـ Embed' : 'Embed Messages' %></span>
+            </a>
+            <!-- Components Messages -->
+            <a href="/dashboard/<%= guildId %>/components" class="mgmt-item <%= _ac('components') %>nav-link">
+              <div class="mgmt-item-indicator"></div>
+              <div class="mgmt-item-icon">
+                <i data-lucide="layout-panel-top" style="width:22px;height:22px;stroke:currentColor;fill:none;pointer-events:none;"></i>
+              </div>
+              <span class="mgmt-item-label"><%= lang === 'ar' ? 'رسائل المكونات' : 'Components Messages' %></span>
+            </a>
+
           </div>
         </div>
 

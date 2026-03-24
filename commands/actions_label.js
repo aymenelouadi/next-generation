@@ -13,9 +13,7 @@ const adminGuard = require('../utils/adminGuard.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('actions_label')
-        .setDescription('تغيير تسمية الاوامر')
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .setDescription('تغيير تسمية الاوامر'),
     textCommand: {
         name: 'al',
         aliases: []

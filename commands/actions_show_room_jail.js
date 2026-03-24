@@ -13,9 +13,7 @@ const adminGuard = require('../utils/adminGuard.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('actions_show_room_jail')
-        .setDescription('ادارة غرف السجن المسموح مشاهدتها')
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .setDescription('ادارة غرف السجن المسموح مشاهدتها'),
     textCommand: {
         name: 'asrj',
         aliases: []

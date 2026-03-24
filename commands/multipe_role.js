@@ -26,9 +26,7 @@ module.exports = {
             .addChoices({ name: 'Humans', value: 'humans' }, { name: 'Bots', value: 'bots' }, { name: 'Everyone', value: 'all' }))
         .addRoleOption(o => o.setName('role').setDescription('Role').setRequired(true))
         .addStringOption(o => o.setName('action').setDescription('Action').setRequired(true)
-            .addChoices({ name: 'Add', value: 'add' }, { name: 'Remove', value: 'remove' }))
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
-
+            .addChoices({ name: 'Add', value: 'add' }, { name: 'Remove', value: 'remove' })),
     textCommand: { name: 'mr', aliases: ['multipe_role'] },
 
     async execute(client, ctx, args) {

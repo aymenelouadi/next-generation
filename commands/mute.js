@@ -85,9 +85,7 @@ module.exports = {
         .setDescription('Timeout a member')
         .addUserOption(o => o.setName('user').setDescription('Target user').setRequired(true))
         .addStringOption(o => o.setName('duration').setDescription('Duration — e.g. 5m 1h 1d 7d (max 28d)').setRequired(true))
-        .addStringOption(o => o.setName('reason').setDescription('Reason for the timeout').setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .addStringOption(o => o.setName('reason').setDescription('Reason for the timeout').setRequired(true)),
     textCommand: { name: 'mute', aliases: [] },
 
     async execute(client, ctx, args) {

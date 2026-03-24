@@ -26,8 +26,13 @@ async function connect() {
 
     try {
         await mongoose.connect(uri, {
-            serverSelectionTimeoutMS: 10_000,
-            socketTimeoutMS:          45_000,
+            serverSelectionTimeoutMS: 15_000,
+            socketTimeoutMS:          60_000,
+            connectTimeoutMS:         15_000,
+            heartbeatFrequencyMS:     10_000,
+            retryWrites:              true,
+            retryReads:               true,
+            maxPoolSize:              10,
         });
         logger.db('Connected to MongoDB Atlas');
     } catch (err) {
@@ -38,9 +43,14 @@ async function connect() {
     mongoose.connection.on('disconnected', () =>
         logger.warn('MongoDB disconnected — will auto-reconnect', { category: 'db' })
     );
-    mongoose.connection.on('error', err =>
-        logger.error('MongoDB connection error', { category: 'db', error: err.message })
+    mongoose.connection.on('reconnected', () =>
+        logger.db('MongoDB reconnected')
     );
+    mongoose.connection.on('error', err => {
+        // Suppress noisy monitor timeout logs
+        if (/timeout|monitor/i.test(err.message)) return;
+        logger.error('MongoDB connection error', { category: 'db', error: err.message });
+    });
 }
 
 // ── Connection lifecycle helpers ──────────────────────────────────────────────

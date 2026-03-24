@@ -65,9 +65,7 @@ module.exports = {
         .setName('unban')
         .setDescription('Unban a member from the server')
         .addStringOption(o => o.setName('user').setDescription('User ID to unban').setRequired(true))
-        .addStringOption(o => o.setName('reason').setDescription('Reason for the unban').setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .addStringOption(o => o.setName('reason').setDescription('Reason for the unban').setRequired(true)),
     textCommand: { name: 'unban', aliases: [] },
 
     async execute(client, ctx, args) {

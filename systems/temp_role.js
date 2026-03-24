@@ -26,12 +26,12 @@ module.exports = {
     async checkExpiredRoles() {
         try {
             const mongoose = require('mongoose');
-            if (mongoose.connection.readyState < 1) return;
+            if (mongoose.connection.readyState !== 1) return;
 
             const expired = await db.TempRole.find({
                 active: true,
                 expiresAt: { $lte: new Date() },
-            }).lean();
+            }).lean().maxTimeMS(8_000);
 
             for (const record of expired) {
                 try {
@@ -52,11 +52,14 @@ module.exports = {
 
                     await db.TempRole.findByIdAndUpdate(record._id, { active: false });
                 } catch (e) {
-                    logger.error(`[TempRole] Error processing record ${record._id}:`, e.message);
+                    logger.error(`[TempRole] Error processing record ${record._id}: ${e?.message || e}`);
                 }
             }
         } catch (e) {
-            logger.error('[TempRole] checkExpiredRoles error:', e.message);
+            const msg = e?.message || (typeof e === 'object' ? JSON.stringify(e) : String(e));
+            // Ignore transient network/timeout errors silently — mongo will auto-reconnect
+            if (/timeout|ECONNRESET|ENOTFOUND|ETIMEDOUT|monitor/i.test(msg)) return;
+            logger.error(`[TempRole] checkExpiredRoles error: ${msg}`);
         }
     },
 };

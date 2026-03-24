@@ -1,0 +1,226 @@
+<%#
+  This project was programmed by the Next Generation team.
+  If you encounter any problems, open an Issue or log into the Discord server:
+  https://discord.gg/BhJStSa89s
+%>
+<!DOCTYPE html>
+<html lang="<%= t.lang %>" dir="<%= t.dir %>">
+<head>
+  <%- include('partials/head_theme') %>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= lang === 'ar' ? 'رسائل المكونات' : 'Components Messages' %> — <%= guildInfo.name %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Tajawal:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #040010; --surface: rgba(255,255,255,.04); --surface-2: rgba(255,255,255,.07);
+      --card: rgba(10,3,30,.78); --purple: #7c3aed; --purple-l: #a78bfa;
+      --cyan: #06b6d4; --cyan-l: #67e8f9; --gold: #d97706; --gold-l: #fcd34d;
+      --green: #22c55e; --red: #ef4444; --orange: #f97316; --yellow: #eab308;
+      --border: rgba(124,58,237,.2); --border-h: rgba(124,58,237,.5);
+      --muted: rgba(203,194,255,.5); --white: #f8fafc;
+      --nav-w: 64px; --mgmt-w: 220px;
+    }
+    html, body { min-height: 100%; overflow-x: hidden; }
+    body {
+      background: var(--bg); color: var(--white);
+      font-family: '<%= t.fontBody %>', 'Tajawal', 'Inter', system-ui, sans-serif;
+      line-height: 1.6; overflow-x: hidden;
+    }
+    #c { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .glow { position: fixed; border-radius: 50%; pointer-events: none; z-index: 1; filter: blur(120px); animation: glow-drift 22s ease-in-out infinite alternate; }
+    .glow-a { width: min(600px, 80vw); height: min(600px, 80vw); top: -20%; right: -16%; background: radial-gradient(circle, rgba(124,58,237,.28) 0%, transparent 65%); }
+    .glow-b { width: min(500px, 70vw); height: min(500px, 70vw); bottom: -18%; left: -12%; background: radial-gradient(circle, rgba(6,182,212,.18) 0%, transparent 65%); animation-delay: -11s; }
+    @keyframes glow-drift { from { transform: translate(0,0) scale(1); } to { transform: translate(20px,15px) scale(1.06); } }
+
+    /* ── Topbar ── */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 60px;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
+      background: rgba(4,0,16,.8); backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,.06); gap: 12px;
+    }
+    .topbar-left  { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .topbar-sep   { width: 1px; height: 24px; background: rgba(255,255,255,.1); flex-shrink: 0; }
+    .topbar-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
+    .topbar-brand img  { height: 26px; width: auto; filter: drop-shadow(0 0 8px rgba(124,58,237,.5)); }
+    .topbar-brand span { font-size: .72rem; font-weight: 700; letter-spacing: .08em; color: var(--purple-l); white-space: nowrap; }
+    .guild-icon-top { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; flex-shrink: 0; border: 1px solid rgba(124,58,237,.35); box-shadow: 0 2px 12px rgba(124,58,237,.25); }
+    .guild-icon-top-fallback { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; border: 1px solid rgba(124,58,237,.35); background: rgba(124,58,237,.15); display: flex; align-items: center; justify-content: center; font-size: .85rem; font-weight: 700; color: var(--purple-l); }
+    .guild-meta { min-width: 0; }
+    .guild-meta-name { font-size: .82rem; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+    .guild-meta-id   { font-size: .65rem; color: var(--muted); margin-top: 1px; display: flex; align-items: center; gap: 4px; }
+    .user-chip { display: flex; align-items: center; gap: 8px; padding: 5px 10px; border-radius: 20px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); cursor: pointer; font-size: .78rem; color: var(--white); transition: background .15s; }
+    .user-chip:hover { background: rgba(255,255,255,.1); }
+    .user-chip-av { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+    .user-chip-av-fallback { width: 24px; height: 24px; border-radius: 50%; background: rgba(124,58,237,.3); display: flex; align-items: center; justify-content: center; }
+    .menu-toggle { display: none; background: none; border: none; color: var(--white); cursor: pointer; padding: 6px; }
+    .gms-item { display: inline-flex; align-items: center; gap: 3px; }
+    .gms-sep { color: var(--muted); opacity: .4; }
+
+    /* ── Layout ── */
+    .main {
+      position: relative; z-index: 2;
+      margin-top: 60px;
+      margin-left: calc(var(--nav-w) + var(--mgmt-w));
+      padding: 32px 28px 60px;
+      min-height: calc(100vh - 60px);
+    }
+    [dir="rtl"] .main { margin-left: 0; margin-right: calc(var(--nav-w) + var(--mgmt-w)); }
+    @media (max-width: 900px) {
+      .main { margin-left: 0; padding: 20px 16px 40px; }
+      [dir="rtl"] .main { margin-right: 0; }
+    }
+
+    /* ── Page header ── */
+    .page-header { margin-bottom: 28px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .page-header-left { display: flex; flex-direction: column; gap: 6px; }
+    .page-header-left h2 { font-size: 1.45rem; font-weight: 800; color: var(--white); letter-spacing: -.02em; }
+    .page-header-left p  { font-size: .83rem; color: var(--muted); max-width: 480px; line-height: 1.5; }
+    .page-header-badge   { display: inline-flex; align-items: center; gap: 5px; font-size: .68rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--purple-l); background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.25); border-radius: 20px; padding: 3px 10px; width: fit-content; }
+
+    /* ── Empty state / Coming soon card ── */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 16px; padding: 72px 24px; text-align: center;
+      background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+      margin-top: 8px;
+    }
+    .empty-state-icon {
+      width: 64px; height: 64px; border-radius: 16px;
+      background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.2);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--purple-l);
+    }
+    .empty-state h3  { font-size: 1.1rem; font-weight: 700; color: var(--white); }
+    .empty-state p   { font-size: .83rem; color: var(--muted); max-width: 360px; line-height: 1.55; }
+    .badge-soon {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: .68rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+      color: var(--gold-l); background: rgba(217,119,6,.12); border: 1px solid rgba(217,119,6,.25);
+      border-radius: 20px; padding: 4px 12px;
+    }
+
+    /* ── Page-in animation ── */
+    @keyframes pIn  { from { opacity:1; } to { opacity: 0; pointer-events: none; } }
+    @keyframes pOut { from { opacity:0; } to { opacity: 1; } }
+    #ov { position:fixed;inset:0;z-index:9999;background:#040010;animation:pIn .45s cubic-bezier(.4,0,.2,1) forwards;pointer-events:none; }
+  </style>
+</head>
+<body>
+  <div id="ov"></div>
+  <canvas id="c"></canvas>
+  <div class="glow glow-a"></div>
+  <div class="glow glow-b"></div>
+
+  <%- include('partials/layout', { activePage: 'components' }) %>
+
+  <!-- Main content -->
+  <main class="main">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <h2><%= lang === 'ar' ? 'رسائل المكونات' : 'Components Messages' %></h2>
+        <p><%= lang === 'ar' ? 'أنشئ رسائل تفاعلية تحتوي على أزرار وقوائم منسدلة باستخدام Discord Components V2' : 'Build interactive messages with buttons and select menus using Discord Components V2' %></p>
+        <div class="page-header-badge">
+          <i data-lucide="layout-panel-top" style="width:11px;height:11px;stroke:currentColor;"></i>
+          <%= lang === 'ar' ? 'الرسائل والـ Embeds' : 'Messaging & Embeds' %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty / Coming soon state -->
+    <div class="empty-state">
+      <div class="empty-state-icon">
+        <i data-lucide="layout-panel-top" style="width:28px;height:28px;stroke:currentColor;fill:none;"></i>
+      </div>
+      <h3><%= lang === 'ar' ? 'رسائل المكونات' : 'Components Messages' %></h3>
+      <p>
+        <%= lang === 'ar'
+          ? 'قم بإنشاء رسائل تفاعلية باستخدام Discord Components V2 من أزرار وقوائم وإرسالها بسهولة.'
+          : 'Create interactive messages using Discord Components V2 with buttons, selects, and send them with ease.' %>
+      </p>
+      <span class="badge-soon">
+        <i data-lucide="clock" style="width:10px;height:10px;stroke:currentColor;"></i>
+        <%= lang === 'ar' ? 'قريباً' : 'Coming Soon' %>
+      </span>
+    </div>
+
+  </main>
+
+  <%- include('partials/promo_card') %>
+  <%- include('partials/footer') %>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="/js/lucide.min.js"></script>
+  <%- include('partials/bg_particles') %>
+  <script>
+    lucide.createIcons();
+
+    const bannerSolid = document.querySelector('.prof-banner-solid');
+    if (bannerSolid && bannerSolid.dataset.bg) bannerSolid.style.background = bannerSolid.dataset.bg;
+
+    /* ── Profile sidebar ── */
+    const openProf  = document.getElementById('open-profile');
+    const closeProf = document.getElementById('close-profile');
+    const profSide  = document.getElementById('prof-sidebar');
+    const profBack  = document.getElementById('prof-backdrop');
+    if (openProf && profSide) {
+      openProf.addEventListener('click', () => { profSide.classList.add('open'); profBack && profBack.classList.add('show'); profSide.removeAttribute('aria-hidden'); });
+      [closeProf, profBack].forEach(el => el && el.addEventListener('click', () => { profSide.classList.remove('open'); profBack && profBack.classList.remove('show'); profSide.setAttribute('aria-hidden','true'); }));
+    }
+
+    /* ── Nav overlay (mobile) ── */
+    const menuToggle = document.getElementById('menu-toggle');
+    const navOverlay = document.getElementById('nav-overlay');
+    const navSidebar = document.querySelector('.nav-sidebar');
+    const mgmtSidebar = document.getElementById('mgmt-sidebar');
+    if (menuToggle) menuToggle.addEventListener('click', () => {
+      if (mgmtSidebar && mgmtSidebar.classList.contains('open')) { mgmtSidebar.classList.remove('open'); navOverlay && navOverlay.classList.remove('open'); }
+      else if (mgmtSidebar) { mgmtSidebar.classList.add('open'); navOverlay && navOverlay.classList.add('open'); }
+    });
+    if (navOverlay) navOverlay.addEventListener('click', () => { mgmtSidebar && mgmtSidebar.classList.remove('open'); navSidebar && navSidebar.classList.remove('open'); navOverlay.classList.remove('open'); });
+
+    /* ── Copy user ID ── */
+    const copyIdRow = document.getElementById('prof-copy-id');
+    if (copyIdRow) {
+      copyIdRow.addEventListener('click', () => {
+        navigator.clipboard.writeText(copyIdRow.dataset.uid || '').catch(() => {});
+        const lbl = document.getElementById('prof-copy-label');
+        if (lbl) {
+          const orig = lbl.textContent;
+          lbl.textContent = document.documentElement.lang === 'ar' ? 'تم النسخ!' : 'Copied!';
+          setTimeout(() => { lbl.textContent = orig; }, 1500);
+        }
+      });
+    }
+
+    /* ── Mgmt sidebar collapse ── */
+    document.querySelectorAll('.mgmt-section-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const body = btn.nextElementSibling;
+        btn.classList.toggle('open');
+        if (body) body.classList.toggle('open');
+      });
+    });
+
+    /* ── Nav links (page transition) ── */
+    document.querySelectorAll('.nav-link').forEach(a => {
+      a.addEventListener('click', e => {
+        const href = a.getAttribute('href');
+        if (!href || href.startsWith('#') || href.startsWith('javascript')) return;
+        e.preventDefault();
+        const ov = document.getElementById('ov');
+        if (ov) { ov.style.animation = 'pOut .35s cubic-bezier(.4,0,.2,1) forwards'; ov.style.pointerEvents = 'all'; }
+        setTimeout(() => { window.location.href = href; }, 340);
+      });
+    });
+  </script>
+</body>
+</html>

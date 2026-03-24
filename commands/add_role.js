@@ -22,8 +22,8 @@ module.exports = {
             option.setName('role')
                 .setDescription('الرتبة لاضافتها')
                 .setRequired(true)
-        )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
+        ),
+
 
     textCommand: {
         name: 'ad',

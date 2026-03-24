@@ -50,9 +50,7 @@ module.exports = {
         .setDescription('Give a member a temporary role')
         .addUserOption(o => o.setName('user').setDescription('Target member').setRequired(true))
         .addRoleOption(o => o.setName('role').setDescription('Role to assign').setRequired(true))
-        .addStringOption(o => o.setName('time').setDescription('e.g. 30s 5m 2h 1d 1mo').setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
-
+        .addStringOption(o => o.setName('time').setDescription('e.g. 30s 5m 2h 1d 1mo').setRequired(true)),
     textCommand: { name: 'tr', aliases: ['temp_role'] },
 
     async execute(client, ctx, args) {

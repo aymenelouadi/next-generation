@@ -62,9 +62,7 @@ module.exports = {
         .setDescription('Bulk delete messages in a channel')
         .addIntegerOption(o => o.setName('amount').setDescription('Number of messages to delete (1–100)').setRequired(true).setMinValue(1).setMaxValue(100))
         .addUserOption(o => o.setName('user').setDescription('Only delete messages from this user (optional)').setRequired(false))
-        .addStringOption(o => o.setName('reason').setDescription('Reason (optional)').setRequired(false))
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
-
+        .addStringOption(o => o.setName('reason').setDescription('Reason (optional)').setRequired(false)),
     textCommand: { name: 'clear', aliases: [] },
 
     async execute(client, ctx, args) {

@@ -3,10 +3,10 @@
 <img src="media/login.png" alt="Bot Discord Dashboard Banner" width="800"/>
 
 # 🤖 Bot Discord Dashboard ALL-IN-ONE
-### Next Generation — v5.3.3 Beta
+### Next Generation — v5.4.0 Beta
 
 **A full-featured Discord bot with an integrated web dashboard built for modern Discord servers.**  
-Protection · Moderation · Tickets · Auto Roles · Levels · Dashboard · and more.
+Protection · Moderation · Tickets · Embeds Flow Builder · Auto Roles · Levels · Dashboard · and more.
 
 [![Discord](https://img.shields.io/badge/Support-Discord-5865F2?style=for-the-badge&logo=discord)](https://discord.gg/BhJStSa89s)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
@@ -78,7 +78,8 @@ Protection · Moderation · Tickets · Auto Roles · Levels · Dashboard · and 
 | 📊 **Utility** | Server/User info, Avatar, Banners, Ping, AFK, Help |
 | 🌐 **Dashboard** | Discord OAuth2, Live editing of all settings, Beautiful UI |
 | 📝 **Logging** | Full audit log for every moderation action |
-| 🌍 **Multi-language** | 11 languages: English, Arabic, French, German, Spanish, Russian, Portuguese, Hindi, Bengali, Urdu, Chinese |
+| � **Embeds Flow Builder** | Visual XState flow canvas — design multi-state embed messages with buttons/select menus, transitions, triggers, version history & recycle bin |
+| �🌍 **Multi-language** | 11 languages: English, Arabic, French, German, Spanish, Russian, Portuguese, Hindi, Bengali, Urdu, Chinese |
 
 ---
 

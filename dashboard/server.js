@@ -527,6 +527,23 @@ app.get('/dashboard/:guildId/stats/activity', require('./middleware/auth'), (req
     }
 });
 
+/* ── Guild banner middleware — injects guildBanner into res.locals for ALL
+ *    /dashboard/:guildId/* pages so the sidebar server card always works.  ── */
+app.use('/dashboard/:guildId', (req, res, next) => {
+    const { getClient } = require('./utils/botClient');
+    const botClient = getClient();
+    const { guildId } = req.params;
+    const raw = req.session.guilds || [];
+    const guildInfo = raw.find(g => g.id === guildId);
+    const discordGuild = botClient ? botClient.guilds.cache.get(guildId) : null;
+    res.locals.guildBanner  = discordGuild?.banner || guildInfo?.banner || null;
+    res.locals.memberCount  = discordGuild ? discordGuild.memberCount : null;
+    res.locals.onlineCount  = discordGuild
+        ? discordGuild.members.cache.filter(m => m.presence && m.presence.status !== 'offline').size || null
+        : null;
+    next();
+});
+
 app.get('/dashboard/:guildId', require('./middleware/auth'), (req, res) => {
     const guildDb   = require('./utils/guildDb');
     const { getClient } = require('./utils/botClient');
@@ -846,6 +863,486 @@ app.post('/dashboard/:guildId/setting/bot-banner', require('./middleware/auth'),
         logger.error('setting/bot-banner failed', { category: 'dashboard', error: err.message, stack: err.stack });
         res.status(500).json({ error: err.message });
     }
+});
+
+/* ── Messaging: Embed Messages ──────────────────────── */
+app.get('/dashboard/:guildId/embeds', require('./middleware/auth'), async (req, res) => {
+    const guildDb   = require('./utils/guildDb');
+    const { getClient } = require('./utils/botClient');
+    const EmbedMessage = require('../systems/schemas/EmbedMessage');
+    const botClient = getClient();
+    const { guildId } = req.params;
+
+    const raw = req.session.guilds || [];
+    if (!raw.find(g => g.id === guildId)) return res.redirect('/dashboard');
+    const inBot = botClient ? botClient.guilds.cache.has(guildId) : guildDb.exists(guildId);
+    if (!inBot) return res.redirect('/dashboard');
+
+    const guildInfo = raw.find(g => g.id === guildId);
+    const guilds    = raw.map(g => ({ ...g, inBot: botClient ? botClient.guilds.cache.has(g.id) : guildDb.exists(g.id) }));
+
+    // Fetch channels from bot
+    let guildChannels = [];
+    if (botClient) {
+        const guild = botClient.guilds.cache.get(guildId);
+        if (guild) {
+            guildChannels = guild.channels.cache
+                .filter(c => c.type === 0)
+                .map(c => ({ id: c.id, name: c.name }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+        }
+    }
+
+    // Load saved embed messages for this guild
+    let embedMessages = [];
+    try {
+        embedMessages = await EmbedMessage.find({ guildId }).sort({ updatedAt: -1 }).lean();
+    } catch (_) {}
+
+    // Guild emojis for emoji picker
+    let guildEmojis = [];
+    if (botClient) {
+        const guild = botClient.guilds.cache.get(guildId);
+        if (guild) {
+            guildEmojis = guild.emojis.cache
+                .map(e => ({ id: e.id, name: e.name, animated: e.animated, url: `https://cdn.discordapp.com/emojis/${e.id}.${e.animated ? 'gif' : 'png'}?size=32` }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+        }
+    }
+    const botInfo = botClient?.user
+        ? { username: botClient.user.username, avatar: botClient.user.displayAvatarURL({ size: 64 }) }
+        : { username: 'Bot', avatar: null };
+
+    // Guild roles for permissions system
+    let guildRoles = [];
+    if (botClient) {
+        const guild = botClient.guilds.cache.get(guildId);
+        if (guild) {
+            guildRoles = guild.roles.cache
+                .filter(r => !r.managed && r.name !== '@everyone')
+                .map(r => ({ id: r.id, name: r.name, color: r.hexColor || '#99aab5', position: r.rawPosition }))
+                .sort((a, b) => b.position - a.position);
+        }
+    }
+
+    res.render('embeds', {
+        user: req.session.user, guildInfo, guilds,
+        guildChannels, embedMessages,
+        guildEmojis, botInfo, guildRoles,
+        t: req.t, lang: req.lang, guildId,
+        isShip: getIsShip(req.session.user?.id)
+    });
+});
+
+/* ── Embeds API: list ────────────────────────────────── */
+app.get('/dashboard/:guildId/embeds/api/list', require('./middleware/auth'), async (req, res) => {
+    const EmbedMessage = require('../systems/schemas/EmbedMessage');
+    const { guildId } = req.params;
+    const raw = req.session.guilds || [];
+    if (!raw.find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const list = await EmbedMessage.find({ guildId }).sort({ updatedAt: -1 }).lean();
+        res.json({ success: true, data: list });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+/* ── Embed Templates: list ───────────────────────────── */
+app.get('/dashboard/:guildId/embeds/api/templates', require('./middleware/auth'), async (req, res) => {
+    const EmbedTemplate = require('../systems/schemas/EmbedTemplate');
+    const { guildId } = req.params;
+    const raw = req.session.guilds || [];
+    if (!raw.find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const list = await EmbedTemplate.find({ guildId }).sort({ createdAt: -1 }).lean();
+        res.json({ success: true, data: list });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* ── Embed Templates: save ───────────────────────────── */
+app.post('/dashboard/:guildId/embeds/api/templates', require('./middleware/auth'), express.json(), async (req, res) => {
+    const EmbedTemplate = require('../systems/schemas/EmbedTemplate');
+    const { guildId } = req.params;
+    const raw = req.session.guilds || [];
+    if (!raw.find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
+    const { name, description, machine } = req.body || {};
+    if (!name || !machine) return res.status(400).json({ error: 'name and machine are required' });
+    if (!machine.states || !machine.initial) return res.status(400).json({ error: 'machine must have states and initial' });
+    try {
+        const stateCount = Object.keys(machine.states).length;
+        const doc = await EmbedTemplate.create({
+            guildId,
+            name:        String(name).trim().slice(0, 100),
+            description: String(description || '').trim().slice(0, 200),
+            machine,
+            stateCount,
+            createdBy:   req.session.userId || '',
+        });
+        res.json({ success: true, data: doc });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* ── Embed Templates: delete ─────────────────────────── */
+app.delete('/dashboard/:guildId/embeds/api/templates/:tid', require('./middleware/auth'), async (req, res) => {
+    const EmbedTemplate = require('../systems/schemas/EmbedTemplate');
+    const { guildId, tid } = req.params;
+    const raw = req.session.guilds || [];
+    if (!raw.find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const doc = await EmbedTemplate.findOneAndDelete({ _id: tid, guildId });
+        if (!doc) return res.status(404).json({ error: 'Not found' });
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* ── Embeds Trash: list ──────────────────────────────── */
+app.get('/dashboard/:guildId/embeds/api/trash', require('./middleware/auth'), async (req, res) => {
+    const EmbedTrash = require('../systems/schemas/EmbedTrash');
+    const { guildId } = req.params;
+    if (!( req.session.guilds || []).find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const list = await EmbedTrash.find({ guildId }).sort({ createdAt: -1 }).lean();
+        res.json({ success: true, data: list });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* ── Embeds Trash: restore ───────────────────────────── */
+app.post('/dashboard/:guildId/embeds/api/trash/:tid/restore', require('./middleware/auth'), async (req, res) => {
+    const EmbedTrash    = require('../systems/schemas/EmbedTrash');
+    const EmbedMessage  = require('../systems/schemas/EmbedMessage');
+    const { guildId, tid } = req.params;
+    if (!(req.session.guilds || []).find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const trash = await EmbedTrash.findOne({ _id: tid, guildId }).lean();
+        if (!trash) return res.status(404).json({ error: 'Not found in trash' });
+        // Restore — use a new name if original name is taken
+        let name = trash.name;
+        const existing = await EmbedMessage.findOne({ guildId, name }).lean();
+        if (existing) name = name + ' (restored)';
+        // Rebuild componentIds from machine
+        const componentIds = [];
+        if (trash.machine?.states) {
+            for (const s of Object.values(trash.machine.states)) {
+                for (const row of (s.components || [])) {
+                    if (row.type === 'buttons') {
+                        for (const btn of (row.buttons || [])) { if (btn.customId) componentIds.push(btn.customId); }
+                    } else if (row.type === 'select' && row.select?.customId) {
+                        componentIds.push(row.select.customId);
+                    }
+                }
+            }
+        }
+        const initialState      = trash.machine?.states?.[trash.machine?.initial] || {};
+        const doc = await EmbedMessage.create({
+            guildId,
+            name,
+            channelId:    trash.channelId  || '',
+            messageId:    trash.messageId  || null,
+            machine:      trash.machine    || null,
+            epTheme:      !!trash.epTheme,
+            componentIds,
+            embeds:       initialState.embeds     || [],
+            components:   initialState.components || [],
+            createdBy:    req.session.user?.id || '',
+        });
+        await EmbedTrash.findByIdAndDelete(tid);
+        res.json({ success: true, data: doc });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* ── Embeds Trash: permanent delete ─────────────────── */
+app.delete('/dashboard/:guildId/embeds/api/trash/:tid', require('./middleware/auth'), async (req, res) => {
+    const EmbedTrash = require('../systems/schemas/EmbedTrash');
+    const { guildId, tid } = req.params;
+    if (!(req.session.guilds || []).find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const doc = await EmbedTrash.findOneAndDelete({ _id: tid, guildId });
+        if (!doc) return res.status(404).json({ error: 'Not found' });
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* ── Embeds Versions: list ───────────────────────────── */
+app.get('/dashboard/:guildId/embeds/api/:id/versions', require('./middleware/auth'), async (req, res) => {
+    const EmbedVersion = require('../systems/schemas/EmbedVersion');
+    const { guildId, id } = req.params;
+    if (!(req.session.guilds || []).find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const list = await EmbedVersion.find({ docId: id, guildId }).sort({ version: -1 }).lean();
+        res.json({ success: true, data: list });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* ── Embeds Versions: create manual snapshot ────────── */
+app.post('/dashboard/:guildId/embeds/api/:id/versions', require('./middleware/auth'), express.json(), async (req, res) => {
+    const EmbedVersion = require('../systems/schemas/EmbedVersion');
+    const EmbedMessage = require('../systems/schemas/EmbedMessage');
+    const { guildId, id } = req.params;
+    if (!(req.session.guilds || []).find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const doc = await EmbedMessage.findOne({ _id: id, guildId }).lean();
+        if (!doc) return res.status(404).json({ error: 'Not found' });
+        const { label } = req.body || {};
+        const lastVer = await EmbedVersion.findOne({ docId: id }).sort({ version: -1 }).lean();
+        const version = await EmbedVersion.create({
+            guildId,
+            docId:       id,
+            version:     (lastVer?.version || 0) + 1,
+            label:       String(label || '').trim().slice(0, 80),
+            machineName: doc.name,
+            machine:     doc.machine,
+            savedBy:     req.session.user?.id || '',
+            autoSave:    false,
+        });
+        res.json({ success: true, data: version });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* ── Embeds Versions: rollback ───────────────────────── */
+app.post('/dashboard/:guildId/embeds/api/:id/versions/:vid/rollback', require('./middleware/auth'), async (req, res) => {
+    const EmbedVersion = require('../systems/schemas/EmbedVersion');
+    const EmbedMessage = require('../systems/schemas/EmbedMessage');
+    const { guildId, id, vid } = req.params;
+    if (!(req.session.guilds || []).find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const ver = await EmbedVersion.findOne({ _id: vid, docId: id, guildId }).lean();
+        if (!ver) return res.status(404).json({ error: 'Version not found' });
+        // Snapshot current before rollback
+        const current = await EmbedMessage.findOne({ _id: id, guildId }).lean();
+        if (current?.machine) {
+            const last = await EmbedVersion.findOne({ docId: id }).sort({ version: -1 }).lean();
+            await EmbedVersion.create({
+                guildId, docId: id,
+                version:     (last?.version || 0) + 1,
+                label:       'Before rollback to v' + ver.version,
+                machineName: current.name,
+                machine:     current.machine,
+                savedBy:     req.session.user?.id || '',
+                autoSave:    true,
+            });
+        }
+        const updated = await EmbedMessage.findOneAndUpdate(
+            { _id: id, guildId },
+            { $set: { machine: ver.machine, updatedBy: req.session.user?.id || '' } },
+            { new: true }
+        );
+        if (!updated) return res.status(404).json({ error: 'Message not found' });
+        try { require('../systems/emped').invalidateTriggerCache(); } catch (_) {}
+        res.json({ success: true, data: updated });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* ── Embeds Versions: delete one version ────────────── */
+app.delete('/dashboard/:guildId/embeds/api/:id/versions/:vid', require('./middleware/auth'), async (req, res) => {
+    const EmbedVersion = require('../systems/schemas/EmbedVersion');
+    const { guildId, id, vid } = req.params;
+    if (!(req.session.guilds || []).find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const doc = await EmbedVersion.findOneAndDelete({ _id: vid, docId: id, guildId });
+        if (!doc) return res.status(404).json({ error: 'Version not found' });
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* ── Embeds API: get one ─────────────────────────────── */
+app.get('/dashboard/:guildId/embeds/api/:id', require('./middleware/auth'), async (req, res) => {
+    const EmbedMessage = require('../systems/schemas/EmbedMessage');
+    const { guildId, id } = req.params;
+    const raw = req.session.guilds || [];
+    if (!raw.find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const doc = await EmbedMessage.findOne({ _id: id, guildId }).lean();
+        if (!doc) return res.status(404).json({ error: 'Not found' });
+        res.json({ success: true, data: doc });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+/* ── Embeds API: save (create / update) ─────────────── */
+app.post('/dashboard/:guildId/embeds/api/save', require('./middleware/auth'), express.json(), async (req, res) => {
+    const EmbedMessage = require('../systems/schemas/EmbedMessage');
+    const { getClient } = require('./utils/botClient');
+    const { guildId } = req.params;
+    const raw = req.session.guilds || [];
+    if (!raw.find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
+
+    const { _id, name, channelId, epTheme, machine, forceNew } = req.body;
+    if (!name || !name.trim()) return res.status(400).json({ error: 'Name is required' });
+    if (!channelId) return res.status(400).json({ error: 'Channel is required' });
+
+    // ── Compute flat componentIds index from machine definition ──────────────
+    // Includes all button.customId + selectMenu.customId values for fast lookup.
+    const componentIds = [];
+    if (machine?.states) {
+        for (const s of Object.values(machine.states)) {
+            for (const row of (s.components || [])) {
+                if (row.type === 'buttons') {
+                    for (const btn of (row.buttons || [])) {
+                        if (btn.customId) componentIds.push(btn.customId);
+                    }
+                } else if (row.type === 'select' && row.select?.customId) {
+                    componentIds.push(row.select.customId);
+                }
+            }
+        }
+    }
+
+    // ── Get initial state's embeds + components for Discord send ─────────────
+    const initialState = machine?.states?.[machine?.initial] || {};
+    const initialEmbeds     = initialState.embeds     || [];
+    const initialComponents = initialState.components || [];
+
+    try {
+        let doc;
+        const updateData = {
+            name: name.trim(), channelId,
+            epTheme: !!epTheme,
+            machine: machine || null,
+            componentIds,
+            // Keep legacy fields in sync with initial state for backward compat
+            embeds:     initialEmbeds,
+            components: initialComponents,
+            updatedBy:  req.session.user?.id || '',
+        };
+
+        if (_id) {
+            // ── Auto-snapshot the current machine before overwriting ──────────
+            try {
+                const EmbedVersion = require('../systems/schemas/EmbedVersion');
+                const existing = await EmbedMessage.findOne({ _id, guildId }).lean();
+                if (existing?.machine) {
+                    const lastVer = await EmbedVersion.findOne({ docId: _id.toString() }).sort({ version: -1 }).lean();
+                    await EmbedVersion.create({
+                        guildId,
+                        docId:       _id.toString(),
+                        version:     (lastVer?.version || 0) + 1,
+                        label:       '',
+                        machineName: existing.name,
+                        machine:     existing.machine,
+                        savedBy:     req.session.user?.id || '',
+                        autoSave:    true,
+                    });
+                    // Prune: keep only the 10 most recent auto-snapshots
+                    const all = await EmbedVersion.find({ docId: _id.toString(), autoSave: true })
+                        .sort({ version: -1 }).lean();
+                    if (all.length > 10) {
+                        const pruneIds = all.slice(10).map(v => v._id);
+                        await EmbedVersion.deleteMany({ _id: { $in: pruneIds } });
+                    }
+                }
+            } catch (verErr) {
+                logger.warn('embeds/save version snapshot failed', { error: verErr.message });
+            }
+            // ─────────────────────────────────────────────────────────────────
+            doc = await EmbedMessage.findOneAndUpdate(
+                { _id, guildId },
+                { $set: updateData },
+                { new: true }
+            );
+            if (!doc) return res.status(404).json({ error: 'Message not found' });
+        } else {
+            doc = await EmbedMessage.create({
+                guildId,
+                ...updateData,
+                createdBy: req.session.user?.id || '',
+            });
+        }
+
+        // ── Try to send or edit the live Discord message ─────────────────────
+        const botClient = getClient();
+        if (botClient && channelId && initialEmbeds.length) {
+            try {
+                const channel = await botClient.channels.fetch(channelId).catch(() => null);
+                if (channel) {
+                    const { buildDiscordPayload } = require('./utils/embedBuilder');
+                    const payload = buildDiscordPayload({
+                        embeds:     initialEmbeds,
+                        components: initialComponents,
+                    });
+                    // forceNew=true → always send a new message, clear the old messageId reference
+                    if (!forceNew && doc.messageId) {
+                        const msg = await channel.messages.fetch(doc.messageId).catch(() => null);
+                        if (msg) {
+                            await msg.edit(payload);
+                        } else {
+                            const sent = await channel.send(payload);
+                            await EmbedMessage.findByIdAndUpdate(doc._id, { $set: { messageId: sent.id } });
+                            doc = doc.toObject ? doc.toObject() : { ...doc };
+                            doc.messageId = sent.id;
+                        }
+                    } else {
+                        const sent = await channel.send(payload);
+                        await EmbedMessage.findByIdAndUpdate(doc._id, { $set: { messageId: sent.id } });
+                        doc = doc.toObject ? doc.toObject() : { ...doc };
+                        doc.messageId = sent.id;
+                    }
+                }
+            } catch (botErr) {
+                logger.warn('embeds/save bot send failed', { error: botErr.message });
+            }
+        }
+
+        // Bust smart trigger cache so any new/changed triggers take effect immediately
+        try { require('../systems/emped').invalidateTriggerCache(); } catch (_) {}
+        res.json({ success: true, data: doc });
+    } catch (e) {
+        if (e.code === 11000) return res.status(409).json({ error: 'A message with this name already exists' });
+        res.status(500).json({ error: e.message });
+    }
+});
+
+/* ── Embeds API: delete (soft — moves to trash) ──────── */
+app.delete('/dashboard/:guildId/embeds/api/:id', require('./middleware/auth'), async (req, res) => {
+    const EmbedMessage = require('../systems/schemas/EmbedMessage');
+    const EmbedTrash   = require('../systems/schemas/EmbedTrash');
+    const { guildId, id } = req.params;
+    const raw = req.session.guilds || [];
+    if (!raw.find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const doc = await EmbedMessage.findOneAndDelete({ _id: id, guildId });
+        if (!doc) return res.status(404).json({ error: 'Not found' });
+        // Move to trash — auto-expires in 30 days
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 30);
+        await EmbedTrash.create({
+            guildId,
+            originalId: doc._id.toString(),
+            name:       doc.name       || '',
+            channelId:  doc.channelId  || '',
+            messageId:  doc.messageId  || null,
+            machine:    doc.machine    || null,
+            epTheme:    !!doc.epTheme,
+            deletedBy:  req.session.user?.id || '',
+            expiresAt,
+        });
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+/* ── Messaging: Components Messages ─────────────────── */
+app.get('/dashboard/:guildId/components', require('./middleware/auth'), (req, res) => {
+    const guildDb   = require('./utils/guildDb');
+    const { getClient } = require('./utils/botClient');
+    const botClient = getClient();
+    const { guildId } = req.params;
+
+    const raw = req.session.guilds || [];
+    if (!raw.find(g => g.id === guildId)) return res.redirect('/dashboard');
+    const inBot = botClient ? botClient.guilds.cache.has(guildId) : guildDb.exists(guildId);
+    if (!inBot) return res.redirect('/dashboard');
+
+    const guildInfo = raw.find(g => g.id === guildId);
+    const guilds    = raw.map(g => ({ ...g, inBot: botClient ? botClient.guilds.cache.has(g.id) : guildDb.exists(g.id) }));
+
+    res.render('components_messages', {
+        user: req.session.user, guildInfo, guilds,
+        t: req.t, lang: req.lang, guildId,
+        isShip: getIsShip(req.session.user?.id)
+    });
 });
 
 app.get('/dashboard/:guildId/levels', require('./middleware/auth'), (req, res) => {

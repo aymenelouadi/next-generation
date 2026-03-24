@@ -23,9 +23,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('set_perm_all')
         .setDescription('Add a role to every admin command')
-        .addRoleOption(o => o.setName('role').setDescription('Role to add').setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .addRoleOption(o => o.setName('role').setDescription('Role to add').setRequired(true)),
     textCommand: { name: 'setpermall', aliases: ['set_perm_all'] },
 
     async execute(client, ctx, args) {

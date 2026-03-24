@@ -374,6 +374,69 @@ async function handleCloseReasonModal(interaction) {
  * @param {import('discord.js').ButtonInteraction} interaction
  * @param {string} ticketId
  */
+/**
+ * Adjust channel permissions for all support roles based on claim state.
+ *
+ * When claimed:
+ *   - CLAIM_SUPPORT_VIEW=false → deny ViewChannel for each support role
+ *   - CLAIM_SUPPORT_TYPE=false → deny SendMessages for each support role
+ *   - claimerId always gets explicit ViewChannel + SendMessages allow
+ *
+ * When unclaimed: restore original allow overwrites for every support role.
+ */
+async function _applyClaimPermissions(channel, ticketData, panel, claimerId, claiming) {
+    if (!channel?.permissionOverwrites) return;
+
+    const general      = ticketData?.general || {};
+    const supportView  = general.CLAIM_SUPPORT_VIEW !== false; // default true
+    const supportType  = general.CLAIM_SUPPORT_TYPE !== false; // default true
+
+    // Collect all unique support role IDs
+    const supportRoles = [
+        ...(Array.isArray(ticketData?.supportRoles) ? ticketData.supportRoles : []),
+        ...(Array.isArray(panel?.supportRoles)       ? panel.supportRoles      : []),
+    ].filter((v, i, a) => v && a.indexOf(v) === i);
+
+    const edits = [];
+
+    if (claiming) {
+        // Give the claimer explicit SendMessages + ViewChannel
+        edits.push(
+            channel.permissionOverwrites.edit(claimerId, {
+                ViewChannel:        true,
+                SendMessages:       true,
+                ReadMessageHistory: true,
+            }).catch(() => {})
+        );
+
+        // Adjust other support roles based on settings
+        for (const roleId of supportRoles) {
+            const overwrite = {};
+            if (!supportView) overwrite.ViewChannel  = false;
+            if (!supportType) overwrite.SendMessages = false;
+            if (Object.keys(overwrite).length > 0) {
+                edits.push(channel.permissionOverwrites.edit(roleId, overwrite).catch(() => {}));
+            }
+        }
+    } else {
+        // Unclaim: restore full access for all support roles
+        for (const roleId of supportRoles) {
+            edits.push(
+                channel.permissionOverwrites.edit(roleId, {
+                    ViewChannel:        true,
+                    SendMessages:       true,
+                    ReadMessageHistory: true,
+                    ManageMessages:     true,
+                }).catch(() => {})
+            );
+        }
+        // Remove the claimer's explicit overwrite (they revert to their role permissions)
+        if (claimerId) edits.push(channel.permissionOverwrites.delete(claimerId).catch(() => {}));
+    }
+
+    await Promise.all(edits);
+}
+
 async function claimTicket(interaction, ticketId) {
     const guildId = interaction.guildId;
     const otDb    = guildDb.read(guildId, 'open_tickets', { tickets: [] });
@@ -404,6 +467,9 @@ async function claimTicket(interaction, ticketId) {
     guildDb.write(guildId, 'open_tickets', otDb);
     ticketStats.onTicketClaim(guildId, otDb.tickets[idx]);
 
+    // ─ Apply claim permissions ────────────────────────────────────────────
+    await _applyClaimPermissions(interaction.channel, ticketData, panel, interaction.user.id, true);
+
     // Move to awaiting category if configured
     if (panel?.awaitingCat && interaction.channel?.setParent) {
         await interaction.channel.setParent(panel.awaitingCat, { lockPermissions: false }).catch(() => {});
@@ -428,17 +494,24 @@ async function unclaimTicket(interaction, ticketId) {
 
     // ─ Permission check ───────────────────────────────────────────────────
     const claimedBy = otDb.tickets[idx].claimedBy;
-    if (!_isStaff(interaction.member, panel, ticketData) && interaction.user.id !== claimedBy) {
+    const isAdmin   = interaction.member?.permissions?.has(PermissionFlagsBits.ManageGuild);
+    // Only the claimer themselves, or a server admin, can unclaim.
+    // Regular staff who did NOT claim this ticket cannot unclaim it.
+    if (interaction.user.id !== claimedBy && !isAdmin) {
         return interaction.reply({
-            content: '❌ You do not have permission to unclaim this ticket.',
-            flags:   MessageFlags.Ephemeral,
+            content: claimedBy
+                ? `❌ Only the staff member who claimed this ticket (<@${claimedBy}>) or an admin can unclaim it.`
+                : '❌ This ticket has not been claimed.',
+            flags: MessageFlags.Ephemeral,
         });
     }
 
-    const prev = claimedBy;
     otDb.tickets[idx].claimedBy = null;
     guildDb.write(guildId, 'open_tickets', otDb);
     ticketStats.onTicketUnclaim(guildId, otDb.tickets[idx]);
+
+    // ─ Restore permissions ────────────────────────────────────────────────
+    await _applyClaimPermissions(interaction.channel, ticketData, panel, claimedBy, false);
 
     const card = new ContainerBuilder().setAccentColor(0xfee75c);
     card.addTextDisplayComponents(

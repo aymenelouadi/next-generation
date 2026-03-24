@@ -5,6 +5,7 @@
     Default theme: 'dark'
     ─────────────────────────────────────────────────────────────────────── -%>
 <script>(function(){try{var t=localStorage.getItem('cn-theme')||'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>(function(){try{var m=localStorage.getItem('cn-motion');if(m)document.documentElement.setAttribute('data-motion',m);}catch(e){}})();</script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <style>
   /* ── Performance ── */
@@ -14,12 +15,23 @@
   @media (max-width: 900px) {
     .glow, .glow-orb { filter: blur(60px) !important; }
   }
-  /* Kill all decorative animation + canvas on reduced-motion devices */
+  /* Kill decorative animation + canvas on reduced-motion devices (unless user overrides).
+     IMPORTANT: transition-duration is intentionally NOT killed — CSS transitions drive UI
+     feedback (hover states, dropdowns, sidebar slides) and disabling them makes the whole
+     dashboard feel frozen. Only non-essential keyframe animations are killed.
+     Elements with an inline style="animation:…" (functional spinners, loaders) are excluded
+     via :not([style*="animation"]) so save/loading indicators keep working. */
   @media (prefers-reduced-motion: reduce) {
-    .glow, .glow-orb { animation: none !important; opacity: 0 !important; }
-    canvas#c { display: none !important; }
-    * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+    html:not([data-motion="full"]) .glow,
+    html:not([data-motion="full"]) .glow-orb { animation: none !important; opacity: 0 !important; }
+    html:not([data-motion="full"]) canvas#c { display: none !important; }
+    html:not([data-motion="full"]) *:not([style*="animation"]) { animation-duration: .001ms !important; }
   }
+  /* Force reduced motion when user explicitly opted out */
+  html[data-motion="reduced"] .glow,
+  html[data-motion="reduced"] .glow-orb { animation: none !important; opacity: 0 !important; }
+  html[data-motion="reduced"] canvas#c { display: none !important; }
+  html[data-motion="reduced"] *:not([style*="animation"]) { animation-duration: .001ms !important; }
   /* ── CSS variables ── */
   html[data-theme="light"] {
     --bg:         #ede9ff;

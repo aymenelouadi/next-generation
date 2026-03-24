@@ -13,8 +13,7 @@ const adminGuard = require('../utils/adminGuard.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('actions_enabled')
-        .setDescription('تفعيل او تعطيل الاوامر')
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+        .setDescription('تفعيل او تعطيل الاوامر'),
 
     textCommand: {
         name: 'ae',

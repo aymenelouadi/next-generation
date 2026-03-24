@@ -143,7 +143,7 @@
     .divider{height:1px;background:linear-gradient(90deg,var(--border),transparent);margin-bottom:28px;}
 
     /* ── Cards ── */
-    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;backdrop-filter:blur(20px);}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;backdrop-filter:blur(20px);}
     .card-mt{margin-top:20px;}
     .card-header{padding:16px 22px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:12px;}
     .card-header-icon{width:34px;height:34px;border-radius:10px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--purple-l);}
@@ -163,7 +163,8 @@
 
     /* ── Protection Grid ── */
     .prot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;margin-top:20px;}
-    .prot-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;backdrop-filter:blur(20px);transition:border-color .2s,box-shadow .2s;}
+    .prot-card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:18px;transition:border-color .2s,box-shadow .2s;}
+    .prot-card::before{content:'';position:absolute;inset:0;border-radius:inherit;backdrop-filter:blur(20px);z-index:-1;pointer-events:none;}
     .prot-card:hover{border-color:rgba(124,58,237,.35);box-shadow:0 4px 24px rgba(124,58,237,.1);}
     .prot-card-header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px;}
     .prot-card-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -194,7 +195,7 @@
     .role-add-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:.72rem;font-weight:700;border:1px dashed rgba(124,58,237,.4);background:transparent;color:var(--purple-l);cursor:pointer;transition:border-color .15s,background .15s;font-family:inherit;}
     .role-add-btn:hover{border-color:var(--purple);background:rgba(124,58,237,.08);}
     .role-picker-wrap{position:relative;display:inline-block;}
-    .role-picker-dd{position:fixed;z-index:9990;background:rgba(10,3,30,.98);border:1px solid rgba(124,58,237,.3);border-radius:12px;padding:6px;min-width:200px;max-height:220px;overflow-y:auto;box-shadow:0 8px 30px rgba(0,0,0,.6);display:none;scrollbar-width:thin;scrollbar-color:rgba(124,58,237,.4) transparent;}
+    .role-picker-dd{position:fixed;z-index:9999;background:rgba(10,3,30,.98);border:1px solid rgba(124,58,237,.3);border-radius:12px;padding:6px;min-width:200px;max-height:220px;overflow-y:auto;box-shadow:0 8px 30px rgba(0,0,0,.6);display:none;scrollbar-width:thin;scrollbar-color:rgba(124,58,237,.4) transparent;}
     .role-picker-dd.open{display:block;}
     /* guild switcher */
     .guild-switch-dd{position:fixed;z-index:9991;background:rgba(10,3,30,.98);border:1px solid rgba(124,58,237,.3);border-radius:14px;padding:6px;min-width:210px;max-height:300px;overflow-y:auto;box-shadow:0 8px 30px rgba(0,0,0,.65);display:none;scrollbar-width:thin;scrollbar-color:rgba(124,58,237,.4) transparent;}
@@ -659,7 +660,6 @@
 
     document.getElementById('reset-btn')?.addEventListener('click', () => location.reload());
 
-    /* Role pickers – portalled to <body> to escape backdrop-filter containing block */
     function _closeAllPickers() {
       document.querySelectorAll('.role-picker-dd.open').forEach(dd => {
         dd.classList.remove('open');
@@ -670,24 +670,28 @@
     function toggleRolePicker(ddId) {
       const dd = document.getElementById(ddId); if (!dd) return;
       const isOpen = dd.classList.contains('open');
+      /* Capture button rect NOW — before any DOM move — using origParent if already portaled */
+      const wrap = dd._origParent || dd.parentElement;
+      const btn  = wrap.querySelector('.role-add-btn');
+      const r    = btn.getBoundingClientRect();
       _closeAllPickers();
       if (!isOpen) {
-        const btn = dd._origParent ? dd._origParent.querySelector('.role-add-btn') : dd.previousElementSibling;
-        const r   = btn.getBoundingClientRect();
         dd._origParent = dd.parentElement;
-        document.body.appendChild(dd);  /* escape backdrop-filter containing block */
-        dd.style.position = 'fixed';
-        const ddW = 220;  /* min-width from CSS */
-        let left = r.left;
-        /* clamp so dropdown never overflows right edge */
+        document.body.appendChild(dd);   /* escape all backdrop-filter stacking contexts */
+        dd.classList.add('open');
+        const ddW = dd.offsetWidth || 220;
+        const isRtl = document.documentElement.dir === 'rtl';
+        let left = isRtl ? (r.right - ddW) : r.left;
         if (left + ddW > window.innerWidth - 8) left = window.innerWidth - ddW - 8;
         if (left < 8) left = 8;
-        dd.style.top  = (r.bottom + 5) + 'px';
+        dd.style.top  = (r.bottom + 4) + 'px';
         dd.style.left = left + 'px';
-        dd.classList.add('open');
       }
     }
-    window.addEventListener('scroll', _closeAllPickers, true);
+    window.addEventListener('scroll', e => {
+      if (e.target && e.target.closest && e.target.closest('.role-picker-dd')) return;
+      _closeAllPickers();
+    }, true);
     window.addEventListener('resize', _closeAllPickers);
     document.addEventListener('click', e => {
       if (!e.target.closest('.role-picker-wrap') && !e.target.closest('.role-picker-dd')) _closeAllPickers();

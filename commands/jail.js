@@ -63,8 +63,7 @@ module.exports = {
         .setDescription('Jail a member')
         .addUserOption(o => o.setName('user').setDescription('Target member').setRequired(true))
         .addStringOption(o => o.setName('duration').setDescription('e.g. 1h 6h 1d 7d 0/permanent').setRequired(true))
-        .addStringOption(o => o.setName('reason').setDescription('Reason').setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+        .addStringOption(o => o.setName('reason').setDescription('Reason').setRequired(true)),
 
     textCommand: { name: 'jail', aliases: [] },
 

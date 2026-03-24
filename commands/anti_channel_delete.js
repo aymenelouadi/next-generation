@@ -32,9 +32,7 @@ module.exports = {
                 { name: 'Ban / حظر',                 value: '3' }
             )
         )
-        .addBooleanOption(o => o.setName('enabled').setDescription('Enable/Disable').setRequired(false))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .addBooleanOption(o => o.setName('enabled').setDescription('Enable/Disable').setRequired(false)),
     textCommand: { name: 'antichdelete', aliases: ["anti-channel-delete"] },
 
     async execute(client, ctx, args) {

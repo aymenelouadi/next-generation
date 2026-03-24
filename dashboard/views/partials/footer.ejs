@@ -153,4 +153,54 @@
     _init();
   }
 })();
+
+/* ── Motion toggle logic ── */
+(function () {
+  var _isAr = document.documentElement.lang === 'ar';
+
+  function _getMotionState() {
+    var saved = localStorage.getItem('cn-motion');
+    if (saved === 'full') return 'full';
+    if (saved === 'reduced') return 'reduced';
+    // follow system
+    var systemReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return systemReduced ? 'reduced' : 'full';
+  }
+
+  function _syncMotionButtons(state) {
+    document.querySelectorAll('.motion-toggle-btn').forEach(function (btn) {
+      var ico   = btn.querySelector('[data-lucide]');
+      var lbl   = btn.querySelector('.ttb-label');
+      var badge = btn.querySelector('.ttb-badge');
+      var isFull = state === 'full';
+      if (ico)   ico.setAttribute('data-lucide', isFull ? 'pause-circle' : 'play-circle');
+      if (lbl)   lbl.textContent = isFull ? (_isAr ? 'تقليل الحركة' : 'Reduce Motion') : (_isAr ? 'تفعيل الحركة' : 'Enable Motion');
+      if (badge) badge.textContent = isFull ? (_isAr ? 'مفعّل' : 'On') : (_isAr ? 'متوقف' : 'Off');
+    });
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function _applyMotion(state) {
+    document.documentElement.setAttribute('data-motion', state);
+    localStorage.setItem('cn-motion', state);
+    _syncMotionButtons(state);
+  }
+
+  function _initMotion() {
+    var cur = _getMotionState();
+    _syncMotionButtons(cur);
+    document.querySelectorAll('.motion-toggle-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var now = document.documentElement.getAttribute('data-motion') || _getMotionState();
+        _applyMotion(now === 'full' ? 'reduced' : 'full');
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _initMotion);
+  } else {
+    _initMotion();
+  }
+})();
 </script>

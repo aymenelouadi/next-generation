@@ -26,9 +26,7 @@ module.exports = {
         .setDescription('Manage the server protection whitelist')
         .addStringOption(o => o.setName('action').setDescription('Add or remove').setRequired(true)
             .addChoices({ name: 'Add', value: 'add' }, { name: 'Remove', value: 'remove' }))
-        .addRoleOption(o => o.setName('role').setDescription('Role').setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .addRoleOption(o => o.setName('role').setDescription('Role').setRequired(true)),
     textCommand: { name: 'sw', aliases: ['set_whitelist'] },
 
     async execute(client, ctx, args) {

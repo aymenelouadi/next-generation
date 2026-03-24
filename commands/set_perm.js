@@ -26,9 +26,7 @@ function errCard(lines) {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('set_perm')
-        .setDescription('Manage command permissions')
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .setDescription('Manage command permissions'),
     textCommand: { name: 'setperm', aliases: ['set_perm'] },
 
     async execute(client, ctx, args) {

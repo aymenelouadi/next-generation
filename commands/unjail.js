@@ -79,9 +79,7 @@ module.exports = {
         .addStringOption(option =>
             option.setName('reason')
                 .setDescription('سبب الاطلاق')
-                .setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-    
+                .setRequired(true)),
     textCommand: {
         name: 'unjail',
         aliases: []

@@ -24,9 +24,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('court_set_name')
         .setDescription('تغيير اسم المحكمة')
-        .addStringOption(o => o.setName('name').setDescription('الاسم الجديد').setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .addStringOption(o => o.setName('name').setDescription('الاسم الجديد').setRequired(true)),
     textCommand: { name: 'csname', aliases: [] },
 
     async execute(client, ctx, args) {

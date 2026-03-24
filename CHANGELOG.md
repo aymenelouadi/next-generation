@@ -7,6 +7,95 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v5.4.0 Beta] — 2026-03-25 ✨ Embeds Flow Builder System
+
+### Added — Embed Message Builder (`/dashboard/:id/embeds`)
+
+A complete visual flow-builder for creating and sending rich Discord messages with interactive XState-powered automation.
+
+#### 🏗️ Flow Builder
+- **Visual state-flow canvas** — drag-and-drop XState-compatible flow builder with pan/zoom, zoom-lock, and auto-layout (BFS grid)
+- **State cards** — each state holds independent embed content, components (buttons / select menus), transitions, and permissions
+- **Drag-to-connect** — draw transitions between states by dragging port handles
+- **Auto-layout** — one-click BFS grid placement for all states
+- **Initial state** — mark any state as the entry point (rendered with a crown indicator)
+- **State count badge** — live counter in the canvas toolbar
+
+#### 💬 Embed & Component Editor (Inspector)
+- **Embeds panel** — full Discord embed editor per state: title, description, color picker, URL, author, footer, thumbnail, image, timestamp, and fields (inline support)
+- **Components panel** — build Button rows and Select Menu rows; per-component `customId`, label, style, emoji, URL, disabled toggle; select options with value, description, emoji, default flag
+- **Transitions panel** — pipeline step builder with all action types: `update_content`, `replace_embeds`, `append_embeds`, `update_components`, `disable_component`, `enable_component`, `hide_component`, `send_ephemeral`, `send_to_channel`, `delay`
+- **Permissions panel** — per-state role whitelist, cooldown (seconds), and deny-message configuration
+- **Live preview** — Discord-style message preview pane updated in real time
+
+#### 🤖 Flow Execution Engine (`systems/emped.js`)
+- XState-compatible execution engine — processes button clicks and select-menu interactions against the saved machine definition
+- **Multi-User mode** — optional per-user state isolation (each user has their own flow position keyed by `msgId:userId`)
+- **EP Theme mode** — all component interactions share one shared embed state across all users
+- **Permission enforcement** — role-based access check before executing any transition
+- **Cooldown system** — per-state per-user cooldown tracking with `_cooldownMap`
+- **All action types** implemented: content updates, embed replace/append, component mutations (disable/enable/hide), ephemeral replies, channel messages, delays
+- **Smart triggers** — fire machine transitions automatically on external events:
+  - `cron` — time-based, configurable schedule (runs every 60 s tick)
+  - `member_join` / `member_leave` — guild member events
+  - `role_add` / `role_remove` — role change events
+  - `message_create` — message pattern matching
+
+#### 💾 Save & Send
+- **Save & Send modal** — context-aware title ("Save Changes" vs "New Message") and button text ("Save & Update" vs "Save & Send")
+- **Edit vs New mode** — choose to edit the existing live Discord message in-place or send a brand-new one
+- **`embedBuilder.js` utility** — converts stored embed/component JSON to Discord.js `EmbedBuilder` / `ActionRowBuilder` payloads; skips empty embeds, handles emoji safely
+
+#### 🕐 Version History
+- **Version snapshots** — every save auto-creates a snapshot; manual snapshots with custom labels
+- **Rollback** — revert the live flow to any previous snapshot; current state is auto-saved before rollback
+- **Snapshot pruning** — auto-saves are capped at 10 per document (oldest pruned automatically)
+- **Version count badge** on the History toolbar button
+
+#### 🗑️ Trash / Recycle Bin
+- **Soft delete** — deleted flows move to trash with a 30-day TTL (MongoDB TTL index auto-expires)
+- **Restore** — restore any trashed flow back to the active list, including full `componentIds` rebuild
+- **Permanent delete** — force-remove a trashed flow immediately
+
+#### 📋 Templates
+- **Save as Template** — save the current flow machine as a named, reusable template
+- **Apply Template** — apply any saved template to the current flow or create a new flow from it
+- **Import JSON** — import a machine definition from a `.json` file
+- **Templates drawer** — slideout panel listing all guild templates with apply/delete actions
+
+#### 🎛️ Triggers Modal
+- Full CRUD UI for smart triggers — add, remove, and configure type + target state per trigger
+- Trigger types: `cron`, `member_join`, `member_leave`, `role_add`, `role_remove`, `message_create`
+- Changes saved independently from the flow via the Triggers save button
+
+#### 🔧 UX Improvements & Bug Fixes
+- **Keyboard shortcuts** — `Ctrl+S` / `Cmd+S` saves the flow from anywhere in the builder; `Escape` closes any open modal
+- **Overlay click to close** — all modals (save, triggers, versions, trash, template save) close when clicking the backdrop
+- **"Add First State" button** — canvas empty state now has a direct action button, no need to find the toolbar
+- **EP Theme label** — renamed from cryptic `epTheme` to "EP Theme" with a tooltip explaining its purpose
+- **machine mutation guard** — save handler clones the machine before writing `multiUser`; the shared in-memory machine object is never mutated
+- **Triggers save sync** — saving triggers now updates `currentDoc` and `savedMessages` in place so the list reflects changes without a page reload
+
+### Added — New Schemas
+- `systems/schemas/EmbedMessage.js` — full embed message schema (embeds, components, machine, epTheme, multiUser, instanceStates, componentIds, messageId, channelId)
+- `systems/schemas/EmbedVersion.js` — version snapshot schema with TTL-pruning of auto-saves
+- `systems/schemas/EmbedTrash.js` — recycle bin schema with 30-day MongoDB TTL index
+- `systems/schemas/EmbedTemplate.js` — guild-scoped template storage schema
+
+---
+
+## [v5.3.4 Beta] — 2026-03-22 🐛 Bug Fixes
+
+### Fixed
+- **Slash command visibility for non-admin users** — Changed `setDefaultMemberPermissions(PermissionFlagsBits.X)` to `setDefaultMemberPermissions(0)` on 44 commands so that Discord shows them to users who are granted access via the moderation dashboard (allowedRoles / allowedUsers), not just server Administrators
+- **Double AFK notification on reply** — When replying to an AFK user Discord auto-includes that user in `message.mentions`, causing both the reply-reference block and the mentions loop to fire. Fixed by tracking `afkNotifiedId` and skipping the same user in the mentions loop
+- **`/say` sends message twice** — The `buildCard` success reply used `flags: CV2` which Discord.js doesn't merge with `ephemeral: true`, making it a visible channel message in addition to the actual sent message. Replaced the confirmation card with a minimal ephemeral `✅` reply
+- **Levels dashboard selections not saving on mobile** — After `document.body.appendChild(dd)` (portal pattern), `makeCPicker()` still queried options using `wrap.querySelectorAll()`, finding nothing after the detach; `syncHidden()` then cleared the hidden `<select>`. Fixed by changing all four query sites to `dd.querySelectorAll()` / `dd.querySelector()`
+- **Levels save bar disappears before showing success** — `markClean()` was called immediately after setting the "✓ Saved!" label, hiding the save bar instantly. Moved it inside the `setTimeout` so the bar stays visible for 2 seconds
+- **`come.js` ThumbnailBuilder crash** — `ThumbnailBuilder.setMedia({ url })` does not exist in discord.js 14.25.1; replaced with the correct `setURL(url)` method
+
+---
+
 ## [v5.3.3 Beta] — 2026-03-21 🔧 Credits & Branding Update
 
 ### Changed

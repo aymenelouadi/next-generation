@@ -13,9 +13,7 @@ const adminGuard = require('../utils/adminGuard.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('actions_role_jail')
-        .setDescription('ادارة رتبة السجن')
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .setDescription('ادارة رتبة السجن'),
     textCommand: {
         name: 'arj',
         aliases: []

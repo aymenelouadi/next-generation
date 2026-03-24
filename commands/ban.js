@@ -81,9 +81,7 @@ module.exports = {
         .setDescription('Ban a member from the server')
         .addUserOption(o => o.setName('user').setDescription('Target user').setRequired(true))
         .addStringOption(o => o.setName('reason').setDescription('Reason for the ban').setRequired(true))
-        .addStringOption(o => o.setName('duration').setDescription('Ban duration (e.g. 7d, 30d) — leave empty for permanent').setRequired(false))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .addStringOption(o => o.setName('duration').setDescription('Ban duration (e.g. 7d, 30d) — leave empty for permanent').setRequired(false)),
     textCommand: { name: 'ban', aliases: [] },
 
     async execute(client, ctx, args) {

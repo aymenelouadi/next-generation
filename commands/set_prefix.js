@@ -24,9 +24,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('set_prefix')
         .setDescription('Change the bot command prefix')
-        .addStringOption(o => o.setName('prefix').setDescription('New prefix (max 3 chars)').setRequired(true).setMaxLength(3))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .addStringOption(o => o.setName('prefix').setDescription('New prefix (max 3 chars)').setRequired(true).setMaxLength(3)),
     textCommand: { name: 'prefix', aliases: ['set_prefix'] },
 
     async execute(client, ctx, args) {

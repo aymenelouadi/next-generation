@@ -239,6 +239,7 @@ client.on('messageCreate', async (message) => {
             .catch(() => {});
     }
     
+    let afkNotifiedId = null;
     if (message.reference && message.reference.messageId) {
         try {
             const repliedMessage = await message.channel.messages.fetch(message.reference.messageId);
@@ -249,6 +250,7 @@ client.on('messageCreate', async (message) => {
                 await message.reply(response)
                     .then(msg => setTimeout(() => msg.delete().catch(() => {}), 10000))
                     .catch(() => {});
+                afkNotifiedId = repliedMessage.author.id;
             }
         } catch (error) {
             if (error.code !== 10008) logger.error('Error fetching replied message', { category: 'discord', error: error.message });
@@ -259,6 +261,7 @@ client.on('messageCreate', async (message) => {
     if (mentions.size > 0) {
         for (const [userId, user] of mentions) {
             if (userId === message.author.id) continue;
+            if (userId === afkNotifiedId) continue; // already notified via reply-reference
             
             const mentionedUserAFK = await getAFKUser(userId);
             if (mentionedUserAFK) {

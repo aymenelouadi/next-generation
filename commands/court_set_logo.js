@@ -24,9 +24,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('court_set_logo')
         .setDescription('تغيير شعار المحكمة')
-        .addStringOption(o => o.setName('url').setDescription('رابط الصورة').setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .addStringOption(o => o.setName('url').setDescription('رابط الصورة').setRequired(true)),
     textCommand: { name: 'cslogo', aliases: [] },
 
     async execute(client, ctx, args) {

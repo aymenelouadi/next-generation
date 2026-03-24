@@ -28,9 +28,7 @@ module.exports = {
                 { name: 'Ban / حظر',                 value: '3' }
             )
         )
-        .addBooleanOption(o => o.setName('enabled').setDescription('Enable/Disable').setRequired(false))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .addBooleanOption(o => o.setName('enabled').setDescription('Enable/Disable').setRequired(false)),
     textCommand: { name: 'antiwebhook', aliases: ["anti-webhook"] },
 
     async execute(client, ctx, args) {

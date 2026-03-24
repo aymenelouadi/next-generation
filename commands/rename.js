@@ -26,8 +26,7 @@ module.exports = {
         .setName('rename')
         .setDescription('Rename a channel')
         .addStringOption(o => o.setName('name').setDescription('New name').setRequired(true))
-        .addChannelOption(o => o.setName('channel').setDescription('Channel to rename (default: current)').setRequired(false))
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
+        .addChannelOption(o => o.setName('channel').setDescription('Channel to rename (default: current)').setRequired(false)),
 
     textCommand: { name: 'rename', aliases: [] },
 

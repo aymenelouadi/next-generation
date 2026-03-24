@@ -67,9 +67,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('unwarn')
         .setDescription('Remove a warning by its Case ID')
-        .addStringOption(o => o.setName('case').setDescription('Case ID to remove (8 characters)').setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .addStringOption(o => o.setName('case').setDescription('Case ID to remove (8 characters)').setRequired(true)),
     textCommand: { name: 'unwarn', aliases: [] },
 
     async execute(client, ctx, args) {

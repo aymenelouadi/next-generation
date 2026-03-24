@@ -695,25 +695,25 @@
     },
     "DASHBOARD": {
         "ENABLED": true,
-        "INTRO": true,
+        "INTRO": false,
         "SHIPS": [
-            "756947441592303707"
+            "YOUR_DISCORD_USER_ID"
         ],
         "OWNERS": [
-            "756947441592303707"
+            "YOUR_DISCORD_USER_ID"
         ],
         "SERVERS": {
             "ADD_BOT_ON_MANY_SERVER": false,
             "SERVER_ALLOWED": [],
             "LEAVE_AUTO": false
         },
-        "CODE_ACCESS": true,
+        "CODE_ACCESS": false,
         "CODE": "ADMIN",
         "WEBHOOK_LOG": {
             "URL": "",
             "COLOR": "#7c3aed"
         },
-        "ANYWARE": true 
+        "ANYWARE": true
     },
     "LEVEL_SYSTEM": {
         "ENABLE": true,

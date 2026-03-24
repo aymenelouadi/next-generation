@@ -24,9 +24,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('court_set_color')
         .setDescription('تغيير لون المحكمة')
-        .addStringOption(o => o.setName('color').setDescription('لون Hex مثال: #FFD700').setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .addStringOption(o => o.setName('color').setDescription('لون Hex مثال: #FFD700').setRequired(true)),
     textCommand: { name: 'cscolor', aliases: [] },
 
     async execute(client, ctx, args) {

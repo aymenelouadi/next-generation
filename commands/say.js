@@ -11,7 +11,6 @@ const logSystem  = require('../systems/log.js');
 
 const CV2 = 1 << 15;
 const C   = { Container: 17, Text: 10, Sep: 14 };
-const ACCENT = 0x8b5cf6; // violet
 
 function buildCard(color, lines) {
     return {
@@ -94,16 +93,10 @@ module.exports = {
             return;
         }
 
-        const card = buildCard(ACCENT, [
-            `## 📢  ${t(lang,'say.title')}`,
-            `${t(lang,'say.label_channel')}  \u2192  ${targetChannel}`,
-            `${t(lang,'say.label_mod')}  \u2192  <@${author.id}>`,
-        ]);
         if (isSlash) {
-            await ctx.reply({ ...card, ephemeral: true });
+            await ctx.reply({ content: '✅', ephemeral: true });
         } else {
-            const botReply = await ctx.channel.send(card);
-            setTimeout(() => adminGuard.cleanup(guard.cfg, authorMsg, botReply), 8000);
+            setTimeout(() => adminGuard.cleanup(guard.cfg, authorMsg, null), 8000);
         }
 
         if (guard.cfg?.log !== false) {

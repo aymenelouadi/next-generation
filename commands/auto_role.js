@@ -11,8 +11,7 @@ const logSystem = require('../systems/log.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('auto_role')
-        .setDescription('Manage auto roles for new members')
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
+        .setDescription('Manage auto roles for new members'),
 
     textCommand: {
         name: 'ar',

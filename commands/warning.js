@@ -108,9 +108,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('warning')
         .setDescription('View warning history for a member')
-        .addUserOption(o => o.setName('user').setDescription('Target user').setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .addUserOption(o => o.setName('user').setDescription('Target user').setRequired(true)),
     textCommand: { name: 'warning', aliases: [] },
 
     async execute(client, ctx, args) {

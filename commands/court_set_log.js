@@ -25,9 +25,7 @@ module.exports = {
         .setName('court_set_log')
         .setDescription('تغيير قناة السجلات')
         .addChannelOption(o => o.setName('channel').setDescription('قناة السجلات').setRequired(true)
-            .addChannelTypes(ChannelType.GuildText))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+            .addChannelTypes(ChannelType.GuildText)),
     textCommand: { name: 'cslog', aliases: [] },
 
     async execute(client, ctx, args) {

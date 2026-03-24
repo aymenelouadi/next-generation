@@ -51,9 +51,7 @@ module.exports = {
         .setName('slowmode')
         .setDescription('Set slowmode on a channel')
         .addStringOption(o => o.setName('time').setDescription('e.g. 5s 10m 1h 0').setRequired(true))
-        .addChannelOption(o => o.setName('channel').setDescription('Target channel (default: current)').setRequired(false).addChannelTypes(ChannelType.GuildText))
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
-
+        .addChannelOption(o => o.setName('channel').setDescription('Target channel (default: current)').setRequired(false).addChannelTypes(ChannelType.GuildText)),
     textCommand: { name: 'slowmode', aliases: ['slow'] },
 
     async execute(client, ctx, args) {

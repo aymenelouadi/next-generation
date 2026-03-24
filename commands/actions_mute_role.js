@@ -13,9 +13,7 @@ const adminGuard = require('../utils/adminGuard.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('actions_role_mute')
-        .setDescription('ادارة رتبة الميوت')
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .setDescription('ادارة رتبة الميوت'),
     textCommand: {
         name: 'arm',
         aliases: []

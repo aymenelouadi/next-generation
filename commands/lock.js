@@ -26,9 +26,7 @@ module.exports = {
         .setName('lock')
         .setDescription('Lock a text channel')
         .addChannelOption(o => o.setName('channel').setDescription('Channel to lock').setRequired(true).addChannelTypes(ChannelType.GuildText))
-        .addStringOption(o => o.setName('reason').setDescription('Reason').setRequired(false))
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
-
+        .addStringOption(o => o.setName('reason').setDescription('Reason').setRequired(false)),
     textCommand: { name: 'lock', aliases: [] },
 
     async execute(client, ctx, args) {

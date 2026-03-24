@@ -20,8 +20,7 @@ module.exports = {
         .addStringOption(option =>
             option.setName('reason')
                 .setDescription('سبب الاستدعاء - اختياري')
-                .setRequired(false))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+                .setRequired(false)),
     
     textCommand: {
         name: 'come',
@@ -110,7 +109,7 @@ module.exports = {
                         )
                     )
                     .setThumbnailAccessory(
-                        new ThumbnailBuilder().setMedia({ url: guildIcon })
+                        new ThumbnailBuilder().setURL(guildIcon)
                     );
 
                 const bodyText = [

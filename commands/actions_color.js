@@ -13,8 +13,7 @@ const adminGuard = require('../utils/adminGuard.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('actions_color')
-        .setDescription('تغيير لون الأوامر (Hex Code)')
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+        .setDescription('تغيير لون الأوامر (Hex Code)'),
 
     textCommand: {
         name: 'ac',

@@ -65,9 +65,7 @@ module.exports = {
         .setName('kick')
         .setDescription('Kick a member from the server')
         .addUserOption(o => o.setName('user').setDescription('Target user').setRequired(true))
-        .addStringOption(o => o.setName('reason').setDescription('Reason for the kick').setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .addStringOption(o => o.setName('reason').setDescription('Reason for the kick').setRequired(true)),
     textCommand: { name: 'kick', aliases: [] },
 
     async execute(client, ctx, args) {

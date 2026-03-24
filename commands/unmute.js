@@ -66,9 +66,7 @@ module.exports = {
         .setName('unmute')
         .setDescription('Remove a timeout from a member')
         .addUserOption(o => o.setName('user').setDescription('Target user').setRequired(true))
-        .addStringOption(o => o.setName('reason').setDescription('Reason for removing the timeout').setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .addStringOption(o => o.setName('reason').setDescription('Reason for removing the timeout').setRequired(true)),
     textCommand: { name: 'unmute', aliases: [] },
 
     async execute(client, ctx, args) {

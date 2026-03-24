@@ -69,9 +69,7 @@ module.exports = {
         .setName('warn')
         .setDescription('Issue a warning to a member')
         .addUserOption(o => o.setName('user').setDescription('Target user').setRequired(true))
-        .addStringOption(o => o.setName('reason').setDescription('Reason for the warning').setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .addStringOption(o => o.setName('reason').setDescription('Reason for the warning').setRequired(true)),
     textCommand: { name: 'warn', aliases: [] },
 
     async execute(client, ctx, args) {

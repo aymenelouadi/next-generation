@@ -37,9 +37,7 @@ module.exports = {
             .setName('enabled')
             .setDescription('Enable or disable | تفعيل أو تعطيل')
             .setRequired(false)
-        )
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        ),
     textCommand: {
         name: 'antiban',
         aliases: ['anti-ban']

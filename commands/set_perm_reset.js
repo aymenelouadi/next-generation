@@ -23,9 +23,7 @@ function buildCard(color, lines) {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('set_perm_reset')
-        .setDescription('Reset all command role restrictions')
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .setDescription('Reset all command role restrictions'),
     textCommand: { name: 'setpermreset', aliases: ['set_perm_reset'] },
 
     async execute(client, ctx, args) {

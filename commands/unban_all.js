@@ -21,9 +21,7 @@ function buildCard(color, lines) {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('unban_all')
-        .setDescription('Lift all active bans on this server')
-        .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
-
+        .setDescription('Lift all active bans on this server'),
     textCommand: { name: 'unban_all', aliases: ['unbanall'] },
 
     async execute(client, ctx, args) {

@@ -13,9 +13,7 @@ const adminGuard = require('../utils/adminGuard.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('actions_log')
-        .setDescription('تفعيل او تعطيل تسجيل الاوامر')
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+        .setDescription('تفعيل او تعطيل تسجيل الاوامر'),
     textCommand: {
         name: 'alog',
         aliases: []

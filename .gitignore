@@ -15,6 +15,14 @@ dashboard/public/uploads/
 # Dashboard runtime data (logs, etc.)
 dashboard/data/
 
+# Dev/patch utility scripts starting with underscore — not for distribution
+_*.js
+_*.css
+_*.ts
+
+# Backup files
+*.bak
+
 # Development/util scripts — not part of the distributable
 dashboard/i18n_transform.js
 dashboard/i18n_transform2.js
@@ -44,3 +52,4 @@ build/
 tmp/
 
 package-lock.json
+
