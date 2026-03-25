@@ -1247,6 +1247,13 @@
       const opts = { method, headers: { 'Content-Type': 'application/json' } };
       if (body) opts.body = JSON.stringify(body);
       const r = await fetch(API_BASE + p, opts);
+      const ct = r.headers.get('content-type') || '';
+      if (!ct.includes('application/json')) {
+        // Server returned HTML (e.g. session expired → login redirect, or 404 page)
+        const text = await r.text();
+        if (r.status === 401 || r.status === 403) throw new Error(isAr ? 'انتهت الجلسة — أعد تسجيل الدخول' : 'Session expired — please log in again');
+        throw new Error((isAr ? 'خطأ في الخادم' : 'Server error') + ' (' + r.status + ')');
+      }
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || 'Request failed');
       return j;
