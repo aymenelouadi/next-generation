@@ -937,18 +937,18 @@
       <div class="builder-toolbar" style="flex-shrink:0;flex-wrap:wrap;">
         <button class="btn btn-ghost btn-sm" id="btnBack">
           <i data-lucide="arrow-left" style="width:14px;height:14px;"></i>
-          <span class="hide-xs">Back</span>
+          <span class="hide-xs"><%= t.embeds.btnBack %></span>
         </button>
-        <h3 id="builderTitle" style="flex:1;font-size:.95rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">New Flow</h3>
+        <h3 id="builderTitle" style="flex:1;font-size:.95rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= t.embeds.jsNewFlow %></h3>
         <div class="toggle-wrap" title="Ephemeral Theme: when enabled all component interactions update the same shared embed state instead of per-user state">
-          <span style="font-size:.76rem;color:var(--muted);" class="hide-xs">EP Theme</span>
+          <span style="font-size:.76rem;color:var(--muted);" class="hide-xs"><%= t.embeds.builderEpTheme %></span>
           <label class="toggle"><input type="checkbox" id="epThemeToggle"><span class="toggle-slider"></span></label>
         </div>
         <div clas
         <button class="btn btn-ghost btn-sm" id="btnAddGroup" title="Add a labeled region to group states visually">
-          <i data-lucide="square-dashed" style="width:14px;height:14px;"></i> <span class="hide-xs">Group</span>
+          <i data-lucide="square-dashed" style="width:14px;height:14px;"></i> <span class="hide-xs"><%= t.embeds.builderGroup %></span>
         </button>s="toggle-wrap" title="Each user gets their own independent flow state">
-          <span style="font-size:.76rem;color:var(--muted);" class="hide-xs">Multi-User</span>
+          <span style="font-size:.76rem;color:var(--muted);" class="hide-xs"><%= t.embeds.builderMultiUser %></span>
           <label class="toggle"><input type="checkbox" id="multiUserToggle"><span class="toggle-slider"></span></label>
         </div>
         <button class="btn btn-ghost btn-sm icon-only" id="btnUndo" title="Undo (Ctrl+Z)" disabled>
@@ -958,10 +958,10 @@
           <i data-lucide="redo-2" style="width:14px;height:14px;"></i>
         </button>
         <button class="btn btn-ghost btn-sm" id="btnAddState">
-          <i data-lucide="plus" style="width:14px;height:14px;"></i> <span class="hide-xs">Add State</span>
+          <i data-lucide="plus" style="width:14px;height:14px;"></i> <span class="hide-xs"><%= t.embeds.btnAddState %></span>
         </button>
         <button class="btn btn-ghost btn-sm" id="btnTriggers" style="position:relative;">
-          <i data-lucide="zap" style="width:14px;height:14px;"></i> <span class="hide-xs">Triggers</span>
+          <i data-lucide="zap" style="width:14px;height:14px;"></i> <span class="hide-xs"><%= t.embeds.btnTriggers %></span>
           <span id="trgCountBadge" class="trg-count-badge" style="display:none;">0</span>
         </button>
         <button class="btn btn-ghost btn-sm" id="btnSaveAsTemplate" title="<%= t.embeds.btnSaveAsTemplate %>">
@@ -970,18 +970,18 @@
         </button>
         <button class="btn btn-ghost btn-sm" id="btnVersionHistory" title="Version History" style="position:relative;">
           <i data-lucide="history" style="width:14px;height:14px;"></i>
-          <span class="hide-xs">History</span>
+          <span class="hide-xs"><%= t.embeds.btnHistory %></span>
           <span id="verCountBadge" class="trg-count-badge" style="display:none;">0</span>
         </button>
         <button class="btn btn-primary btn-sm" id="btnSave">
-          <i data-lucide="save" style="width:14px;height:14px;"></i> <span class="hide-xs">Save &amp; Send</span>
+          <i data-lucide="save" style="width:14px;height:14px;"></i> <span class="hide-xs"><%= t.embeds.btnSaveAndSend %></span>
         </button>
       </div>
       <div class="flow-body" style="flex:1;min-height:0;margin-top:12px;">
         <div class="flow-canvas-wrap">
           <div class="canvas-toolbar">
-            <span class="canvas-tool-lbl">Flow Canvas</span>
-            <span class="state-count-badge" id="stateCountBadge">0 states</span>
+            <span class="canvas-tool-lbl"><%= t.embeds.builderFlowCanvas %></span>
+            <span class="state-count-badge" id="stateCountBadge">0 <%= t.embeds.builderStates %></span>
             <div class="canvas-zoom-controls">
               <button class="canvas-zoom-btn" id="btnZoomOut" title="Zoom out"><i data-lucide="minus" style="width:11px;height:11px;"></i></button>
               <span class="canvas-zoom-lbl" id="zoomLabel">100%</span>
@@ -1004,10 +1004,10 @@
               <div id="flowStates"></div>
               <div class="canvas-empty" id="canvasEmpty">
                 <div class="canvas-empty-ico"><i data-lucide="git-branch" style="width:26px;height:26px;stroke:currentColor;fill:none;"></i></div>
-                <p style="font-size:.82rem;font-weight:600;">No states yet</p>
-                <p style="font-size:.74rem;">Add your first state to begin building the flow</p>
+                <p style="font-size:.82rem;font-weight:600;"><%= t.embeds.builderNoStates %></p>
+                <p style="font-size:.74rem;"><%= t.embeds.builderNoStatesDesc %></p>
                 <button class="btn btn-primary btn-sm" id="btnAddStateEmpty" style="margin-top:4px;">
-                  <i data-lucide="plus" style="width:13px;height:13px;"></i> Add First State
+                  <i data-lucide="plus" style="width:13px;height:13px;"></i> <%= t.embeds.btnAddFirstState %>
                 </button>
               </div>
             </div>
@@ -1016,13 +1016,13 @@
         <div class="flow-inspector" id="flowInspector">
           <div class="insp-empty" id="inspEmpty">
             <div class="insp-empty-ico"><i data-lucide="mouse-pointer-click" style="width:24px;height:24px;stroke:currentColor;fill:none;"></i></div>
-            <p style="font-size:.82rem;font-weight:600;">Select a State</p>
-            <p style="font-size:.73rem;">Click any state on the canvas to edit it</p>
+            <p style="font-size:.82rem;font-weight:600;"><%= t.embeds.builderSelectState %></p>
+            <p style="font-size:.73rem;"><%= t.embeds.builderSelectStateDesc %></p>
           </div>
           <div class="insp-content" id="inspContent" style="display:none;">
             <div class="insp-hd">
               <div class="insp-hd-r1">
-                <input class="insp-label" id="inspLabel" placeholder="State name" maxlength="60">
+                <input class="insp-label" id="inspLabel" placeholder="<%= t.embeds.builderStateName %>" maxlength="60">
                 <div class="color-theme-wrap">
                   <div class="color-swatches" id="colorSwatches">
                     <span class="color-swatch" data-color="#7c3aed" title="Default" style="background:#7c3aed"></span>
@@ -1037,17 +1037,17 @@
                 </div>
               </div>
               <div class="insp-hd-r2">
-                <span class="insp-init-badge" id="inspInitBadge">INITIAL</span>
-                <button class="insp-set-init" id="inspSetInit">Set as Initial</button>
+                <span class="insp-init-badge" id="inspInitBadge"><%= t.embeds.builderInitial %></span>
+                <button class="insp-set-init" id="inspSetInit"><%= t.embeds.builderSetInitial %></button>
                 <button class="insp-set-init" id="btnCopyState" title="Copy State (Ctrl+C)" style="color:var(--purple-l);"><i data-lucide="copy" style="width:11px;height:11px;"></i></button>
-                <button class="insp-del" id="inspDelState">Delete</button>
+                <button class="insp-del" id="inspDelState"><%= t.embeds.btnDelete %></button>
               </div>
             </div>
             <div class="insp-tabs">
-              <button class="insp-tab active" data-tab="embeds">Embeds</button>
-              <button class="insp-tab" data-tab="components">Components</button>
-              <button class="insp-tab" data-tab="transitions">Transitions</button>
-              <button class="insp-tab" data-tab="permissions"><i data-lucide="shield" style="width:10px;height:10px;vertical-align:middle;margin-right:2px;"></i>Perms</button>
+              <button class="insp-tab active" data-tab="embeds"><%= t.embeds.tabEmbeds %></button>
+              <button class="insp-tab" data-tab="components"><%= t.embeds.tabComponents %></button>
+              <button class="insp-tab" data-tab="transitions"><%= t.embeds.tabTransitions %></button>
+              <button class="insp-tab" data-tab="permissions"><i data-lucide="shield" style="width:10px;height:10px;vertical-align:middle;margin-right:2px;"></i><%= t.embeds.tabPerms %></button>
             </div>
             <div class="insp-scroll">
               <div class="insp-panel active" id="panelEmbeds" data-panel="embeds"></div>
@@ -1058,7 +1058,7 @@
             <div class="flow-preview-wrap collapsed" id="previewWrap">
               <div class="preview-toggle-bar" id="previewToggleBar">
                 <svg class="preview-toggle-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>
-                <span class="preview-toggle-label">Preview — Current State</span>
+                <span class="preview-toggle-label"><%= t.embeds.builderPreview %></span>
               </div>
               <div class="preview-body">
                 <div class="preview-panel">
@@ -1079,21 +1079,21 @@
             <div class="multi-sel-ico">&#xFE0F;&#x2694;</div>
             <div class="multi-sel-lbl" id="multiSelLbl">2 <%= t.embeds.jsMultiSelSelected %></div>
             <div class="multi-sel-hint"><%- t.embeds.jsMultiSelHint %></div>
-            <button class="btn btn-danger btn-sm" id="btnDelMulti"><i data-lucide="trash-2" style="width:13px;height:13px;"></i> Delete All Selected</button>
+            <button class="btn btn-danger btn-sm" id="btnDelMulti"><i data-lucide="trash-2" style="width:13px;height:13px;"></i> <%= t.embeds.btnDeleteAllSelected %></button>
           </div>
           <!-- Group region inspector (shown when a group is selected instead of state inspector) -->
           <div id="inspGroupContent" style="display:none;flex-direction:column;padding:16px;gap:12px;">
             <div style="display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:2px;">
               <i data-lucide="square-dashed" style="width:15px;height:15px;color:var(--purple-l);flex-shrink:0;"></i>
-              <span style="font-size:.82rem;font-weight:700;flex:1;color:var(--white);">Group Region</span>
-              <button class="insp-del" id="btnDelGroup">Delete</button>
+              <span style="font-size:.82rem;font-weight:700;flex:1;color:var(--white);"><%= t.embeds.builderGroupRegion %></span>
+              <button class="insp-del" id="btnDelGroup"><%= t.embeds.btnDelete %></button>
             </div>
             <div style="display:flex;align-items:center;gap:8px;">
-              <label style="font-size:.72rem;color:var(--muted);min-width:42px;flex-shrink:0;">Label</label>
-              <input class="insp-label" id="inspGroupLabel" placeholder="Group name" maxlength="40" style="font-size:.8rem;">
+              <label style="font-size:.72rem;color:var(--muted);min-width:42px;flex-shrink:0;"><%= t.embeds.builderLabel %></label>
+              <input class="insp-label" id="inspGroupLabel" placeholder="<%= t.embeds.builderGroupName %>" maxlength="40" style="font-size:.8rem;">
             </div>
             <div style="display:flex;align-items:center;gap:8px;">
-              <label style="font-size:.72rem;color:var(--muted);min-width:42px;flex-shrink:0;">Color</label>
+              <label style="font-size:.72rem;color:var(--muted);min-width:42px;flex-shrink:0;"><%= t.embeds.builderColor %></label>
               <input type="color" class="insp-color-inp" id="inspGroupColor" value="#7c3aed">
             </div>
           </div>
@@ -1142,11 +1142,11 @@
       <h3 id="saveModalTitle"><%= t.embeds.saveModalTitle %></h3>
       <p id="saveModalDesc" class="modal-desc"><%= t.embeds.saveModalDesc %></p>
       <div class="form-group">
-        <label class="form-label">Name</label>
+        <label class="form-label"><%= t.embeds.saveModalName %></label>
         <input class="form-input" id="modalName" maxlength="100" placeholder="e.g. Welcome Message" />
       </div>
       <div class="form-group">
-        <label class="form-label">Channel</label>
+        <label class="form-label"><%= t.embeds.saveModalChannel %></label>
         <select class="form-select" id="modalChannel">
           <option value="">-- Select --</option>
           <% (guildChannels || []).forEach(ch => { %>
@@ -1290,6 +1290,7 @@
       saved:      '<%= t.embeds.jsSaved %>',
       deleted:    '<%= t.embeds.jsDeleted %>',
       confirmDel: '<%= t.embeds.jsConfirmDel %>',
+      builderStates: '<%= t.embeds.builderStates %>',
     };
 
     /* ════════════════════════════════════════
@@ -2083,7 +2084,7 @@
        ════════════════════════════════════════ */
     function renderCanvas() {
       const ids = Object.keys(machine.states);
-      $stateCountBadge.textContent = ids.length + ' state' + (ids.length !== 1 ? 's' : '');
+      $stateCountBadge.textContent = ids.length + ' ' + L.builderStates;
       $canvasEmpty.style.display   = ids.length ? 'none' : '';
       // Groups render first (lower z-index 1) then state cards (z-index 10)
       $flowStates.innerHTML = (machine.groups || []).map(g => groupDivHTML(g)).join('')
@@ -2468,7 +2469,7 @@
               + '<div class="embed-color-bar" style="background:' + esc(col) + '"></div>'
               + '<div class="embed-item-header">'
               + '<span class="embed-drag"><i data-lucide="grip-vertical" style="width:14px;height:14px;"></i></span>'
-              + '<span class="embed-title-lbl">Embed #' + (i+1) + (emb.title ? ' \u2014 ' + esc(emb.title.slice(0,24)) : '') + '</span>'
+              + '<span class="embed-title-lbl"><%= t.embeds.embPrefix %> #' + (i+1) + (emb.title ? ' \u2014 ' + esc(emb.title.slice(0,24)) : '') + '</span>'
               + '<button class="embed-col-btn embed-collapse-btn" data-idx="' + i + '"><i data-lucide="chevron-up" style="width:14px;height:14px;"></i></button>'
               + '<button class="embed-rem-btn embed-remove-btn" data-idx="' + i + '"><i data-lucide="x" style="width:14px;height:14px;"></i></button>'
               + '</div>'
@@ -2495,38 +2496,38 @@
     function embedForm(emb, i) {
       return ''
         + '<div class="form-row">'
-        + '<div class="form-group"><label class="form-label">Title</label>'
-        + '<input class="form-input emb-title" data-idx="' + i + '" value="' + esc(emb.title||'') + '" maxlength="256" placeholder="Embed title"></div>'
-        + '<div class="form-group" style="max-width:70px;"><label class="form-label">Color</label>'
+        + '<div class="form-group"><label class="form-label"><%= t.embeds.embFldTitle %></label>'
+        + '<input class="form-input emb-title" data-idx="' + i + '" value="' + esc(emb.title||'') + '" maxlength="256" placeholder="<%= t.embeds.embFldEmbedTitle %>"></div>'
+        + '<div class="form-group" style="max-width:70px;"><label class="form-label"><%= t.embeds.embFldColor %></label>'
         + '<div class="form-color-wrap"><input type="color" class="form-color emb-color" data-idx="' + i + '" value="' + (emb.color||'#5865f2') + '"></div></div>'
         + '</div>'
-        + '<div class="form-group"><label class="form-label">Description</label>'
-        + '<textarea class="form-textarea emb-desc" data-idx="' + i + '" maxlength="4096" placeholder="Description" style="min-height:70px;">' + esc(emb.description||'') + '</textarea></div>'
+        + '<div class="form-group"><label class="form-label"><%= t.embeds.embFldDesc %></label>'
+        + '<textarea class="form-textarea emb-desc" data-idx="' + i + '" maxlength="4096" placeholder="<%= t.embeds.embFldDescPh %>" style="min-height:70px;">' + esc(emb.description||'') + '</textarea></div>'
         + '<div class="form-row">'
-        + '<div class="form-group"><label class="form-label">Author Name</label>'
-        + '<input class="form-input emb-author-name" data-idx="' + i + '" value="' + esc(emb.author?.name||'') + '" placeholder="Author"></div>'
-        + '<div class="form-group"><label class="form-label">Author Icon</label>'
+        + '<div class="form-group"><label class="form-label"><%= t.embeds.embFldAuthorName %></label>'
+        + '<input class="form-input emb-author-name" data-idx="' + i + '" value="' + esc(emb.author?.name||'') + '" placeholder="<%= t.embeds.embFldAuthorPh %>"></div>'
+        + '<div class="form-group"><label class="form-label"><%= t.embeds.embFldAuthorIcon %></label>'
         + '<div class="url-upload-wrap"><input class="form-input emb-author-icon" data-idx="' + i + '" data-field="author-icon" value="' + esc(emb.author?.iconUrl||'') + '" placeholder="https://...">'
         + '<button type="button" class="upload-btn emb-upload" data-idx="' + i + '" data-field="author-icon" data-target="emb-author-icon"><i data-lucide="upload" style="width:12px;height:12px;"></i></button></div></div>'
         + '</div>'
         + '<div class="form-row">'
-        + '<div class="form-group"><label class="form-label">Footer Text</label>'
-        + '<input class="form-input emb-footer-text" data-idx="' + i + '" value="' + esc(emb.footer?.text||'') + '" placeholder="Footer"></div>'
-        + '<div class="form-group"><label class="form-label">Footer Icon</label>'
+        + '<div class="form-group"><label class="form-label"><%= t.embeds.embFldFooterText %></label>'
+        + '<input class="form-input emb-footer-text" data-idx="' + i + '" value="' + esc(emb.footer?.text||'') + '" placeholder="<%= t.embeds.embFldFooterPh %>"></div>'
+        + '<div class="form-group"><label class="form-label"><%= t.embeds.embFldFooterIcon %></label>'
         + '<div class="url-upload-wrap"><input class="form-input emb-footer-icon" data-idx="' + i + '" data-field="footer-icon" value="' + esc(emb.footer?.iconUrl||'') + '" placeholder="https://...">'
         + '<button type="button" class="upload-btn emb-upload" data-idx="' + i + '" data-field="footer-icon" data-target="emb-footer-icon"><i data-lucide="upload" style="width:12px;height:12px;"></i></button></div></div>'
         + '</div>'
         + '<div class="form-row">'
-        + '<div class="form-group"><label class="form-label">Thumbnail</label>'
+        + '<div class="form-group"><label class="form-label"><%= t.embeds.embFldThumbnail %></label>'
         + '<div class="url-upload-wrap"><input class="form-input emb-thumb" data-idx="' + i + '" value="' + esc(emb.thumbnail||'') + '" placeholder="https://...">'
         + '<button type="button" class="upload-btn emb-upload" data-idx="' + i + '" data-field="thumbnail" data-target="emb-thumb"><i data-lucide="upload" style="width:12px;height:12px;"></i></button></div></div>'
-        + '<div class="form-group"><label class="form-label">Image</label>'
+        + '<div class="form-group"><label class="form-label"><%= t.embeds.embFldImage %></label>'
         + '<div class="url-upload-wrap"><input class="form-input emb-image" data-idx="' + i + '" value="' + esc(emb.image||'') + '" placeholder="https://...">'
         + '<button type="button" class="upload-btn emb-upload" data-idx="' + i + '" data-field="image" data-target="emb-image"><i data-lucide="upload" style="width:12px;height:12px;"></i></button></div></div>'
         + '</div>'
-        + '<div class="form-group"><label class="form-label">URL</label>'
+        + '<div class="form-group"><label class="form-label"><%= t.embeds.embFldUrl %></label>'
         + '<input class="form-input emb-url" data-idx="' + i + '" value="' + esc(emb.url||'') + '" placeholder="https://..."></div>'
-        + '<label class="form-checkbox"><input type="checkbox" class="emb-timestamp" data-idx="' + i + '"' + (emb.timestamp?' checked':'') + '> Timestamp</label>'
+        + '<label class="form-checkbox"><input type="checkbox" class="emb-timestamp" data-idx="' + i + '"' + (emb.timestamp?' checked':'') + '> <%= t.embeds.embFldTimestamp %></label>'
         + '<div class="form-group" style="margin-top:10px;"><label class="form-label">' + '<%= t.embeds.jsFields %>' + '</label>'
         + '<div class="fields-list" id="fields' + i + '">' + (emb.fields||[]).map((f,fi) => fieldItem(i,fi,f)).join('') + '</div>'
         + '<button class="btn btn-ghost btn-xs btnAddField" data-idx="' + i + '" style="margin-top:6px;">'
@@ -2537,11 +2538,11 @@
     function fieldItem(ei, fi, f) {
       return '<div class="field-item" data-ei="' + ei + '" data-fi="' + fi + '">'
         + '<div><div class="form-group" style="margin-bottom:6px;">'
-        + '<input class="form-input field-name" data-ei="' + ei + '" data-fi="' + fi + '" value="' + esc(f.name||'') + '" placeholder="Name"></div>'
+        + '<input class="form-input field-name" data-ei="' + ei + '" data-fi="' + fi + '" value="' + esc(f.name||'') + '" placeholder="<%= t.embeds.embFldFName %>"></div>'
         + '<div class="form-group" style="margin-bottom:6px;">'
-        + '<input class="form-input field-value" data-ei="' + ei + '" data-fi="' + fi + '" value="' + esc(f.value||'') + '" placeholder="Value"></div>'
+        + '<input class="form-input field-value" data-ei="' + ei + '" data-fi="' + fi + '" value="' + esc(f.value||'') + '" placeholder="<%= t.embeds.embFldFValue %>"></div>'
         + '<label class="form-checkbox" style="font-size:.74rem;">'
-        + '<input type="checkbox" class="field-inline" data-ei="' + ei + '" data-fi="' + fi + '"' + (f.inline?' checked':'') + '> Inline</label></div>'
+        + '<input type="checkbox" class="field-inline" data-ei="' + ei + '" data-fi="' + fi + '"' + (f.inline?' checked':'') + '> <%= t.embeds.embFldInline %></label></div>'
         + '<button class="field-remove" data-ei="' + ei + '" data-fi="' + fi + '">'
         + '<i data-lucide="x" style="width:12px;height:12px;"></i></button>'
         + '</div>';
@@ -2635,7 +2636,7 @@
         if (!ss.components) ss.components = [];
         if (ss.components.length >= 5) return toast('Max 5 rows', 'error');
         const cid = nid('btn');
-        ss.components.push({ id: nid('row'), type: 'buttons', buttons: [{ customId: cid, label: 'Button', style: 'Primary', emoji: '', url: '', disabled: false }], select: null });
+        ss.components.push({ id: nid('row'), type: 'buttons', buttons: [{ customId: cid, label: '<%= t.embeds.jsButton %>', style: 'Primary', emoji: '', url: '', disabled: false }], select: null });
         renderComponentsPanel(); lucide.createIcons();
       });
       document.getElementById('btnAddSelRow').addEventListener('click', () => {
@@ -2643,22 +2644,22 @@
         if (!ss.components) ss.components = [];
         if (ss.components.length >= 5) return toast('Max 5 rows', 'error');
         const cid = nid('sel'), ocid = nid('opt');
-        ss.components.push({ id: nid('row'), type: 'select', buttons: [], select: { customId: cid, placeholder: 'Select an option\u2026', minValues: 1, maxValues: 1, disabled: false, options: [{ customId: ocid, label: 'Option', value: ocid, description: '', emoji: '', default: false }] } });
+        ss.components.push({ id: nid('row'), type: 'select', buttons: [], select: { customId: cid, placeholder: 'Select an option\u2026', minValues: 1, maxValues: 1, disabled: false, options: [{ customId: ocid, label: '<%= t.embeds.jsOption %>', value: ocid, description: '', emoji: '', default: false }] } });
         renderComponentsPanel(); lucide.createIcons();
       });
     }
 
     function buttonRowHTML(row, ri) {
       return '<div class="comp-row" data-ri="' + ri + '">'
-        + '<div class="comp-row-header"><span class="comp-type-badge btn-type"><i data-lucide="layout-grid" style="width:10px;height:10px;"></i> Buttons</span>'
-        + '<span class="comp-row-lbl">Row #' + (ri + 1) + '</span>'
+        + '<div class="comp-row-header"><span class="comp-type-badge btn-type"><i data-lucide="layout-grid" style="width:10px;height:10px;"></i> <%= t.embeds.compBadgeBtns %></span>'
+        + '<span class="comp-row-lbl"><%= t.embeds.compRowLbl %> #' + (ri + 1) + '</span>'
         + '<button class="comp-rem-btn comp-remove-row" data-ri="' + ri + '"><i data-lucide="x" style="width:14px;height:14px;"></i></button></div>'
         + (row.buttons || []).map((b, bi) => ''
           + '<div class="btn-item" data-ri="' + ri + '" data-bi="' + bi + '">'
           + '<div class="form-group" style="margin-bottom:0;flex:1;min-width:0;">'
-          + '<input class="form-input btn-label" data-ri="' + ri + '" data-bi="' + bi + '" value="' + esc(b.label||'') + '" placeholder="Label"></div>'
+          + '<input class="form-input btn-label" data-ri="' + ri + '" data-bi="' + bi + '" value="' + esc(b.label||'') + '" placeholder="<%= t.embeds.compLabelPh %>"></div>'
           + '<select class="form-select btn-style" data-ri="' + ri + '" data-bi="' + bi + '" style="width:100px;flex-shrink:0;">'
-          + ['Primary','Secondary','Success','Danger','Link'].map(ss => '<option' + (b.style===ss?' selected':'') + '>' + ss + '</option>').join('')
+          + ['Primary','Secondary','Success','Danger','Link'].map(ss => '<option value="' + ss + '"' + (b.style===ss?' selected':'') + '>' + ss + '</option>').join('')
           + '</select>'
           + '<button type="button" class="emoji-trigger btn-emoji-pick" data-ri="' + ri + '" data-bi="' + bi + '" data-val="' + esc(b.emoji||'') + '" title="Emoji">'
           + renderEmojiBtn(b.emoji) + '</button>'
@@ -2675,17 +2676,17 @@
     function selectRowHTML(row, ri) {
       const sel = row.select || {};
       return '<div class="comp-row" data-ri="' + ri + '">'
-        + '<div class="comp-row-header"><span class="comp-type-badge sel-type"><i data-lucide="chevrons-up-down" style="width:10px;height:10px;"></i> Select</span>'
-        + '<span class="comp-row-lbl">Row #' + (ri + 1) + '</span>'
+        + '<div class="comp-row-header"><span class="comp-type-badge sel-type"><i data-lucide="chevrons-up-down" style="width:10px;height:10px;"></i> <%= t.embeds.compBadgeSel %></span>'
+        + '<span class="comp-row-lbl"><%= t.embeds.compRowLbl %> #' + (ri + 1) + '</span>'
         + '<button class="comp-rem-btn comp-remove-row" data-ri="' + ri + '"><i data-lucide="x" style="width:14px;height:14px;"></i></button></div>'
-        + '<div class="form-group"><label class="form-label">Placeholder</label>'
+        + '<div class="form-group"><label class="form-label"><%= t.embeds.compSelectLabel %></label>'
         + '<input class="form-input sel-placeholder" data-ri="' + ri + '" value="' + esc(sel.placeholder||'') + '" placeholder="Select an option\u2026"></div>'
         + (sel.options || []).map((o, oi) => ''
           + '<div class="select-opt-item" data-ri="' + ri + '" data-oi="' + oi + '">'
           + '<div class="form-group" style="margin-bottom:0;flex:1;min-width:0;">'
-          + '<input class="form-input opt-label" data-ri="' + ri + '" data-oi="' + oi + '" value="' + esc(o.label||'') + '" placeholder="Label"></div>'
+          + '<input class="form-input opt-label" data-ri="' + ri + '" data-oi="' + oi + '" value="' + esc(o.label||'') + '" placeholder="<%= t.embeds.compLabelPh %>"></div>'
           + '<div class="form-group" style="margin-bottom:0;flex:1;min-width:0;">'
-          + '<input class="form-input opt-desc" data-ri="' + ri + '" data-oi="' + oi + '" value="' + esc(o.description||'') + '" placeholder="Desc"></div>'
+          + '<input class="form-input opt-desc" data-ri="' + ri + '" data-oi="' + oi + '" value="' + esc(o.description||'') + '" placeholder="<%= t.embeds.compOptDescPh %>"></div>'
           + '<button type="button" class="emoji-trigger opt-emoji-pick" data-ri="' + ri + '" data-oi="' + oi + '" data-val="' + esc(o.emoji||'') + '" title="Emoji">'
           + renderEmojiBtn(o.emoji) + '</button>'
           + '<input type="hidden" class="opt-emoji" data-ri="' + ri + '" data-oi="' + oi + '" value="' + esc(o.emoji||'') + '">'
@@ -2716,7 +2717,7 @@
         const ri = +b.dataset.ri;
         if ((ss.components[ri].buttons || []).length >= 5) return;
         const cid = nid('btn');
-        ss.components[ri].buttons.push({ customId: cid, label: 'Button', style: 'Primary', emoji: '', url: '', disabled: false });
+        ss.components[ri].buttons.push({ customId: cid, label: '<%= t.embeds.jsButton %>', style: 'Primary', emoji: '', url: '', disabled: false });
         renderComponentsPanel(); lucide.createIcons();
       }));
       document.querySelectorAll('.sel-placeholder').forEach(el => el.addEventListener('input', () => {
@@ -2737,7 +2738,7 @@
         const sel = ss.components[ri].select;
         if ((sel.options || []).length >= 25) return;
         const cid = nid('opt');
-        sel.options.push({ customId: cid, label: 'Option', value: cid, description: '', emoji: '', default: false });
+        sel.options.push({ customId: cid, label: '<%= t.embeds.jsOption %>', value: cid, description: '', emoji: '', default: false });
         renderComponentsPanel(); lucide.createIcons();
       }));
       // Emoji – buttons
@@ -2783,138 +2784,138 @@
     /* ────────────────── Transitions Panel ────────────────── */
     // ── Action definitions: type → { label, params[] } ─────────────────────
     const ACTION_DEFS = {
-      update_content:    { label: 'Update Content',    params: [] },
-      replace_embeds:    { label: 'Replace Embeds',    params: [] },
-      append_embeds:     { label: 'Append Embeds',     params: [] },
-      update_components: { label: 'Update Components', params: [] },
-      disable_component: { label: 'Disable Button',    params: [
-        { key: 'customId', label: 'Custom ID',  type: 'text',   placeholder: 'Leave blank = clicked button' },
+      update_content:    { label: '<%= t.embeds.actUpdateContent %>',    params: [] },
+      replace_embeds:    { label: '<%= t.embeds.actReplaceEmbeds %>',    params: [] },
+      append_embeds:     { label: '<%= t.embeds.actAppendEmbeds %>',     params: [] },
+      update_components: { label: '<%= t.embeds.actUpdateComponents %>', params: [] },
+      disable_component: { label: '<%= t.embeds.actDisableBtn %>',       params: [
+        { key: 'customId', label: '<%= t.embeds.actParamCustomId %>',  type: 'text',   placeholder: 'Leave blank = clicked button' },
       ]},
-      enable_component:  { label: 'Enable Button',     params: [
-        { key: 'customId', label: 'Custom ID',  type: 'text',   placeholder: 'Button custom ID' },
+      enable_component:  { label: '<%= t.embeds.actEnableBtn %>',        params: [
+        { key: 'customId', label: '<%= t.embeds.actParamCustomId %>',  type: 'text',   placeholder: 'Button custom ID' },
       ]},
-      hide_component:    { label: 'Hide Component',    params: [
-        { key: 'customId', label: 'Custom ID',         type: 'text',   placeholder: 'Button / select custom ID' },
-        { key: 'duration', label: 'Restore after (ms)', type: 'number', placeholder: '5000  (0 = permanent)' },
+      hide_component:    { label: '<%= t.embeds.actHideComponent %>',    params: [
+        { key: 'customId', label: '<%= t.embeds.actParamCustomId %>',  type: 'text',   placeholder: 'Button / select custom ID' },
+        { key: 'duration', label: '<%= t.embeds.actParamRestoreMs %>', type: 'number', placeholder: '5000  (0 = permanent)' },
       ]},
-      send_ephemeral:    { label: 'Send Ephemeral',    params: [] },
-      send_to_channel:   { label: 'Send to Channel',   params: [
-        { key: 'channelId', label: 'Channel ID', type: 'text', placeholder: 'Channel ID' },
+      send_ephemeral:    { label: '<%= t.embeds.actSendEphemeral %>',    params: [] },
+      send_to_channel:   { label: '<%= t.embeds.actSendToChannel %>',   params: [
+        { key: 'channelId', label: '<%= t.embeds.actParamChannelId %>', type: 'text', placeholder: 'Channel ID' },
       ]},
 
       // ── DM / Channel fork ────────────────────────────────────────────────
-      open_dm:           { label: '📨 Open DM Flow',   params: [
-        { key: 'confirmMessage',  label: 'Confirm message (blank = default)', type: 'text',   placeholder: '📬 Check your DMs to continue!' },
-        { key: 'failMessage',     label: 'DM-blocked message  (blank = default)', type: 'text', placeholder: '❌ Please enable DMs first.' },
-        { key: 'timeout',         label: 'Flow timeout (ms, 0 = no expiry)',  type: 'number', placeholder: '600000' },
-        { key: 'returnAction',    label: 'On complete_flow → action type',    type: 'text',   placeholder: 'add_role | edit_origin_message | send_to_origin' },
-        { key: 'returnRoleId',    label: 'On complete_flow → role',           type: 'role' },
-        { key: 'returnChannelId', label: 'On complete_flow → channel ID',     type: 'text',   placeholder: 'Channel ID (if returnAction = send_to_channel)' },
+      open_dm:           { label: '📨 <%= t.embeds.actOpenDm %>',   params: [
+        { key: 'confirmMessage',  label: '<%= t.embeds.actParamConfirmMsg %>',     type: 'text',   placeholder: '📬 Check your DMs to continue!' },
+        { key: 'failMessage',     label: '<%= t.embeds.actParamDmBlockedMsg %>',   type: 'text', placeholder: '❌ Please enable DMs first.' },
+        { key: 'timeout',         label: '<%= t.embeds.actParamFlowTimeout %>',    type: 'number', placeholder: '600000' },
+        { key: 'returnAction',    label: '<%= t.embeds.actParamOnCompleteType %>', type: 'text',   placeholder: 'add_role | edit_origin_message | send_to_origin' },
+        { key: 'returnRoleId',    label: '<%= t.embeds.actParamOnCompleteRole %>', type: 'role' },
+        { key: 'returnChannelId', label: '<%= t.embeds.actParamOnCompleteCh %>',   type: 'text',   placeholder: 'Channel ID (if returnAction = send_to_channel)' },
       ]},
-      open_channel_flow: { label: '↗ Continue in Channel', params: [
-        { key: 'channelId',       label: 'Channel ID',                        type: 'text',   placeholder: 'Channel to forward the flow to' },
-        { key: 'mention',         label: 'Mention user? ("no" to disable)',   type: 'text',   placeholder: 'leave blank to mention' },
-        { key: 'timeout',         label: 'Flow timeout (ms, 0 = no expiry)',  type: 'number', placeholder: '600000' },
-        { key: 'returnAction',    label: 'On complete_flow → action type',    type: 'text',   placeholder: 'add_role | edit_origin_message | send_to_origin' },
-        { key: 'returnRoleId',    label: 'On complete_flow → role',           type: 'role' },
+      open_channel_flow: { label: '↗ <%= t.embeds.actOpenChannelFlow %>', params: [
+        { key: 'channelId',       label: '<%= t.embeds.actParamChannelId %>',      type: 'text',   placeholder: 'Channel to forward the flow to' },
+        { key: 'mention',         label: '<%= t.embeds.actParamMentionUser %>',    type: 'text',   placeholder: 'leave blank to mention' },
+        { key: 'timeout',         label: '<%= t.embeds.actParamFlowTimeout %>',    type: 'number', placeholder: '600000' },
+        { key: 'returnAction',    label: '<%= t.embeds.actParamOnCompleteType %>', type: 'text',   placeholder: 'add_role | edit_origin_message | send_to_origin' },
+        { key: 'returnRoleId',    label: '<%= t.embeds.actParamOnCompleteRole %>', type: 'role' },
       ]},
 
       // ── Origin-aware actions (for states inside a DM / channel flow) ─────
-      complete_flow:       { label: '✅ Complete Flow',       params: [] },
-      send_to_origin:      { label: '↩ Send to Origin Channel', params: [] },
-      edit_origin_message: { label: '✏️ Edit Origin Message',   params: [] },
+      complete_flow:       { label: '✅ <%= t.embeds.actCompleteFlow %>',       params: [] },
+      send_to_origin:      { label: '↩ <%= t.embeds.actSendToOrigin %>',        params: [] },
+      edit_origin_message: { label: '✏️ <%= t.embeds.actEditOrigin %>',         params: [] },
 
       // ── Role management ──────────────────────────────────────────────────
-      add_role:    { label: '🔑 Add Role',    params: [
-        { key: 'roleId', label: 'Role to add',    type: 'role' },
+      add_role:    { label: '🔑 <%= t.embeds.actAddRole %>',    params: [
+        { key: 'roleId', label: '<%= t.embeds.actParamRoleToAdd %>',    type: 'role' },
       ]},
-      remove_role: { label: '🗑 Remove Role', params: [
-        { key: 'roleId', label: 'Role to remove', type: 'role' },
+      remove_role: { label: '🗑 <%= t.embeds.actRemoveRole %>', params: [
+        { key: 'roleId', label: '<%= t.embeds.actParamRoleToRemove %>', type: 'role' },
       ]},
 
       // ── Advanced Role Automation (conditions + anti-abuse + smart logic) ──
-      role_toggle: { label: '🔄 Toggle Role', params: [
-        { key: 'roleId',          label: 'Role',                               type: 'role' },
-        { key: 'feedbackMessage', label: 'Feedback msg (blank = silent)',       type: 'text',   placeholder: '✅ Role updated!' },
-        { key: 'addedMessage',    label: 'When added (overrides feedback)',     type: 'text',   placeholder: '✅ Role granted!' },
-        { key: 'removedMessage',  label: 'When removed (overrides feedback)',   type: 'text',   placeholder: '❌ Role removed.' },
-        { key: 'hasRole',         label: 'Required role (must have)',           type: 'role' },
-        { key: 'missingRole',     label: 'Blocked role (must NOT have)',        type: 'role' },
-        { key: 'minLevel',        label: 'Min level required',                  type: 'number', placeholder: '5' },
-        { key: 'minXp',           label: 'Min XP required',                    type: 'number', placeholder: '500' },
-        { key: 'denyMessage',     label: 'Deny message',                        type: 'text',   placeholder: '🚫 You do not meet the requirements.' },
-        { key: 'abuse_cooldown',  label: 'Cooldown (seconds)',                  type: 'number', placeholder: '10' },
-        { key: 'abuse_maxUses',   label: 'Max uses (0 = unlimited)',            type: 'number', placeholder: '0' },
+      role_toggle: { label: '🔄 <%= t.embeds.actToggleRole %>', params: [
+        { key: 'roleId',          label: '<%= t.embeds.actParamRole %>',              type: 'role' },
+        { key: 'feedbackMessage', label: '<%= t.embeds.actParamFeedbackMsg %>',       type: 'text',   placeholder: '✅ Role updated!' },
+        { key: 'addedMessage',    label: '<%= t.embeds.actParamWhenAdded %>',         type: 'text',   placeholder: '✅ Role granted!' },
+        { key: 'removedMessage',  label: '<%= t.embeds.actParamWhenRemoved %>',       type: 'text',   placeholder: '❌ Role removed.' },
+        { key: 'hasRole',         label: '<%= t.embeds.actParamRequiredRoleHave %>',  type: 'role' },
+        { key: 'missingRole',     label: '<%= t.embeds.actParamBlockedRoleMust %>',   type: 'role' },
+        { key: 'minLevel',        label: '<%= t.embeds.actParamMinLevelReq %>',       type: 'number', placeholder: '5' },
+        { key: 'minXp',           label: '<%= t.embeds.actParamMinXpReq %>',          type: 'number', placeholder: '500' },
+        { key: 'denyMessage',     label: '<%= t.embeds.actParamDenyMsg %>',           type: 'text',   placeholder: '🚫 You do not meet the requirements.' },
+        { key: 'abuse_cooldown',  label: '<%= t.embeds.actParamCooldown %>',          type: 'number', placeholder: '10' },
+        { key: 'abuse_maxUses',   label: '<%= t.embeds.actParamMaxUses %>',           type: 'number', placeholder: '0' },
       ]},
-      role_exclusive: { label: '🎯 Exclusive Role', params: [
-        { key: 'roleId',         label: 'Role to assign',                      type: 'role' },
-        { key: 'groupRoles',     label: 'Sibling roles',                       type: 'roles' },
-        { key: 'hasRole',        label: 'Required role',                       type: 'role' },
-        { key: 'missingRole',    label: 'Blocked role',                        type: 'role' },
-        { key: 'minLevel',       label: 'Min level required',                  type: 'number' },
-        { key: 'denyMessage',    label: 'Deny message',                        type: 'text' },
-        { key: 'abuse_cooldown', label: 'Cooldown (seconds)',                  type: 'number', placeholder: '10' },
-        { key: 'abuse_maxUses',  label: 'Max uses (0 = unlimited)',            type: 'number', placeholder: '0' },
+      role_exclusive: { label: '🎯 <%= t.embeds.actExclusiveRole %>', params: [
+        { key: 'roleId',         label: '<%= t.embeds.actParamRoleAssign %>',    type: 'role' },
+        { key: 'groupRoles',     label: '<%= t.embeds.actParamSiblingRoles %>', type: 'roles' },
+        { key: 'hasRole',        label: '<%= t.embeds.actParamRequiredRole %>', type: 'role' },
+        { key: 'missingRole',    label: '<%= t.embeds.actParamBlockedRole %>',  type: 'role' },
+        { key: 'minLevel',       label: '<%= t.embeds.actParamMinLevelReq %>',  type: 'number' },
+        { key: 'denyMessage',    label: '<%= t.embeds.actParamDenyMsg %>',      type: 'text' },
+        { key: 'abuse_cooldown', label: '<%= t.embeds.actParamCooldown %>',     type: 'number', placeholder: '10' },
+        { key: 'abuse_maxUses',  label: '<%= t.embeds.actParamMaxUses %>',      type: 'number', placeholder: '0' },
       ]},
-      role_temp: { label: '⏳ Temp Role', params: [
-        { key: 'roleId',         label: 'Role',                                type: 'role' },
-        { key: 'duration',       label: 'Duration (ms)',                       type: 'number', placeholder: '3600000  (= 1 hour)' },
-        { key: 'confirmMessage', label: 'Confirm msg  ([expiry] = timestamp)', type: 'text',   placeholder: '✅ Granted until [expiry]!' },
-        { key: 'hasRole',        label: 'Required role',                       type: 'role' },
-        { key: 'missingRole',    label: 'Blocked role',                        type: 'role' },
-        { key: 'minLevel',       label: 'Min level required',                  type: 'number' },
-        { key: 'denyMessage',    label: 'Deny message',                        type: 'text' },
-        { key: 'abuse_cooldown', label: 'Cooldown (seconds)',                  type: 'number', placeholder: '60' },
-        { key: 'abuse_maxUses',  label: 'Max uses (0 = unlimited)',            type: 'number', placeholder: '1' },
+      role_temp: { label: '⏳ <%= t.embeds.actTempRole %>', params: [
+        { key: 'roleId',         label: '<%= t.embeds.actParamRole %>',           type: 'role' },
+        { key: 'duration',       label: '<%= t.embeds.actParamDuration %>',       type: 'number', placeholder: '3600000  (= 1 hour)' },
+        { key: 'confirmMessage', label: '<%= t.embeds.actParamConfirmExpiry %>',  type: 'text',   placeholder: '✅ Granted until [expiry]!' },
+        { key: 'hasRole',        label: '<%= t.embeds.actParamRequiredRole %>',   type: 'role' },
+        { key: 'missingRole',    label: '<%= t.embeds.actParamBlockedRole %>',    type: 'role' },
+        { key: 'minLevel',       label: '<%= t.embeds.actParamMinLevelReq %>',    type: 'number' },
+        { key: 'denyMessage',    label: '<%= t.embeds.actParamDenyMsg %>',        type: 'text' },
+        { key: 'abuse_cooldown', label: '<%= t.embeds.actParamCooldown %>',       type: 'number', placeholder: '60' },
+        { key: 'abuse_maxUses',  label: '<%= t.embeds.actParamMaxUses %>',        type: 'number', placeholder: '1' },
       ]},
-      role_conditional: { label: '📋 Conditional Role', params: [
-        { key: 'roleId',         label: 'Role',                                type: 'role' },
-        { key: 'operator',       label: 'Operator (add / remove)',             type: 'text',   placeholder: 'add' },
-        { key: 'hasRole',        label: 'Required role',                       type: 'role' },
-        { key: 'missingRole',    label: 'Blocked role',                        type: 'role' },
-        { key: 'hasAllRoles',    label: 'Must have ALL',                       type: 'roles' },
-        { key: 'hasAnyRole',     label: 'Must have ANY',                       type: 'roles' },
-        { key: 'minLevel',       label: 'Min level',                           type: 'number' },
-        { key: 'minXp',          label: 'Min XP',                              type: 'number' },
-        { key: 'denyMessage',    label: 'Deny message',                        type: 'text' },
-        { key: 'abuse_cooldown', label: 'Cooldown (seconds)',                  type: 'number' },
-        { key: 'abuse_maxUses',  label: 'Max uses',                            type: 'number' },
+      role_conditional: { label: '📋 <%= t.embeds.actConditionalRole %>', params: [
+        { key: 'roleId',         label: '<%= t.embeds.actParamRole %>',          type: 'role' },
+        { key: 'operator',       label: '<%= t.embeds.actParamOperator %>',      type: 'text',   placeholder: 'add' },
+        { key: 'hasRole',        label: '<%= t.embeds.actParamRequiredRole %>', type: 'role' },
+        { key: 'missingRole',    label: '<%= t.embeds.actParamBlockedRole %>',  type: 'role' },
+        { key: 'hasAllRoles',    label: '<%= t.embeds.actParamHasAll %>',       type: 'roles' },
+        { key: 'hasAnyRole',     label: '<%= t.embeds.actParamHasAny %>',       type: 'roles' },
+        { key: 'minLevel',       label: '<%= t.embeds.actParamMinLevel %>',     type: 'number' },
+        { key: 'minXp',          label: '<%= t.embeds.actParamMinXp %>',        type: 'number' },
+        { key: 'denyMessage',    label: '<%= t.embeds.actParamDenyMsg %>',      type: 'text' },
+        { key: 'abuse_cooldown', label: '<%= t.embeds.actParamCooldown %>',     type: 'number' },
+        { key: 'abuse_maxUses',  label: '<%= t.embeds.actParamMaxUsesShort %>', type: 'number' },
       ]},
-      role_check_branch: { label: '🔀 Role Branch (Condition Gate)', params: [
-        { key: 'thenTarget',     label: 'State ID if conditions PASS',         type: 'text',   placeholder: 'state_id' },
-        { key: 'elseTarget',     label: 'State ID if conditions FAIL',         type: 'text',   placeholder: 'state_id (optional)' },
-        { key: 'hasRole',        label: 'Must HAVE role',                      type: 'role' },
-        { key: 'missingRole',    label: 'Must NOT have role',                  type: 'role' },
-        { key: 'hasAllRoles',    label: 'Must have ALL',                       type: 'roles' },
-        { key: 'hasAnyRole',     label: 'Must have ANY',                       type: 'roles' },
-        { key: 'minLevel',       label: 'Min total level',                     type: 'number' },
-        { key: 'minTextLevel',   label: 'Min text level',                      type: 'number' },
-        { key: 'minVoiceLevel',  label: 'Min voice level',                     type: 'number' },
-        { key: 'minXp',          label: 'Min XP',                              type: 'number' },
-        { key: 'minMessages',    label: 'Min messages sent',                   type: 'number' },
+      role_check_branch: { label: '🔀 <%= t.embeds.actRoleBranch %>', params: [
+        { key: 'thenTarget',     label: '<%= t.embeds.actParamThenTarget %>',    type: 'text',   placeholder: 'state_id' },
+        { key: 'elseTarget',     label: '<%= t.embeds.actParamElseTarget %>',    type: 'text',   placeholder: 'state_id (optional)' },
+        { key: 'hasRole',        label: '<%= t.embeds.actParamMustHaveRole %>',  type: 'role' },
+        { key: 'missingRole',    label: '<%= t.embeds.actParamMustNotRole %>',   type: 'role' },
+        { key: 'hasAllRoles',    label: '<%= t.embeds.actParamHasAll %>',        type: 'roles' },
+        { key: 'hasAnyRole',     label: '<%= t.embeds.actParamHasAny %>',        type: 'roles' },
+        { key: 'minLevel',       label: '<%= t.embeds.actParamMinTotalLvl %>',   type: 'number' },
+        { key: 'minTextLevel',   label: '<%= t.embeds.actParamMinTextLvl %>',    type: 'number' },
+        { key: 'minVoiceLevel',  label: '<%= t.embeds.actParamMinVoiceLvl %>',   type: 'number' },
+        { key: 'minXp',          label: '<%= t.embeds.actParamMinXp %>',         type: 'number' },
+        { key: 'minMessages',    label: '<%= t.embeds.actParamMinMessages %>',   type: 'number' },
       ]},
-      grant_xp: { label: '⭐ Grant XP', params: [
-        { key: 'xp',    label: 'XP amount',            type: 'number', placeholder: '50' },
-        { key: 'track', label: 'Track (text / voice)',  type: 'text',   placeholder: 'text' },
+      grant_xp: { label: '⭐ <%= t.embeds.actGrantXp %>', params: [
+        { key: 'xp',    label: '<%= t.embeds.actParamXpAmount %>', type: 'number', placeholder: '50' },
+        { key: 'track', label: '<%= t.embeds.actParamXpTrack %>',  type: 'text',   placeholder: 'text' },
       ]},
 
       // ── Dynamic pipeline actions ─────────────────────────────────────────
-      role_sequence: { label: '⛓ Role Sequence', params: [
-        { key: 'actions',         label: 'Sub-actions (JSON array)',            type: 'textarea', placeholder: '[{"type":"role_temp","roleId":"...","duration":3600000},{"type":"grant_xp","xp":50}]' },
-        { key: 'feedbackMessage', label: 'Feedback message after all steps',    type: 'text',     placeholder: '✅ Done!' },
+      role_sequence: { label: '⛓ <%= t.embeds.actRoleSequence %>', params: [
+        { key: 'actions',         label: '<%= t.embeds.actParamSubActions %>',     type: 'textarea', placeholder: '[{"type":"role_temp","roleId":"...","duration":3600000},{"type":"grant_xp","xp":50}]' },
+        { key: 'feedbackMessage', label: '<%= t.embeds.actParamFeedbackAfter %>', type: 'text',     placeholder: '✅ Done!' },
       ]},
-      fire_webhook: { label: '🌐 Fire Webhook', params: [
-        { key: 'url',            label: 'Webhook URL (https://...)',            type: 'text',     placeholder: 'https://your-server.com/webhook' },
-        { key: 'payload',        label: 'JSON Payload (supports {{vars}})',     type: 'textarea', placeholder: '{"userId":"{{member.id}}","guild":"{{guild.name}}","level":{{level}}}' },
-        { key: 'successMessage', label: 'Success message (blank = silent)',     type: 'text',     placeholder: '✅ Webhook sent!' },
-        { key: 'failMessage',    label: 'Fail message (blank = silent)',        type: 'text',     placeholder: '❌ Webhook failed.' },
+      fire_webhook: { label: '🌐 <%= t.embeds.actFireWebhook %>', params: [
+        { key: 'url',            label: '<%= t.embeds.actParamWebhookUrl %>',     type: 'text',     placeholder: 'https://your-server.com/webhook' },
+        { key: 'payload',        label: '<%= t.embeds.actParamJsonPayload %>',    type: 'textarea', placeholder: '{"userId":"{{member.id}}","guild":"{{guild.name}}","level":{{level}}}' },
+        { key: 'successMessage', label: '<%= t.embeds.actParamSuccessMsg %>',     type: 'text',     placeholder: '✅ Webhook sent!' },
+        { key: 'failMessage',    label: '<%= t.embeds.actParamFailMsg %>',        type: 'text',     placeholder: '❌ Webhook failed.' },
       ]},
 
       // ── Direct DM (no flow tracking) ─────────────────────────────────────
-      send_dm_message: { label: '💬 Send DM Message', params: [] },
+      send_dm_message: { label: '💬 <%= t.embeds.actSendDmMsg %>', params: [] },
 
-      delay:             { label: 'Delay',              params: [
-        { key: 'ms', label: 'Milliseconds', type: 'number', placeholder: 'e.g. 2000' },
+      delay:             { label: '<%= t.embeds.actDelay %>',              params: [
+        { key: 'ms', label: '<%= t.embeds.actParamMs %>', type: 'number', placeholder: 'e.g. 2000' },
       ]},
     };
 
@@ -2955,30 +2956,30 @@
 
     /* ────────────────── Smart Trigger Definitions ────────────────── */
     const TRIGGER_TYPE_DEFS = {
-      cron:         { label: 'Scheduled (Cron)',  icon: 'clock',          params: [
-        { key: 'schedule',       label: 'Cron Expression',         type: 'text',    placeholder: '0 9 * * *  (min hr dom mon dow)' },
-        { key: 'channelOverride',label: 'Channel Override (opt.)', type: 'channel' },
+      cron:         { label: '<%= t.embeds.trgScheduled %>',   icon: 'clock',          params: [
+        { key: 'schedule',       label: '<%= t.embeds.trgParamCronExpr %>',    type: 'text',    placeholder: '0 9 * * *  (min hr dom mon dow)' },
+        { key: 'channelOverride',label: '<%= t.embeds.trgParamChOverride %>', type: 'channel' },
       ]},
-      member_join:  { label: 'Member Join',       icon: 'user-plus',      params: [] },
-      member_leave: { label: 'Member Leave',      icon: 'user-minus',     params: [] },
-      role_add:     { label: 'Role Added',        icon: 'shield-check',   params: [
-        { key: 'roleId', label: 'Role', type: 'role' },
+      member_join:  { label: '<%= t.embeds.trgMemberJoin %>',  icon: 'user-plus',      params: [] },
+      member_leave: { label: '<%= t.embeds.trgMemberLeave %>', icon: 'user-minus',     params: [] },
+      role_add:     { label: '<%= t.embeds.trgRoleAdded %>',   icon: 'shield-check',   params: [
+        { key: 'roleId', label: '<%= t.embeds.actParamRole %>', type: 'role' },
       ]},
-      role_remove:  { label: 'Role Removed',      icon: 'shield-off',     params: [
-        { key: 'roleId', label: 'Role', type: 'role' },
+      role_remove:  { label: '<%= t.embeds.trgRoleRemoved %>', icon: 'shield-off',     params: [
+        { key: 'roleId', label: '<%= t.embeds.actParamRole %>', type: 'role' },
       ]},
-      message:      { label: 'Message Keyword',   icon: 'message-circle', params: [
-        { key: 'pattern',  label: 'Keyword / Regex',         type: 'text',    placeholder: 'buy' },
-        { key: 'isRegex',  label: 'Treat as RegExp',          type: 'checkbox' },
-        { key: 'channelId',label: 'In channel (blank = all)', type: 'channel'  },
+      message:      { label: '<%= t.embeds.trgMsgKeyword %>',  icon: 'message-circle', params: [
+        { key: 'pattern',  label: '<%= t.embeds.trgParamKeyword %>',    type: 'text',    placeholder: 'buy' },
+        { key: 'isRegex',  label: '<%= t.embeds.trgParamIsRegex %>',    type: 'checkbox' },
+        { key: 'channelId',label: '<%= t.embeds.trgParamInChannel %>', type: 'channel'  },
       ]},
     };
 
     const TRIGGER_ACTION_DEFS = {
-      edit_message:    { label: 'Edit live Discord message' },
-      send_to_channel: { label: 'Send embed to channel' },
-      send_dm:         { label: 'DM the member' },
-      send_reply:      { label: 'Reply to message' },
+      edit_message:    { label: '<%= t.embeds.trgActEditMsg %>' },
+      send_to_channel: { label: '<%= t.embeds.trgActSendCh %>' },
+      send_dm:         { label: '<%= t.embeds.trgActDm %>' },
+      send_reply:      { label: '<%= t.embeds.trgActReply %>' },
     };
 
     function getStateTriggers(stateId) {
@@ -3042,13 +3043,13 @@
                   + esc(r ? r.name : id)
                   + '<span class="tr-role-tag-x" data-roleid="' + esc(id) + '">\xd7</span></span>';
               }).join('');
-              pillInner = '<div class="tr-role-tags">' + (tagsHtml || '<span style="opacity:.4;font-size:.71rem;">Select roles\u2026</span>') + '</div>'
+              pillInner = '<div class="tr-role-tags">' + (tagsHtml || '<span style="opacity:.4;font-size:.71rem;"><%= t.embeds.trSelectRoles %></span>') + '</div>'
                 + '<i data-lucide="chevron-down" style="width:11px;height:11px;margin-left:4px;flex-shrink:0;opacity:.4;"></i>';
             } else {
               const sr = guildRoles.find(r => r.id === String(val));
               pillInner = (sr
                 ? _ri(sr) + '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">' + esc(sr.name) + '</span>'
-                : '<i data-lucide="shield" style="width:12px;height:12px;opacity:.35;flex-shrink:0;"></i><span style="flex:1;opacity:.4;font-size:.71rem;">Select role\u2026</span>')
+                : '<i data-lucide="shield" style="width:12px;height:12px;opacity:.35;flex-shrink:0;"></i><span style="flex:1;opacity:.4;font-size:.71rem;"><%= t.embeds.trSelectRole %></span>')
                 + '<i data-lucide="chevron-down" style="width:11px;height:11px;flex-shrink:0;opacity:.4;"></i>';
             }
             inputHtml =
@@ -3056,8 +3057,8 @@
               + '<input type="hidden" class="tr-param-input"' + attrD + ' value="' + esc(String(val)) + '">'
               + '<div class="tr-role-pill">' + pillInner + '</div>'
               + '<div class="tr-role-drop">'
-              + '<input class="tr-role-search" type="text" placeholder="Search roles\u2026">'
-              + '<div class="tr-role-list">' + (guildRoles.length ? optsHtml : '<div style="padding:6px 8px;font-size:.72rem;opacity:.5;">No roles</div>') + '</div>'
+              + '<input class="tr-role-search" type="text" placeholder="<%= t.embeds.trSearchRoles %>">'
+              + '<div class="tr-role-list">' + (guildRoles.length ? optsHtml : '<div style="padding:6px 8px;font-size:.72rem;opacity:.5;"><%= t.embeds.trNoRoles %></div>') + '</div>'
               + '</div>'
               + '</div>';
           } else if (p.type === 'textarea') {
@@ -3119,14 +3120,14 @@
           + '<span class="tr-badge" title="' + esc(tid) + '">' + esc(tid.length > 18 ? tid.slice(0, 16) + '\u2026' : tid) + '</span>'
           + '<svg style="width:14px;height:14px;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="rgba(203,194,255,.5)" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>'
           + '<select class="form-select tr-target-sel" data-tid="' + esc(tid) + '" style="flex:1;">'
-          + '<option value="">\u2014 target state \u2014</option>' + stateOpts + '</select>'
+          + '<option value="">\u2014 <%= t.embeds.trTargetState %> \u2014</option>' + stateOpts + '</select>'
           + '<button class="state-act-btn del tr-remove-btn" data-tid="' + esc(tid) + '" title="Remove transition">'
           + '<i data-lucide="x" style="width:11px;height:11px;"></i></button>'
           + '</div>'
           + '<div class="tr-pipeline">'
           + pipeHtml
           + '<button class="btn btn-xs tr-step-add" data-tid="' + esc(tid) + '" style="margin-top:6px;font-size:.71rem;background:rgba(124,58,237,.08);border:1px dashed rgba(124,58,237,.25);color:var(--purple-l);border-radius:7px;padding:4px 10px;width:100%;justify-content:center;">'
-          + '<i data-lucide="plus" style="width:11px;height:11px;"></i> Add Step</button>'
+          + '<i data-lucide="plus" style="width:11px;height:11px;"></i> <%= t.embeds.trAddStep %></button>'
           + '</div>'
           + '</div>';
       }).join('');
@@ -3134,11 +3135,11 @@
       if (available.length) {
         html += '<div style="display:flex;gap:7px;align-items:center;margin-top:10px;padding:10px;background:rgba(124,58,237,.04);border:1px dashed rgba(124,58,237,.2);border-radius:9px;">'
           + '<select class="form-select" id="trNewTrigger" style="flex:1;">'
-          + '<option value="">\u2014 pick trigger \u2014</option>'
+          + '<option value="">\u2014 <%= t.embeds.trPickTrigger %> \u2014</option>'
           + available.map(t => '<option value="' + esc(t.id) + '">' + esc(t.label) + '</option>').join('')
           + '</select>'
           + '<button class="btn btn-primary btn-xs" id="trAddBtn">'
-          + '<i data-lucide="plus" style="width:12px;height:12px;"></i> Add</button>'
+          + '<i data-lucide="plus" style="width:12px;height:12px;"></i> <%= t.embeds.trAdd %></button>'
           + '</div>';
       } else if (!triggers.length) {
         html += '<div style="margin-top:10px;padding:10px;background:rgba(255,255,255,.03);border-radius:9px;font-size:.76rem;color:var(--muted);">'
@@ -3384,9 +3385,9 @@
 
     function renderTriggersModal() {
       const triggers = machine.triggers || [];
-      const channelOptHtml = '<option value="">\u2014 all channels \u2014</option>'
+      const channelOptHtml = '<option value="">\u2014 <%= t.embeds.trgAllChannels %> \u2014</option>'
         + guildChannels.map(c => '<option value="' + esc(c.id) + '">#' + esc(c.name) + '</option>').join('');
-      const stateOptHtml = '<option value="">\u2014 initial state \u2014</option>'
+      const stateOptHtml = '<option value="">\u2014 <%= t.embeds.trgInitialState %> \u2014</option>'
         + Object.keys(machine.states).map(id =>
             '<option value="' + esc(id) + '">' + esc(machine.states[id]?.label || id) + '</option>').join('');
       const actOptHtml = Object.entries(TRIGGER_ACTION_DEFS)
@@ -3397,7 +3398,7 @@
       if (!triggers.length) {
         $body.innerHTML = '<div style="text-align:center;padding:28px 16px;color:var(--muted);font-size:.82rem;">'
           + '<svg xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 12px;width:30px;height:30px;opacity:.3;stroke:currentColor;fill:none;stroke-width:2;" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'
-          + 'No smart triggers yet. Click <strong>Add Trigger</strong> to start automating.</div>';
+          + 'No smart triggers yet. Click <strong><%= t.embeds.trAdd %></strong> to start automating.</div>';
         return;
       }
       $body.innerHTML = '<div class="trg-list">' + triggers.map((tr, i) => {
@@ -3433,21 +3434,21 @@
                   + esc(r ? r.name : id)
                   + '<span class="tr-role-tag-x" data-roleid="' + esc(id) + '">\xd7</span></span>';
               }).join('');
-              pillInner = '<div class="tr-role-tags">' + (tagsHtml || '<span style="opacity:.4;font-size:.71rem;">Select roles\u2026</span>') + '</div>'
+              pillInner = '<div class="tr-role-tags">' + (tagsHtml || '<span style="opacity:.4;font-size:.71rem;"><%= t.embeds.trSelectRoles %></span>') + '</div>'
                 + '<i data-lucide="chevron-down" style="width:11px;height:11px;margin-left:4px;flex-shrink:0;opacity:.4;"></i>';
             } else {
               const sr = guildRoles.find(r => r.id === String(val));
               pillInner = (sr
                 ? _ri(sr) + '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">' + esc(sr.name) + '</span>'
-                : '<i data-lucide="shield" style="width:12px;height:12px;opacity:.35;flex-shrink:0;"></i><span style="flex:1;opacity:.4;font-size:.71rem;">Select role\u2026</span>')
+                : '<i data-lucide="shield" style="width:12px;height:12px;opacity:.35;flex-shrink:0;"></i><span style="flex:1;opacity:.4;font-size:.71rem;"><%= t.embeds.trSelectRole %></span>')
                 + '<i data-lucide="chevron-down" style="width:11px;height:11px;flex-shrink:0;opacity:.4;"></i>';
             }
             inp = '<div class="tr-role-picker-wrap trg-role-wrap' + (isMulti ? ' multi' : '') + '" data-pti="' + i + '" data-pkey="' + esc(p.key) + '">'
               + '<input type="hidden" class="trg-role-inp" data-ti="' + i + '" data-key="' + esc(p.key) + '" value="' + esc(String(val)) + '">'
               + '<div class="tr-role-pill">' + pillInner + '</div>'
               + '<div class="tr-role-drop">'
-              + '<input class="tr-role-search" type="text" placeholder="Search roles\u2026">'
-              + '<div class="tr-role-list">' + (guildRoles.length ? optsHtml : '<div style="padding:6px 8px;font-size:.72rem;opacity:.5;">No roles</div>') + '</div>'
+              + '<input class="tr-role-search" type="text" placeholder="<%= t.embeds.trSearchRoles %>">'
+              + '<div class="tr-role-list">' + (guildRoles.length ? optsHtml : '<div style="padding:6px 8px;font-size:.72rem;opacity:.5;"><%= t.embeds.trNoRoles %></div>') + '</div>'
               + '</div>'
               + '</div>';
           } else {
@@ -3470,10 +3471,10 @@
           + '</div>'
           + (def.params.length ? '<div class="trg-params">' + paramsHtml + '</div>' : '')
           + '<div class="trg-params">'
-          + '<div class="trg-param-field"><span class="trg-param-label">Target State</span>'
+          + '<div class="trg-param-field"><span class="trg-param-label"><%= t.embeds.trgTargetState %></span>'
           + '<select class="form-select trg-state-inp" data-ti="' + i + '" style="font-size:.72rem;">'
           + stateOptHtml + '</select></div>'
-          + '<div class="trg-param-field"><span class="trg-param-label">Action</span>'
+          + '<div class="trg-param-field"><span class="trg-param-label"><%= t.embeds.trgAction %></span>'
           + '<select class="form-select trg-act-inp" data-ti="' + i + '" style="font-size:.72rem;">'
           + actOptHtml + '</select></div>'
           + '</div></div>';
@@ -4185,6 +4186,15 @@
       const lbl = document.getElementById('prof-copy-label');
       if (lbl) { const orig = lbl.textContent; lbl.textContent = '<%= t.embeds.jsCopied %>'; setTimeout(() => lbl.textContent = orig, 1500); }
     });
+    /* Language switcher */
+    const langSelectEl = document.getElementById('lang-select');
+    if (langSelectEl) {
+      langSelectEl.addEventListener('change', function () {
+        const u = new URL(window.location.href);
+        u.searchParams.set('lang', this.value);
+        window.location.href = u.toString();
+      });
+    }
     document.querySelectorAll('.mgmt-section-btn').forEach(btn =>
       btn.addEventListener('click', () => { const body = btn.nextElementSibling; btn.classList.toggle('open'); if (body) body.classList.toggle('open'); }));
     document.querySelectorAll('.nav-link').forEach(a => a.addEventListener('click', e => {

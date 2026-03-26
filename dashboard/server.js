@@ -110,7 +110,7 @@ app.use(session({
     saveUninitialized: false,
     cookie: {
         secure: IS_PROD,      // true over HTTPS proxy, false on localhost
-        sameSite: IS_PROD ? 'strict' : 'lax',
+        sameSite: 'lax',     // 'strict' breaks OAuth redirects (Discord drops the cookie on cross-site nav)
         maxAge: 1000 * 60 * 60 * 24
     }
 }));

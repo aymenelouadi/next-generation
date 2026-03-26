@@ -962,7 +962,17 @@ async function _fireTrigger(client, doc, trigger, ctx = {}) {
                         logger.warn('[emped] send_dm: target state has no embeds/components — skipping DM');
                         break;
                     }
-                    await user.send(payload);
+                    try {
+                        await user.send(payload);
+                    } catch (dmErr) {
+                        // 50007 = Cannot send messages to this user (no mutual guilds, DMs closed, etc.)
+                        // These are expected failures — log at debug level, not warn.
+                        if (dmErr?.code === 50007 || dmErr?.code === 50013) {
+                            logger.debug(`[emped] send_dm skipped for ${user.id}: ${dmErr.message}`);
+                        } else {
+                            throw dmErr;
+                        }
+                    }
                     break;
                 }
                 case 'send_reply': {
