@@ -177,7 +177,23 @@ const CONTENT_ACTION_TYPES = new Set([
 ]);
 
 /** Per-user cooldown tracker. key = `${docId}:${stateId}:${userId}` → timestamp ms */
-const _cooldownMap = new Map();
+const _cooldownMap   = new Map();
+/** Cancel handles for cooldown expiry — prevents stale timeouts when cooldown value changes. */
+const _cooldownTimers = new Map();
+
+/**
+ * Per-stateKey interaction lock — serialises concurrent interactions for the same Discord
+ * message to eliminate the read-modify-write race on shared (non-multiUser) flows.
+ */
+const _msgLocks = new Map();
+function _withMsgLock(key, fn) {
+    if (!key) return fn();
+    const prev  = _msgLocks.get(key) ?? Promise.resolve();
+    const owned = prev.catch(() => {}).then(fn);
+    _msgLocks.set(key, owned);
+    owned.finally(() => { if (_msgLocks.get(key) === owned) _msgLocks.delete(key); });
+    return owned;
+}
 
 // ═════════════════════════════════════════════════════════════════════════════
 // FLOW CONTEXT STORE  —  Cross-Context (DM / Channel) Flow Tracking
@@ -207,7 +223,16 @@ const _flowContexts = new Map();
  * @param {object} ctx             Context payload (see above)
  * @param {number} timeoutMs       0 = no expiry; default 10 minutes
  */
+const _FLOW_CTX_MAX = 500;
 function _registerFlowContext(forwardedMsgId, ctx, timeoutMs = 10 * 60_000) {
+    // Prevent unbounded memory growth — evict the oldest context when at capacity
+    if (_flowContexts.size >= _FLOW_CTX_MAX) {
+        const oldest = _flowContexts.keys().next().value;
+        const evicted = _flowContexts.get(oldest);
+        if (evicted?.timer) clearTimeout(evicted.timer);
+        _flowContexts.delete(oldest);
+        logger.warn('[emped] _flowContexts limit reached — evicted oldest entry', { evicted: oldest });
+    }
     const existing = _flowContexts.get(forwardedMsgId);
     if (existing?.timer) clearTimeout(existing.timer);
     const timer = timeoutMs > 0
@@ -328,7 +353,9 @@ async function _checkPermissions(interaction, doc, currentStateId) {
             return false;
         }
         _cooldownMap.set(key, now);
-        setTimeout(() => _cooldownMap.delete(key), perms.cooldown * 1000 + 500);
+        if (_cooldownTimers.has(key)) clearTimeout(_cooldownTimers.get(key));
+        const _ct = setTimeout(() => { _cooldownMap.delete(key); _cooldownTimers.delete(key); }, perms.cooldown * 1000 + 500);
+        _cooldownTimers.set(key, _ct);
     }
 
     return true;
@@ -339,6 +366,11 @@ async function _execute(interaction, doc, currentStateId, targetStateId, rawActi
     const initialState = machineDef.states[machineDef.initial] || {};
     const targetState  = machineDef.states[targetStateId];
     if (!targetState) return;
+
+    if (!targetState.embeds?.length && !targetState.components?.length)
+        logger.warn('[emped] buildDiscordPayload: target state has no embeds or components — Discord message will appear empty', {
+            docId: String(doc._id), docName: doc.name, state: targetStateId,
+        });
 
     const actions   = _normalizeActions(rawActions);
     const clickedId = interaction.isButton() ? interaction.customId : null;
@@ -862,7 +894,8 @@ async function _refreshTriggerDocs() {
 }
 
 async function _ensureTriggerCache() {
-    if (Date.now() - _triggerDocsTs > 5 * 60_000) await _refreshTriggerDocs();
+    // TTL = 60 s; also force-busted immediately by invalidateTriggerCache() after dashboard saves
+    if (Date.now() - _triggerDocsTs > 60_000) await _refreshTriggerDocs();
 }
 
 /**
@@ -1128,22 +1161,25 @@ function registerHandlers(client) {
                 const stateKey       = (guildId && doc.machine?.multiUser && discordMsgId && userId)
                     ? `${discordMsgId}:${userId}`
                     : discordMsgId;
-                const currentStateId = (stateKey && instanceStates[stateKey])
-                    || doc.machine.initial;
+                return await _withMsgLock(stateKey, async () => {
+                    // Re-read instance state within the lock so two simultaneous users
+                    // on a shared (non-multiUser) message each see the latest DB state.
+                    const _snap      = await EmbedMessage.findById(doc._id, { instanceStates: 1 }).lean();
+                    const _freshSt   = _snap?.instanceStates || {};
+                    const currentStateId = (stateKey && _freshSt[stateKey]) || doc.machine.initial;
 
-                const result = _computeTransition(doc.machine, currentStateId, customId);
-                if (!result) return; // No valid transition from current state
+                    const result = _computeTransition(doc.machine, currentStateId, customId);
+                    if (!result) return;
 
-                if (!await _checkPermissions(interaction, doc, currentStateId)) return;
+                    if (!await _checkPermissions(interaction, doc, currentStateId)) return;
 
-                // Load flow context if this message is part of a DM/channel-forwarded flow
-                const flowCtxBtn = discordMsgId ? (_flowContexts.get(discordMsgId) || null) : null;
-
-                return await _execute(
-                    interaction, doc,
-                    currentStateId, result.targetStateId, result.actions,
-                    flowCtxBtn
-                );
+                    const flowCtxBtn = discordMsgId ? (_flowContexts.get(discordMsgId) || null) : null;
+                    return await _execute(
+                        interaction, doc,
+                        currentStateId, result.targetStateId, result.actions,
+                        flowCtxBtn
+                    );
+                });
             }
 
             // ── String Select Menu ────────────────────────────────────────────
@@ -1170,26 +1206,26 @@ function registerHandlers(client) {
                 const stateKey       = (guildId && doc.machine?.multiUser && discordMsgId && userId)
                     ? `${discordMsgId}:${userId}`
                     : discordMsgId;
-                const currentStateId = (stateKey && instanceStates[stateKey])
-                    || doc.machine.initial;
+                return await _withMsgLock(stateKey, async () => {
+                    const _snap      = await EmbedMessage.findById(doc._id, { instanceStates: 1 }).lean();
+                    const _freshSt   = _snap?.instanceStates || {};
+                    const currentStateId = (stateKey && _freshSt[stateKey]) || doc.machine.initial;
 
-                // Map selectedValue → option.customId → XState event
-                const resolved = _resolveSelectEvent(doc.machine, menuCustomId, selectedValue);
-                if (!resolved) return;
+                    const resolved = _resolveSelectEvent(doc.machine, menuCustomId, selectedValue);
+                    if (!resolved) return;
 
-                const result = _computeTransition(doc.machine, currentStateId, resolved.eventId);
-                if (!result) return;
+                    const result = _computeTransition(doc.machine, currentStateId, resolved.eventId);
+                    if (!result) return;
 
-                if (!await _checkPermissions(interaction, doc, currentStateId)) return;
+                    if (!await _checkPermissions(interaction, doc, currentStateId)) return;
 
-                // Load flow context if this message is part of a DM/channel-forwarded flow
-                const flowCtxSel = discordMsgId ? (_flowContexts.get(discordMsgId) || null) : null;
-
-                return await _execute(
-                    interaction, doc,
-                    currentStateId, result.targetStateId, result.actions,
-                    flowCtxSel
-                );
+                    const flowCtxSel = discordMsgId ? (_flowContexts.get(discordMsgId) || null) : null;
+                    return await _execute(
+                        interaction, doc,
+                        currentStateId, result.targetStateId, result.actions,
+                        flowCtxSel
+                    );
+                });
             }
 
         } catch (err) {

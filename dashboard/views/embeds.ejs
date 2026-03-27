@@ -1389,45 +1389,46 @@
     const guildChannels = JSON.parse(document.getElementById('_data_guildChannels').textContent);
     const guildRoles    = JSON.parse(document.getElementById('_data_guildRoles').textContent);
 
+    function _renderCard(m) {
+      const ch      = guildChannels.find(c => c.id === m.channelId);
+      const chName  = ch ? '#' + esc(ch.name) : (m.channelId || '\u2014');
+      const stCount = m.machine?.states ? Object.keys(m.machine.states).length : 0;
+      const date    = m.updatedAt ? new Date(m.updatedAt).toLocaleDateString() : '';
+      const el = document.createElement('div');
+      el.className = 'msg-card'; el.dataset.id = m._id;
+      el.innerHTML = '<div class="msg-card-top"><span class="msg-card-name">' + esc(m.name) + '</span>'
+        + '<span class="msg-card-channel"><i data-lucide="hash" style="width:12px;height:12px;"></i> ' + chName + '</span></div>'
+        + '<div class="msg-card-meta">'
+        + (stCount ? '<span class="msg-card-tag">' + stCount + ' state' + (stCount !== 1 ? 's' : '') + '</span>' : '')
+        + (m.epTheme          ? '<span class="msg-card-tag ep" title="Ephemeral Theme enabled">EP Theme</span>' : '')
+        + (m.machine?.multiUser ? '<span class="msg-card-tag" style="color:#38bdf8;border-color:rgba(56,189,248,.25);background:rgba(56,189,248,.08);" title="Each user has their own flow state">\uD83D\uDC65 Multi-User</span>' : '')
+        + (m.messageId        ? '<span class="msg-card-tag" style="color:var(--green);">\u2713 Sent</span>' : '')
+        + '</div>'
+        + '<div class="msg-card-actions">'
+        + '<button class="btn btn-ghost btn-xs btnEditMsg" data-id="' + m._id + '">'
+        + '<i data-lucide="pencil" style="width:12px;height:12px;"></i> '
+        + '<%= t.embeds.jsEdit %></button>'
+        + '<button class="btn btn-ghost btn-xs btnDupMsg" data-id="' + m._id + '" title="<%= t.embeds.jsDuplicate %>">'
+        + '<i data-lucide="copy-plus" style="width:12px;height:12px;"></i></button>'
+        + '<button class="btn btn-danger btn-xs btnDelMsg" data-id="' + m._id + '">'
+        + '<i data-lucide="trash-2" style="width:12px;height:12px;"></i></button>'
+        + '</div>'
+        + '<div class="msg-card-date">' + date + '</div>';
+      el.querySelector('.btnEditMsg').addEventListener('click', e => { e.stopPropagation(); openEditor(m._id); });
+      el.querySelector('.btnDupMsg').addEventListener('click', e => { e.stopPropagation(); duplicateMessage(m._id); });
+      el.querySelector('.btnDelMsg').addEventListener('click', e => { e.stopPropagation(); deleteMessage(m._id); });
+      el.addEventListener('click', () => openEditor(el.dataset.id));
+      lucide.createIcons({ nodes: [el] });
+      return el;
+    }
     function renderList() {
       const msgs = savedMessages;
       if (!msgs.length) { $msgGrid.innerHTML = ''; $emptyState.style.display = 'flex'; return; }
       $emptyState.style.display = 'none';
-      $msgGrid.innerHTML = msgs.map(m => {
-        const ch      = guildChannels.find(c => c.id === m.channelId);
-        const chName  = ch ? '#' + esc(ch.name) : (m.channelId || '\u2014');
-        const stCount = m.machine?.states ? Object.keys(m.machine.states).length : 0;
-        const date    = m.updatedAt ? new Date(m.updatedAt).toLocaleDateString() : '';
-        return '<div class="msg-card" data-id="' + m._id + '">'
-          + '<div class="msg-card-top"><span class="msg-card-name">' + esc(m.name) + '</span>'
-          + '<span class="msg-card-channel"><i data-lucide="hash" style="width:12px;height:12px;"></i> ' + chName + '</span></div>'
-          + '<div class="msg-card-meta">'
-          + (stCount ? '<span class="msg-card-tag">' + stCount + ' state' + (stCount !== 1 ? 's' : '') + '</span>' : '')
-          + (m.epTheme          ? '<span class="msg-card-tag ep" title="Ephemeral Theme enabled">EP Theme</span>' : '')
-          + (m.machine?.multiUser ? '<span class="msg-card-tag" style="color:#38bdf8;border-color:rgba(56,189,248,.25);background:rgba(56,189,248,.08);" title="Each user has their own flow state">\uD83D\uDC65 Multi-User</span>' : '')
-          + (m.messageId        ? '<span class="msg-card-tag" style="color:var(--green);">\u2713 Sent</span>' : '')
-          + '</div>'
-          + '<div class="msg-card-actions">'
-          + '<button class="btn btn-ghost btn-xs btnEditMsg" data-id="' + m._id + '">'
-          + '<i data-lucide="pencil" style="width:12px;height:12px;"></i> '
-          + '<%= t.embeds.jsEdit %></button>'
-          + '<button class="btn btn-ghost btn-xs btnDupMsg" data-id="' + m._id + '" title="<%= t.embeds.jsDuplicate %>">'
-          + '<i data-lucide="copy-plus" style="width:12px;height:12px;"></i></button>'
-          + '<button class="btn btn-danger btn-xs btnDelMsg" data-id="' + m._id + '">'
-          + '<i data-lucide="trash-2" style="width:12px;height:12px;"></i></button>'
-          + '</div>'
-          + '<div class="msg-card-date">' + date + '</div>'
-          + '</div>';
-      }).join('');
-      lucide.createIcons();
-      $msgGrid.querySelectorAll('.btnEditMsg').forEach(b =>
-        b.addEventListener('click', e => { e.stopPropagation(); openEditor(b.dataset.id); }));
-      $msgGrid.querySelectorAll('.btnDupMsg').forEach(b =>
-        b.addEventListener('click', e => { e.stopPropagation(); duplicateMessage(b.dataset.id); }));
-      $msgGrid.querySelectorAll('.btnDelMsg').forEach(b =>
-        b.addEventListener('click', e => { e.stopPropagation(); deleteMessage(b.dataset.id); }));
-      $msgGrid.querySelectorAll('.msg-card').forEach(c =>
-        c.addEventListener('click', () => openEditor(c.dataset.id)));
+      const _frag = document.createDocumentFragment();
+      msgs.forEach(m => _frag.appendChild(_renderCard(m)));
+      $msgGrid.innerHTML = '';
+      $msgGrid.appendChild(_frag);
     }
 
     async function deleteMessage(id) {
@@ -1436,7 +1437,9 @@
         await api('DELETE', '/' + id);
         const idx = savedMessages.findIndex(m => m._id === id);
         if (idx >= 0) savedMessages.splice(idx, 1);
-        renderList();
+        const _delEl = $msgGrid.querySelector('.msg-card[data-id="' + id + '"]');
+        if (_delEl) _delEl.remove();
+        if (!savedMessages.length) { $msgGrid.innerHTML = ''; $emptyState.style.display = 'flex'; }
         toast('Moved to Trash (restore within 30 days)', 'success');
       } catch (e) { toast(e.message, 'error'); }
     }
@@ -1453,7 +1456,8 @@
         });
         if (res.data) {
           savedMessages.push(res.data);
-          renderList();
+          $emptyState.style.display = 'none';
+          $msgGrid.appendChild(_renderCard(res.data));
           toast('<%= t.embeds.jsDuplicatedFlow %>', 'success');
         }
       } catch (e) { toast(e.message, 'error'); }
@@ -1612,6 +1616,8 @@
        ════════════════════════════════════════ */
     function openEditor(id) {
       _undoStack.length = 0; _redoStack.length = 0;
+      // Restore undo history persisted by pushHistory() so it survives page navigation
+      if (id) try { const _sv = sessionStorage.getItem('_us_' + id); if (_sv) _undoStack.push(...JSON.parse(_sv)); } catch (_) {}
       clearDirty(); _updateUndoButtons();
       _multiSel.clear();
       _multiSel.clear();
@@ -1779,6 +1785,8 @@
       if (_undoStack.length > MAX_HISTORY) _undoStack.shift();
       _redoStack.length = 0;
       _updateUndoButtons();
+      // Persist so history survives page navigation within the same browser tab
+      if (currentDoc?._id) try { sessionStorage.setItem('_us_' + currentDoc._id, JSON.stringify(_undoStack)); } catch (_) {}
     }
     function _updateUndoButtons() {
       const bu = document.getElementById('btnUndo');
@@ -2142,7 +2150,8 @@
     }
 
     function updateArrows() {
-      $flowSvg.querySelectorAll('.flow-arrow, .flow-arrow-lbl').forEach(e => e.remove());
+      // Build the desired arrows keyed by "fromId__evKey" for diffing
+      const desired = new Map();
       for (const [fromId, s] of Object.entries(machine.states)) {
         for (const [evKey, tr] of Object.entries(s.on || {})) {
           if (!tr.target || !machine.states[tr.target]) continue;
@@ -2155,19 +2164,34 @@
           const x1 = fp.x + 246, y1 = fp.y + fh / 2;
           const x2 = tp.x,       y2 = tp.y + th / 2;
           const cx = (x1 + x2) / 2;
-          const p  = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          p.setAttribute('d', `M ${x1} ${y1} C ${cx} ${y1} ${cx} ${y2} ${x2} ${y2}`);
-          p.setAttribute('class', 'flow-arrow');
-          $flowSvg.appendChild(p);
-          // Transition label at Bezier midpoint
+          const d   = `M ${x1} ${y1} C ${cx} ${y1} ${cx} ${y2} ${x2} ${y2}`;
           const lbl = evKey.length > 16 ? evKey.slice(0, 14) + '\u2026' : evKey;
-          const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-          t.setAttribute('x', (x1 + x2) / 2);
-          t.setAttribute('y', (y1 + y2) / 2 - 5);
-          t.setAttribute('class', 'flow-arrow-lbl');
-          t.textContent = lbl;
+          desired.set(fromId + '__' + evKey, { d, lbl, lx: (x1 + x2) / 2, ly: (y1 + y2) / 2 - 5 });
+        }
+      }
+      // Remove stale arrows that no longer exist in the machine
+      $flowSvg.querySelectorAll('[data-ak]').forEach(el => {
+        if (!desired.has(el.dataset.ak)) el.remove();
+      });
+      // Create or update only the arrows that changed (skips DOM writes when nothing moved)
+      for (const [key, { d, lbl, lx, ly }] of desired) {
+        const ek = CSS.escape(key);
+        let p = $flowSvg.querySelector(`.flow-arrow[data-ak="${ek}"]`);
+        if (!p) {
+          p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          p.setAttribute('class', 'flow-arrow'); p.dataset.ak = key;
+          $flowSvg.appendChild(p);
+        }
+        if (p.getAttribute('d') !== d) p.setAttribute('d', d);
+        let t = $flowSvg.querySelector(`.flow-arrow-lbl[data-ak="${ek}"]`);
+        if (!t) {
+          t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          t.setAttribute('class', 'flow-arrow-lbl'); t.dataset.ak = key;
           $flowSvg.appendChild(t);
         }
+        if (+t.getAttribute('x') !== lx) t.setAttribute('x', lx);
+        if (+t.getAttribute('y') !== ly) t.setAttribute('y', ly);
+        if (t.textContent !== lbl) t.textContent = lbl;
       }
     }
 
@@ -3684,6 +3708,22 @@
       if ($builderView.style.display === 'none') return;
       if ((e.key === 'Delete' || e.key === 'Backspace') && (_multiSel.size > 1 || selectedStateId) && !e.target.matches('input,textarea,select,[contenteditable]')) {
         e.preventDefault(); deleteSelectedState(); return;
+      }
+      // Arrow-key nudge: move selected state on the canvas (Shift = 50 px, plain = 10 px)
+      if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)
+          && selectedStateId && !e.target.matches('input,textarea,select,[contenteditable]')) {
+        e.preventDefault();
+        const _step = e.shiftKey ? 50 : 10;
+        const _ks   = machine.states[selectedStateId]; if (!_ks) return;
+        const _p    = _ks.position || { x: 80, y: 80 };
+        if      (e.key === 'ArrowLeft')  _p.x = Math.max(0, _p.x - _step);
+        else if (e.key === 'ArrowRight') _p.x += _step;
+        else if (e.key === 'ArrowUp')    _p.y = Math.max(0, _p.y - _step);
+        else if (e.key === 'ArrowDown')  _p.y += _step;
+        _ks.position = _p;
+        const _kc = document.getElementById('sc_' + selectedStateId);
+        if (_kc) { _kc.style.left = _p.x + 'px'; _kc.style.top = _p.y + 'px'; }
+        updateArrows(); scheduleMinimapUpdate(); markDirty(); return;
       }
       if (!(e.ctrlKey || e.metaKey)) return;
       if (e.key === 'z' && !e.shiftKey)                          { e.preventDefault(); undoAction(); }
