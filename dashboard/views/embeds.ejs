@@ -33,9 +33,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Tajawal:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <style>
-    <%- include('partials/embeds/_style') %>
-  </style>
+  <%- include('partials/embeds/_style') %>
 </head>
 <body>
   <div id="ov"></div>
@@ -53,19 +51,9 @@
 
   <script src="/js/lucide.min.js"></script>
   <%- include('partials/bg_particles') %>
-  <script>
-  (function () {
-    'use strict';
-
-    <%- include('partials/embeds/_js_core') %>
-
-    <%- include('partials/embeds/_js_canvas') %>
-
-    <%- include('partials/embeds/_js_inspector') %>
-
-    <%- include('partials/embeds/_js_events') %>
-
-  })();
-  </script>
+  <%- include('partials/embeds/_js_core') %>
+  <%- include('partials/embeds/_js_canvas') %>
+  <%- include('partials/embeds/_js_inspector') %>
+  <%- include('partials/embeds/_js_events') %>
 </body>
 </html>
