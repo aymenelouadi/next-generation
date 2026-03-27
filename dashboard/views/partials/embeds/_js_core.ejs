@@ -463,9 +463,9 @@
       for (const s of Object.values(machine.states)) {
         for (const [eid, tr] of Object.entries(s.on || {})) {
           if (tr.target === selectedStateId) delete s.on[eid];
-      _multiSel.clear();
         }
       }
+      _multiSel.clear();
       delete machine.states[selectedStateId];
       if (machine.initial === selectedStateId) machine.initial = Object.keys(machine.states)[0];
       selectedStateId = machine.initial;
