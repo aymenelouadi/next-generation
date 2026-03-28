@@ -255,24 +255,86 @@
     .empty-state h3  { font-size: 1.1rem; font-weight: 700; color: var(--white); }
     .empty-state p   { font-size: .83rem; color: var(--muted); max-width: 360px; line-height: 1.55; }
 
-    /* ── Builder (editor view) ── */
+    /* ── Builder ── */
     .builder { display: none; }
-    .builder.active { display: flex; gap: 20px; }
-    .builder-left { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
-    .builder-right { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px; }
-    @media (max-width: 1100px) { .builder.active { flex-direction: column; } .builder-right { width: 100%; } }
+    .builder.active { display: flex; flex-direction: column; }
+    .bld-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,.07); flex-wrap: wrap; }
+    .bld-name-input { background: none; border: none; border-bottom: 1.5px solid rgba(255,255,255,.2); color: var(--white); font-size: 1.1rem; font-weight: 700; font-family: inherit; outline: none; padding: 4px 6px; min-width: 160px; flex: 1; max-width: 420px; transition: border-color .18s; }
+    .bld-name-input::placeholder { color: var(--muted); font-weight: 400; }
+    .bld-name-input:focus { border-bottom-color: var(--purple); }
+    .bld-header-btns { display: flex; gap: 8px; flex-shrink: 0; }
+    .bld-body { width: 900px; max-width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
+    .bld-meta-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
+    .bld-meta-label { font-size: .72rem; font-weight: 600; color: var(--muted); letter-spacing: .03em; flex-shrink: 0; }
 
-    .bld-section { background: var(--card); border: 1px solid var(--border); border-radius: 14px; }
-    .bld-section-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 0; }
-    .bld-section-title { font-size: .82rem; font-weight: 700; color: var(--white); display: flex; align-items: center; gap: 7px; }
-    .bld-section-body { padding: 12px 16px 16px; }
+    /* ── Component rows (Discord-style) ── */
+    .bld-comp-row { display: flex; gap: 6px; align-items: flex-start; }
+    .bld-comp-row-grip { display: flex; align-items: flex-start; justify-content: center; width: 24px; padding-top: 14px; color: var(--muted); cursor: grab; flex-shrink: 0; opacity: .4; transition: opacity .15s; }
+    .bld-comp-row:hover .bld-comp-row-grip { opacity: .85; }
+    .bld-comp-row-main { flex: 1; min-width: 0; }
+    .bld-comp-row-aside { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; padding-top: 8px; }
+    .bld-comp-row-aside-btn { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; border: none; background: none; cursor: pointer; transition: background .15s; }
+    .bld-comp-row-aside-btn.red   { color: #f44336; }
+    .bld-comp-row-aside-btn.red:hover { background: rgba(244,67,54,.15); }
 
-    /* ── Message content editor ── */
-    .bld-textarea { width: 100%; min-height: 88px; background: var(--surface); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; padding: 10px 12px; color: var(--white); font-size: .82rem; font-family: inherit; resize: vertical; outline: none; transition: border-color .18s; }
-    .bld-textarea:focus { border-color: var(--purple); }
-    .bld-char-count { font-size: .65rem; color: var(--muted); text-align: right; margin-top: 4px; }
+    /* ── Content textarea (always-visible top row) ── */
+    .bld-textarea-wrap { position: relative; display: flex; flex-direction: column; background: var(--surface); border: 1px solid rgba(255,255,255,.12); border-radius: 10px; transition: border-color .18s; overflow: hidden; }
+    .bld-textarea-wrap:focus-within { border-color: var(--purple); }
+    .bld-textarea-inner { width: 100%; min-height: 80px; max-height: 240px; padding: 10px 12px 30px; background: none; border: none; color: var(--white); font-size: .85rem; font-family: inherit; resize: none; outline: none; line-height: 1.5; }
+    .bld-textarea-adornment { position: absolute; bottom: 6px; right: 10px; display: flex; align-items: center; gap: 6px; }
+    [dir="rtl"] .bld-textarea-adornment { right: auto; left: 10px; }
+    .bld-emoji-btn { display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 5px; border: none; background: none; color: var(--muted); cursor: pointer; transition: color .15s, background .15s; padding: 0; }
+    .bld-emoji-btn:hover { color: var(--yellow); background: rgba(255,255,255,.06); }
+    .bld-char-counter { font-size: .65rem; color: var(--muted); white-space: nowrap; }
 
-    /* ── Input fields ── */
+    /* ── Button row card ── */
+    .bld-buttons-card { background: var(--surface); border: 1px solid rgba(255,255,255,.09); border-radius: 10px; padding: 10px 12px; }
+    .bld-row-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .bld-row-title { font-size: .66rem; font-weight: 700; color: var(--muted); letter-spacing: .07em; text-transform: uppercase; }
+    .bld-buttons-list { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 4px; }
+    .bld-btn-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 4px; font-size: .78rem; font-weight: 600; cursor: pointer; border: 1.5px solid transparent; transition: opacity .15s; user-select: none; }
+    .bld-btn-pill.Primary   { background: rgba(88,101,242,.18); border-color: #5865f2; color: #8fa0ff; }
+    .bld-btn-pill.Secondary { background: rgba(79,84,92,.22); border-color: #4f545c; color: #b9bbbe; }
+    .bld-btn-pill.Success   { background: rgba(87,242,135,.12); border-color: #57f287; color: #57f287; }
+    .bld-btn-pill.Danger    { background: rgba(237,66,69,.13); border-color: #ed4245; color: #f87171; }
+    .bld-btn-pill.Link      { background: rgba(79,84,92,.18); border-color: #4f545c; color: #00a8fc; }
+    .bld-btn-pill-del { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; border-radius: 50%; background: rgba(255,255,255,.1); border: none; color: rgba(255,255,255,.5); cursor: pointer; font-size: 9px; padding: 0; line-height: 1; transition: background .15s, color .15s; }
+    .bld-btn-pill-del:hover { background: rgba(239,68,68,.3); color: #fca5a5; }
+
+    /* ── Select row card ── */
+    .bld-select-card { background: var(--surface); border: 1px solid rgba(255,255,255,.09); border-radius: 10px; padding: 10px 12px; }
+    .bld-opts-list { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
+    .bld-opt-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 6px; font-size: .72rem; color: var(--white); cursor: pointer; transition: border-color .15s; }
+    .bld-opt-chip:hover { border-color: rgba(124,58,237,.5); }
+    .bld-opt-chip-del { display: inline-flex; align-items: center; justify-content: center; width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,.1); border: none; color: rgba(255,255,255,.4); cursor: pointer; font-size: 8px; padding: 0; line-height: 1; transition: background .15s, color .15s; }
+    .bld-opt-chip-del:hover { background: rgba(239,68,68,.3); color: #fca5a5; }
+
+    /* ── Add Component button & popup menu ── */
+    .bld-add-comp-wrap { position: relative; margin-top: 4px; }
+    .bld-add-comp-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; background: var(--surface); border: 1px dashed rgba(255,255,255,.14); border-radius: 10px; color: var(--muted); font-size: .82rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all .18s; }
+    .bld-add-comp-btn:hover { background: var(--surface-2); border-color: rgba(124,58,237,.45); color: var(--purple-l); }
+    .bld-add-comp-menu { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: rgba(10,3,30,.97); border: 1px solid var(--border); border-radius: 10px; padding: 6px; min-width: 200px; z-index: 200; display: none; box-shadow: 0 8px 32px rgba(0,0,0,.55); }
+    .bld-add-comp-menu.open { display: block; }
+    .bld-add-comp-menu-item { display: flex; align-items: center; gap: 9px; padding: 9px 12px; border-radius: 7px; font-size: .82rem; font-weight: 600; color: var(--muted); cursor: pointer; transition: background .15s, color .15s; border: none; background: none; width: 100%; font-family: inherit; text-align: start; }
+    .bld-add-comp-menu-item:hover { background: rgba(255,255,255,.07); color: var(--white); }
+
+    /* ── Actions section (collapsible) ── */
+    .bld-actions-section { margin-top: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .bld-actions-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 11px 16px; background: none; border: none; color: var(--white); font-family: inherit; font-size: .82rem; font-weight: 700; cursor: pointer; transition: background .15s; }
+    .bld-actions-toggle:hover { background: rgba(255,255,255,.04); }
+    .bld-actions-chevron { color: var(--muted); transition: transform .25s; }
+    .bld-actions-toggle.open .bld-actions-chevron { transform: rotate(180deg); }
+    .bld-actions-body { padding: 0 16px 14px; display: none; }
+    .bld-actions-body.open { display: block; }
+    .bld-action-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--surface); border: 1px solid rgba(255,255,255,.06); border-radius: 8px; margin-bottom: 6px; cursor: pointer; transition: border-color .15s; }
+    .bld-action-item:last-child { margin-bottom: 0; }
+    .bld-action-item:hover { border-color: rgba(124,58,237,.4); }
+    .bld-action-item-icon { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 7px; background: rgba(124,58,237,.15); color: var(--purple-l); flex-shrink: 0; }
+    .bld-action-item-body { flex: 1; min-width: 0; }
+    .bld-action-item-label { font-size: .78rem; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bld-action-item-count { font-size: .65rem; color: var(--muted); }
+
+    /* ── Input fields (shared / modals) ── */
     .bld-input { width: 100%; background: var(--surface); border: 1px solid rgba(255,255,255,.08); border-radius: 8px; padding: 8px 12px; color: var(--white); font-size: .8rem; font-family: inherit; outline: none; transition: border-color .18s; }
     .bld-input:focus { border-color: var(--purple); }
     .bld-select { width: 100%; background: var(--surface); border: 1px solid rgba(255,255,255,.08); border-radius: 8px; padding: 8px 12px; color: var(--white); font-size: .8rem; font-family: inherit; outline: none; -webkit-appearance: none; appearance: none; cursor: pointer; transition: border-color .18s; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a78bfa' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 12px; }
@@ -283,34 +345,8 @@
     .bld-field:last-child { margin-bottom: 0; }
     .bld-row { display: flex; gap: 10px; }
     .bld-row > * { flex: 1; }
-
-    /* ── Component Row Cards ── */
-    .comp-row-card { background: var(--surface); border: 1px solid rgba(255,255,255,.06); border-radius: 10px; margin-bottom: 10px; transition: border-color .15s; }
-    .comp-row-card:hover { border-color: rgba(255,255,255,.12); }
-    .comp-row-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; cursor: pointer; }
-    .comp-row-head-label { font-size: .78rem; font-weight: 600; color: var(--white); display: flex; align-items: center; gap: 6px; }
-    .comp-row-head-actions { display: flex; gap: 4px; }
-    .comp-row-body { padding: 0 12px 12px; }
-    .comp-row-icon { width: 20px; height: 20px; border-radius: 5px; display: flex; align-items: center; justify-content: center; background: rgba(124,58,237,.15); color: var(--purple-l); flex-shrink: 0; }
-    .comp-row-tag { font-size: .6rem; font-weight: 600; color: var(--muted); background: rgba(255,255,255,.06); border-radius: 4px; padding: 2px 6px; }
-
-    /* ── Button Items ── */
-    .btn-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 8px; margin-bottom: 6px; }
-    .btn-item:last-child { margin-bottom: 0; }
-    .btn-item-color { width: 8px; height: 20px; border-radius: 3px; flex-shrink: 0; }
-    .btn-item-color.Primary { background: #5865f2; }
-    .btn-item-color.Secondary { background: #4f545c; }
-    .btn-item-color.Success { background: #57f287; }
-    .btn-item-color.Danger { background: #ed4245; }
-    .btn-item-color.Link { background: #4f545c; }
-    .btn-item-label { flex: 1; font-size: .78rem; font-weight: 600; color: var(--white); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .btn-item-actions { display: flex; gap: 4px; }
-
-    /* ── Select option Items ── */
-    .opt-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: rgba(255,255,255,.02); border: 1px solid rgba(255,255,255,.04); border-radius: 6px; margin-bottom: 4px; font-size: .75rem; color: var(--muted); }
-    .opt-item:last-child { margin-bottom: 0; }
-    .opt-item-label { flex: 1; color: var(--white); font-weight: 600; }
-    .opt-item-desc  { flex: 1; font-size: .68rem; }
+    .bld-textarea { width: 100%; min-height: 88px; background: var(--surface); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; padding: 10px 12px; color: var(--white); font-size: .82rem; font-family: inherit; resize: vertical; outline: none; transition: border-color .18s; }
+    .bld-textarea:focus { border-color: var(--purple); }
 
     /* ── Icon buttons ── */
     .icon-btn { display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 6px; border: none; background: none; color: var(--muted); cursor: pointer; transition: all .15s; flex-shrink: 0; }
@@ -318,31 +354,9 @@
     .icon-btn.danger:hover { background: rgba(239,68,68,.15); color: #fca5a5; }
 
     /* ── Action pipeline editor ── */
-    .action-list { display: flex; flex-direction: column; gap: 6px; }
-    .action-step { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; background: var(--surface); border: 1px solid rgba(255,255,255,.06); border-radius: 8px; }
+    .action-step { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; background: var(--surface); border: 1px solid rgba(255,255,255,.06); border-radius: 8px; margin-bottom: 6px; }
     .action-step-number { width: 22px; height: 22px; border-radius: 50%; background: rgba(124,58,237,.2); display: flex; align-items: center; justify-content: center; font-size: .65rem; font-weight: 700; color: var(--purple-l); flex-shrink: 0; margin-top: 2px; }
     .action-step-body { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-
-    /* ── Preview panel ── */
-    .preview-panel { background: #2b2d31; border-radius: 8px; padding: 16px; }
-    .preview-msg { display: flex; gap: 14px; font-size: .88rem; line-height: 1.4; }
-    .preview-avatar { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; background: rgba(124,58,237,.3); display: flex; align-items: center; justify-content: center; }
-    .preview-avatar img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-    .preview-body { flex: 1; min-width: 0; }
-    .preview-author { display: flex; align-items: baseline; gap: 6px; margin-bottom: 2px; }
-    .preview-author-name { font-size: .88rem; font-weight: 600; color: #fff; }
-    .preview-author-badge { font-size: .55rem; font-weight: 700; background: #5865f2; color: #fff; padding: 1px 5px; border-radius: 3px; text-transform: uppercase; letter-spacing: .03em; }
-    .preview-content { color: #dbdee1; font-size: .88rem; white-space: pre-wrap; word-break: break-word; margin-bottom: 6px; }
-    .preview-components { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
-    .preview-row { display: flex; flex-wrap: wrap; gap: 6px; }
-    .preview-btn { display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px; border-radius: 3px; font-size: .8rem; font-weight: 500; border: none; cursor: default; min-height: 32px; white-space: nowrap; transition: filter .15s; color: #fff; }
-    .preview-btn.Primary   { background: #5865f2; }
-    .preview-btn.Secondary { background: #4f545c; color: #fff; }
-    .preview-btn.Success   { background: #248046; }
-    .preview-btn.Danger    { background: #da373c; }
-    .preview-btn.Link      { background: #4f545c; color: #00a8fc; }
-    .preview-btn .link-icon { width: 12px; height: 12px; opacity: .6; }
-    .preview-select { width: 100%; max-width: 400px; background: #1e1f22; border: 1px solid #3f4147; border-radius: 4px; padding: 8px 32px 8px 12px; color: #949ba4; font-size: .8rem; font-family: inherit; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23949ba4' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 12px; }
 
     /* ── Modal overlay ── */
     .modal-overlay { position: fixed; inset: 0; z-index: 500; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.6); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity .2s; }
@@ -419,16 +433,14 @@
     <!-- ═══ BUILDER VIEW ═══ -->
     <div class="builder" id="builderView">
 
-      <!-- Toolbar -->
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;flex-wrap:wrap;width:100%;">
-        <div style="display:flex;align-items:center;gap:10px;">
+      <!-- Header: name input + close/save buttons -->
+      <div class="bld-header">
+        <input type="text" class="bld-name-input" id="msgName" maxlength="100"
+               placeholder="<%= lang === 'ar' ? 'اسم الرسالة...' : 'Message name...' %>">
+        <div class="bld-header-btns">
           <button class="btn btn-ghost btn-sm" id="backToList">
-            <i data-lucide="arrow-left" style="width:14px;height:14px;stroke:currentColor;"></i>
-            <%= lang === 'ar' ? 'رجوع' : 'Back' %>
+            <%= lang === 'ar' ? 'إغلاق' : 'Close' %>
           </button>
-          <span id="editorTitle" style="font-size:.92rem;font-weight:700;color:var(--white);"></span>
-        </div>
-        <div style="display:flex;gap:8px;">
           <button class="btn btn-primary" id="saveBtn">
             <i data-lucide="save" style="width:14px;height:14px;stroke:currentColor;"></i>
             <%= lang === 'ar' ? 'حفظ وإرسال' : 'Save & Send' %>
@@ -436,115 +448,91 @@
         </div>
       </div>
 
-      <!-- Builder body -->
-      <div class="builder-left">
+      <!-- Main 900px body -->
+      <div class="bld-body">
 
-        <!-- Message settings -->
-        <div class="bld-section">
-          <div class="bld-section-head">
-            <div class="bld-section-title">
-              <i data-lucide="settings-2" style="width:15px;height:15px;stroke:currentColor;"></i>
-              <%= lang === 'ar' ? 'إعدادات الرسالة' : 'Message Settings' %>
-            </div>
-          </div>
-          <div class="bld-section-body">
-            <div class="bld-row">
-              <div class="bld-field">
-                <label class="bld-label"><%= lang === 'ar' ? 'اسم الرسالة' : 'Message Name' %></label>
-                <input type="text" class="bld-input" id="msgName" maxlength="100" placeholder="<%= lang === 'ar' ? 'مثال: قائمة الأدوار' : 'e.g. Role Menu' %>">
-              </div>
-              <div class="bld-field">
-                <label class="bld-label"><%= lang === 'ar' ? 'القناة' : 'Channel' %></label>
-                <select class="bld-select" id="msgChannel">
-                  <option value=""><%= lang === 'ar' ? 'اختر قناة...' : 'Select channel...' %></option>
-                </select>
-              </div>
-            </div>
-          </div>
+        <!-- Channel selector row -->
+        <div class="bld-meta-row">
+          <span class="bld-meta-label"><%= lang === 'ar' ? 'القناة:' : 'Channel:' %></span>
+          <select class="bld-select" id="msgChannel" style="max-width:240px;">
+            <option value=""><%= lang === 'ar' ? 'اختر قناة...' : 'Select channel...' %></option>
+          </select>
         </div>
 
-        <!-- Message content -->
-        <div class="bld-section">
-          <div class="bld-section-head">
-            <div class="bld-section-title">
-              <i data-lucide="text" style="width:15px;height:15px;stroke:currentColor;"></i>
-              <%= lang === 'ar' ? 'محتوى الرسالة' : 'Message Content' %>
-            </div>
-          </div>
-          <div class="bld-section-body">
-            <textarea class="bld-textarea" id="msgContent" maxlength="2000" placeholder="<%= lang === 'ar' ? 'اكتب محتوى الرسالة هنا...' : 'Type your message content here...' %>"></textarea>
-            <div class="bld-char-count"><span id="contentCount">0</span> / 2000</div>
-          </div>
-        </div>
+        <!-- All component rows (content row first, then dynamic rows) -->
+        <div id="compRows">
 
-        <!-- Components -->
-        <div class="bld-section">
-          <div class="bld-section-head">
-            <div class="bld-section-title">
-              <i data-lucide="layout-grid" style="width:15px;height:15px;stroke:currentColor;"></i>
-              <%= lang === 'ar' ? 'المكونات' : 'Components' %>
-              <span style="font-size:.65rem;color:var(--muted);font-weight:400;">(max 5 rows)</span>
+          <!-- Content row: always-present text block -->
+          <div class="bld-comp-row" id="contentRow">
+            <div class="bld-comp-row-grip">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
+                <circle cx="6.75"  cy="9"     r="1.25" fill="currentColor"></circle>
+                <circle cx="6.75"  cy="3.75"  r="1.25" fill="currentColor"></circle>
+                <circle cx="6.75"  cy="14.25" r="1.25" fill="currentColor"></circle>
+                <circle cx="11.25" cy="9"     r="1.25" fill="currentColor"></circle>
+                <circle cx="11.25" cy="3.75"  r="1.25" fill="currentColor"></circle>
+                <circle cx="11.25" cy="14.25" r="1.25" fill="currentColor"></circle>
+              </svg>
             </div>
-            <div style="display:flex;gap:6px;">
-              <button class="btn btn-ghost btn-sm" id="addBtnRow">
-                <i data-lucide="square" style="width:12px;height:12px;stroke:currentColor;"></i>
-                <%= lang === 'ar' ? 'صف أزرار' : 'Button Row' %>
-              </button>
-              <button class="btn btn-ghost btn-sm" id="addSelectRow">
-                <i data-lucide="list" style="width:12px;height:12px;stroke:currentColor;"></i>
-                <%= lang === 'ar' ? 'قائمة' : 'Select Menu' %>
-              </button>
-            </div>
-          </div>
-          <div class="bld-section-body" id="compRows">
-            <div id="noCompMsg" style="text-align:center;padding:20px;color:var(--muted);font-size:.8rem;">
-              <%= lang === 'ar' ? 'لم تُضف أي مكونات بعد. أضف صف أزرار أو قائمة للبدء.' : 'No components added yet. Add a button row or select menu to get started.' %>
-            </div>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="bld-section">
-          <div class="bld-section-head">
-            <div class="bld-section-title">
-              <i data-lucide="zap" style="width:15px;height:15px;stroke:currentColor;"></i>
-              <%= lang === 'ar' ? 'إجراءات التفاعل' : 'Interaction Actions' %>
-            </div>
-          </div>
-          <div class="bld-section-body" id="actionsPanel">
-            <div id="noActionsMsg" style="text-align:center;padding:20px;color:var(--muted);font-size:.8rem;">
-              <%= lang === 'ar' ? 'أضف مكونات أولاً ثم حدد الإجراءات لكل زر أو خيار.' : 'Add components first, then configure actions for each button or option.' %>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Preview -->
-      <div class="builder-right">
-        <div class="bld-section">
-          <div class="bld-section-head">
-            <div class="bld-section-title">
-              <i data-lucide="eye" style="width:15px;height:15px;stroke:currentColor;"></i>
-              <%= lang === 'ar' ? 'معاينة' : 'Preview' %>
-            </div>
-          </div>
-          <div class="bld-section-body">
-            <div class="preview-panel" id="previewPanel">
-              <div class="preview-msg">
-                <div class="preview-avatar" id="prevAvatar"></div>
-                <div class="preview-body">
-                  <div class="preview-author">
-                    <span class="preview-author-name" id="prevBotName">Bot</span>
-                    <span class="preview-author-badge">BOT</span>
-                  </div>
-                  <div class="preview-content" id="prevContent"><%= lang === 'ar' ? 'محتوى الرسالة يظهر هنا...' : 'Message content appears here...' %></div>
-                  <div class="preview-components" id="prevComponents"></div>
+            <div class="bld-comp-row-main">
+              <div class="bld-textarea-wrap">
+                <textarea class="bld-textarea-inner" id="msgContent" maxlength="2000"
+                  placeholder="<%= lang === 'ar' ? 'اكتب محتوى الرسالة هنا...' : 'Type your message content here...' %>"></textarea>
+                <div class="bld-textarea-adornment">
+                  <button class="bld-emoji-btn" type="button" title="<%= lang === 'ar' ? 'إيموجي' : 'Emoji' %>">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
+                      <path opacity="0.4" d="M9 17C4.589 17 1 13.411 1 9C1 4.589 4.589 1 9 1C13.411 1 17 4.589 17 9C17 13.411 13.411 17 9 17Z" fill="currentColor"></path>
+                      <path d="M6 9C6.552 9 7 8.552 7 8C7 7.448 6.552 7 6 7C5.448 7 5 7.448 5 8C5 8.552 5.448 9 6 9Z" fill="currentColor"></path>
+                      <path d="M12 9C12.552 9 13 8.552 13 8C13 7.448 12.552 7 12 7C11.448 7 11 7.448 11 8C11 8.552 11.448 9 12 9Z" fill="currentColor"></path>
+                      <path d="M11.897 10.757C11.743 10.603 11.531 10.536 11.314 10.568C9.782 10.807 8.202 10.806 6.676 10.567C6.462 10.535 6.255 10.602 6.104 10.752C5.95 10.905 5.877 11.128 5.911 11.35C6.141 12.861 7.469 14 9 14C10.531 14 11.86 12.86 12.089 11.347C12.122 11.131 12.05 10.91 11.897 10.757Z" fill="currentColor"></path>
+                    </svg>
+                  </button>
+                  <span class="bld-char-counter"><span id="contentCount">0</span>/2000</span>
                 </div>
               </div>
             </div>
+            <div class="bld-comp-row-aside"></div>
+          </div>
+
+          <!-- Dynamic button / select rows rendered here by JS -->
+        </div>
+
+        <!-- Add Component button -->
+        <div class="bld-add-comp-wrap">
+          <button class="bld-add-comp-btn" id="addCompBtn" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
+              <path opacity="0.4" d="M14.25 2H12.75C11.784 2 11 2.784 11 3.75V6.25C11 7.216 11.784 8 12.75 8H14.25C15.216 8 16 7.216 16 6.25V3.75C16 2.784 15.216 2 14.25 2Z" fill="currentColor"></path>
+              <path opacity="0.4" d="M5.25 10H3.75C2.784 10 2 10.784 2 11.75V14.25C2 15.216 2.784 16 3.75 16H5.25C6.216 16 7 15.216 7 14.25V11.75C7 10.784 6.216 10 5.25 10Z" fill="currentColor"></path>
+              <path d="M7.75 2H3.75C2.784 2 2 2.784 2 3.75V6.25C2 7.216 2.784 8 3.75 8H7.75C8.716 8 9.5 7.216 9.5 6.25V3.75C9.5 2.784 8.716 2 7.75 2Z" fill="currentColor"></path>
+              <path d="M14.25 10H10.25C9.284 10 8.5 10.784 8.5 11.75V14.25C8.5 15.216 9.284 16 10.25 16H14.25C15.216 16 16 15.216 16 14.25V11.75C16 10.784 15.216 10 14.25 10Z" fill="currentColor"></path>
+            </svg>
+            <%= lang === 'ar' ? 'إضافة مكوّن' : 'Add Component' %>
+          </button>
+          <div class="bld-add-comp-menu" id="addCompMenu">
+            <button class="bld-add-comp-menu-item" id="menuAddBtnRow" type="button">
+              <i data-lucide="square" style="width:15px;height:15px;stroke:currentColor;"></i>
+              <%= lang === 'ar' ? 'صف أزرار' : 'Button Row' %>
+            </button>
+            <button class="bld-add-comp-menu-item" id="menuAddSelectRow" type="button">
+              <i data-lucide="list" style="width:15px;height:15px;stroke:currentColor;"></i>
+              <%= lang === 'ar' ? 'قائمة منسدلة' : 'Select Menu' %>
+            </button>
           </div>
         </div>
+
+        <!-- Interaction Actions (collapsible, hidden until components added) -->
+        <div class="bld-actions-section" id="actionsSection" style="display:none;">
+          <button class="bld-actions-toggle" id="actionsToggle" type="button">
+            <span style="display:flex;align-items:center;gap:7px;">
+              <i data-lucide="zap" style="width:14px;height:14px;stroke:currentColor;"></i>
+              <%= lang === 'ar' ? 'إجراءات التفاعل' : 'Interaction Actions' %>
+            </span>
+            <svg class="bld-actions-chevron" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"></path></svg>
+          </button>
+          <div class="bld-actions-body" id="actionsPanel"></div>
+        </div>
+
+        <div style="padding-bottom:50px;"></div>
       </div>
 
     </div>
@@ -778,22 +766,16 @@
       const emptyState    = document.getElementById('emptyState');
       const newMsgBtn     = document.getElementById('newMsgBtn');
       const emptyNewBtn   = document.getElementById('emptyNewBtn');
-      const backToList    = document.getElementById('backToList');
-      const saveBtn       = document.getElementById('saveBtn');
-      const editorTitle   = document.getElementById('editorTitle');
-      const msgName       = document.getElementById('msgName');
-      const msgChannel    = document.getElementById('msgChannel');
-      const msgContent    = document.getElementById('msgContent');
-      const contentCount  = document.getElementById('contentCount');
-      const compRowsEl    = document.getElementById('compRows');
-      const noCompMsg     = document.getElementById('noCompMsg');
-      const actionsPanel  = document.getElementById('actionsPanel');
-      const noActionsMsg  = document.getElementById('noActionsMsg');
-      const prevAvatar    = document.getElementById('prevAvatar');
-      const prevBotName   = document.getElementById('prevBotName');
-      const prevContent   = document.getElementById('prevContent');
-      const prevComponents = document.getElementById('prevComponents');
-      const toastEl       = document.getElementById('toast');
+      const backToList     = document.getElementById('backToList');
+      const saveBtn        = document.getElementById('saveBtn');
+      const msgName        = document.getElementById('msgName');
+      const msgChannel     = document.getElementById('msgChannel');
+      const msgContent     = document.getElementById('msgContent');
+      const contentCount   = document.getElementById('contentCount');
+      const compRowsEl     = document.getElementById('compRows');
+      const actionsPanel   = document.getElementById('actionsPanel');
+      const actionsSection = document.getElementById('actionsSection');
+      const toastEl        = document.getElementById('toast');
 
       /* ── Modal refs ── */
       const btnEditModal   = document.getElementById('btnEditModal');
@@ -830,10 +812,7 @@
         msgChannel.appendChild(o);
       });
 
-      /* ── Bot info in preview ── */
-      if (botInfo.avatar) prevAvatar.innerHTML = '<img src="' + esc(botInfo.avatar) + '" alt="" />';
-      else prevAvatar.textContent = 'B';
-      if (botInfo.username) prevBotName.textContent = botInfo.username;
+
 
       /* ═══ LIST VIEW RENDERING ═══ */
       function renderList() {
@@ -891,7 +870,6 @@
           compRows   = JSON.parse(JSON.stringify(msg.components || []));
           actionsMap = {};
           (msg.actions || []).forEach(a => { actionsMap[a.customId] = JSON.parse(JSON.stringify(a)); });
-          editorTitle.textContent = isAR ? 'تعديل الرسالة' : 'Edit Message';
         } else {
           editingId = null;
           msgName.value = '';
@@ -899,7 +877,6 @@
           msgContent.value = '';
           compRows   = [];
           actionsMap = {};
-          editorTitle.textContent = isAR ? 'رسالة جديدة' : 'New Message';
         }
         nextRowId = compRows.length ? Math.max(...compRows.map(r => parseInt(r.id?.split('_')[1]) || 0)) + 1 : 1;
         contentCount.textContent = msgContent.value.length;
@@ -908,7 +885,6 @@
         builderView.classList.add('active');
         renderCompRows();
         renderActions();
-        renderPreview();
       }
 
       function closeEditor() {
@@ -917,86 +893,79 @@
         renderList();
       }
 
+      /* ═══ SVG CONSTANTS ═══ */
+      const GRIP_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><circle cx="6.75" cy="9" r="1.25" fill="currentColor"></circle><circle cx="6.75" cy="3.75" r="1.25" fill="currentColor"></circle><circle cx="6.75" cy="14.25" r="1.25" fill="currentColor"></circle><circle cx="11.25" cy="9" r="1.25" fill="currentColor"></circle><circle cx="11.25" cy="3.75" r="1.25" fill="currentColor"></circle><circle cx="11.25" cy="14.25" r="1.25" fill="currentColor"></circle></svg>';
+      const TRASH_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18"><path opacity="0.4" d="M3.408 5L3.903 14.389C3.979 15.853 5.185 17 6.649 17H11.353C12.817 17 14.023 15.853 14.099 14.39L14.594 5H3.408Z" fill="currentColor"></path><path d="M7.374 14C6.98 14 6.649 13.69 6.626 13.29L6.376 8.79C6.354 8.38 6.67 8.02 7.083 8C7.489 7.98 7.851 8.29 7.874 8.71L8.124 13.21C8.147 13.62 7.83 13.98 7.417 14H7.374Z" fill="currentColor"></path><path d="M10.626 14H10.583C10.17 13.98 9.854 13.62 9.876 13.21L10.126 8.71C10.149 8.29 10.498 7.98 10.917 8C11.33 8.02 11.647 8.38 11.624 8.79L11.374 13.29C11.352 13.69 11.021 14 10.626 14Z" fill="currentColor"></path><path d="M15.25 4H12V2.75C12 1.785 11.215 1 10.25 1H7.75C6.785 1 6 1.785 6 2.75V4H2.75C2.336 4 2 4.336 2 4.75C2 5.164 2.336 5.5 2.75 5.5H15.25C15.664 5.5 16 5.164 16 4.75C16 4.336 15.664 4 15.25 4ZM7.5 2.75C7.5 2.614 7.614 2.5 7.75 2.5H10.25C10.386 2.5 10.5 2.614 10.5 2.75V4H7.5V2.75Z" fill="currentColor"></path></svg>';
+
       /* ═══ COMPONENT ROWS RENDERING ═══ */
       function renderCompRows() {
-        const container = compRowsEl;
-        // Remove old row cards but keep noCompMsg
-        container.querySelectorAll('.comp-row-card').forEach(el => el.remove());
+        // Remove only dynamic rows (those with data-row-id), keep #contentRow
+        compRowsEl.querySelectorAll('.bld-comp-row[data-row-id]').forEach(el => el.remove());
 
-        if (!compRows.length) { noCompMsg.style.display = ''; return; }
-        noCompMsg.style.display = 'none';
-
-        compRows.forEach((row, ri) => {
-          const card = document.createElement('div');
-          card.className = 'comp-row-card';
-          card.dataset.rowId = row.id;
+        compRows.forEach((row) => {
+          const wrap = document.createElement('div');
+          wrap.className = 'bld-comp-row';
+          wrap.dataset.rowId = row.id;
 
           if (row.type === 'buttons') {
-            card.innerHTML =
-              '<div class="comp-row-head">' +
-                '<span class="comp-row-head-label">' +
-                  '<span class="comp-row-icon"><i data-lucide="square" style="width:11px;height:11px;stroke:currentColor;"></i></span>' +
-                  (isAR ? 'صف أزرار' : 'Button Row') + ' <span class="comp-row-tag">' + (row.buttons?.length || 0) + '/5</span>' +
-                '</span>' +
-                '<span class="comp-row-head-actions">' +
-                  (ri > 0 ? '<button class="icon-btn _move-up" title="Move up"><i data-lucide="chevron-up" style="width:13px;height:13px;stroke:currentColor;"></i></button>' : '') +
-                  (ri < compRows.length - 1 ? '<button class="icon-btn _move-down" title="Move down"><i data-lucide="chevron-down" style="width:13px;height:13px;stroke:currentColor;"></i></button>' : '') +
-                  '<button class="icon-btn danger _del-row" title="Delete row"><i data-lucide="x" style="width:13px;height:13px;stroke:currentColor;"></i></button>' +
-                '</span>' +
+            const btnsHtml = (row.buttons || []).map((b, bi) =>
+              '<span class="bld-btn-pill ' + b.style + '" data-bi="' + bi + '" title="' + (isAR ? 'تعديل' : 'Edit') + '">' +
+                (b.emoji ? esc(b.emoji) + ' ' : '') + esc(b.label || (isAR ? 'زر' : 'Button')) +
+                ' <button class="bld-btn-pill-del _del-btn" data-bi="' + bi + '">&times;</button>' +
+              '</span>'
+            ).join('');
+            wrap.innerHTML =
+              '<div class="bld-comp-row-grip">' + GRIP_SVG + '</div>' +
+              '<div class="bld-comp-row-main">' +
+                '<div class="bld-buttons-card">' +
+                  '<div class="bld-row-header">' +
+                    '<span class="bld-row-title">' + (isAR ? 'صف أزرار' : 'BUTTON ROW') +
+                      ' <span style="font-size:.6rem;font-weight:400;">' + (row.buttons?.length || 0) + '/5</span></span>' +
+                    ((row.buttons?.length || 0) < 5
+                      ? '<button class="btn btn-ghost btn-sm _add-btn" style="font-size:.7rem;padding:3px 8px;">' + (isAR ? '+ زر' : '+ Button') + '</button>'
+                      : '') +
+                  '</div>' +
+                  '<div class="bld-buttons-list">' + btnsHtml + '</div>' +
+                '</div>' +
               '</div>' +
-              '<div class="comp-row-body">' +
-                (row.buttons || []).map((b, bi) =>
-                  '<div class="btn-item" data-bi="' + bi + '">' +
-                    '<div class="btn-item-color ' + b.style + '"></div>' +
-                    '<span class="btn-item-label">' + esc(b.emoji ? b.emoji + ' ' : '') + esc(b.label || 'Button') + '</span>' +
-                    '<span class="btn-item-actions">' +
-                      '<button class="icon-btn _edit-btn" data-bi="' + bi + '" title="Edit"><i data-lucide="pencil" style="width:11px;height:11px;stroke:currentColor;"></i></button>' +
-                      '<button class="icon-btn _action-btn" data-cid="' + esc(b.customId) + '" title="Actions"><i data-lucide="zap" style="width:11px;height:11px;stroke:currentColor;"></i></button>' +
-                      '<button class="icon-btn danger _del-btn" data-bi="' + bi + '" title="Delete"><i data-lucide="x" style="width:11px;height:11px;stroke:currentColor;"></i></button>' +
-                    '</span>' +
-                  '</div>'
-                ).join('') +
-                ((row.buttons?.length || 0) < 5 ?
-                  '<button class="btn btn-ghost btn-sm _add-btn" style="width:100%;margin-top:6px;justify-content:center;">' +
-                    '<i data-lucide="plus" style="width:11px;height:11px;stroke:currentColor;"></i> ' + (isAR ? 'إضافة زر' : 'Add Button') +
-                  '</button>' : '') +
+              '<div class="bld-comp-row-aside">' +
+                '<button class="bld-comp-row-aside-btn red _del-row" title="' + (isAR ? 'حذف' : 'Delete') + '">' + TRASH_SVG + '</button>' +
               '</div>';
+
           } else if (row.type === 'select') {
             const s = row.select || {};
-            card.innerHTML =
-              '<div class="comp-row-head">' +
-                '<span class="comp-row-head-label">' +
-                  '<span class="comp-row-icon"><i data-lucide="list" style="width:11px;height:11px;stroke:currentColor;"></i></span>' +
-                  (isAR ? 'قائمة منسدلة' : 'Select Menu') + ' <span class="comp-row-tag">' + (s.options?.length || 0) + ' ' + (isAR ? 'خيارات' : 'opts') + '</span>' +
-                '</span>' +
-                '<span class="comp-row-head-actions">' +
-                  (ri > 0 ? '<button class="icon-btn _move-up" title="Move up"><i data-lucide="chevron-up" style="width:13px;height:13px;stroke:currentColor;"></i></button>' : '') +
-                  (ri < compRows.length - 1 ? '<button class="icon-btn _move-down" title="Move down"><i data-lucide="chevron-down" style="width:13px;height:13px;stroke:currentColor;"></i></button>' : '') +
-                  '<button class="icon-btn _action-btn" data-cid="' + esc(s.customId || '') + '" title="Actions"><i data-lucide="zap" style="width:11px;height:11px;stroke:currentColor;"></i></button>' +
-                  '<button class="icon-btn danger _del-row" title="Delete row"><i data-lucide="x" style="width:13px;height:13px;stroke:currentColor;"></i></button>' +
-                '</span>' +
-              '</div>' +
-              '<div class="comp-row-body">' +
-                '<div class="bld-field" style="margin-bottom:8px;">' +
-                  '<label class="bld-label">' + (isAR ? 'النص التوضيحي' : 'Placeholder') + '</label>' +
-                  '<input type="text" class="bld-input _sel-ph" value="' + esc(s.placeholder || '') + '" maxlength="150" style="font-size:.75rem;">' +
+            const optsHtml = (s.options || []).map((o, oi) =>
+              '<span class="bld-opt-chip _edit-opt" data-oi="' + oi + '">' +
+                (o.emoji ? esc(o.emoji) + ' ' : '') + esc(o.label || (isAR ? 'خيار' : 'Option')) +
+                ' <button class="bld-opt-chip-del _del-opt" data-oi="' + oi + '">&times;</button>' +
+              '</span>'
+            ).join('');
+            wrap.innerHTML =
+              '<div class="bld-comp-row-grip">' + GRIP_SVG + '</div>' +
+              '<div class="bld-comp-row-main">' +
+                '<div class="bld-select-card">' +
+                  '<div class="bld-row-header">' +
+                    '<span class="bld-row-title">' + (isAR ? 'قائمة منسدلة' : 'SELECT MENU') +
+                      ' <span style="font-size:.6rem;font-weight:400;">' + (s.options?.length || 0) + '/25</span></span>' +
+                    '<button class="btn btn-ghost btn-sm _action-sel" data-cid="' + esc(s.customId || '') + '" style="font-size:.7rem;padding:3px 8px;">' +
+                      '<i data-lucide="zap" style="width:10px;height:10px;stroke:currentColor;"></i> ' + (isAR ? 'إجراءات' : 'Actions') +
+                    '</button>' +
+                  '</div>' +
+                  '<div class="bld-field" style="margin-bottom:6px;">' +
+                    '<input type="text" class="bld-input _sel-ph" value="' + esc(s.placeholder || '') + '" maxlength="150" placeholder="' + (isAR ? 'النص التوضيحي...' : 'Placeholder...') + '" style="font-size:.78rem;">' +
+                  '</div>' +
+                  '<div class="bld-opts-list">' + optsHtml + '</div>' +
+                  ((s.options?.length || 0) < 25
+                    ? '<button class="btn btn-ghost btn-sm _add-opt" style="font-size:.7rem;padding:3px 8px;margin-top:4px;">' + (isAR ? '+ خيار' : '+ Option') + '</button>'
+                    : '') +
                 '</div>' +
-                (s.options || []).map((o, oi) =>
-                  '<div class="opt-item" data-oi="' + oi + '">' +
-                    '<span class="opt-item-label">' + esc(o.emoji ? o.emoji + ' ' : '') + esc(o.label || 'Option') + '</span>' +
-                    '<span class="opt-item-desc">' + esc(o.description || '') + '</span>' +
-                    '<button class="icon-btn _edit-opt" data-oi="' + oi + '" title="Edit"><i data-lucide="pencil" style="width:10px;height:10px;stroke:currentColor;"></i></button>' +
-                    '<button class="icon-btn danger _del-opt" data-oi="' + oi + '" title="Delete"><i data-lucide="x" style="width:10px;height:10px;stroke:currentColor;"></i></button>' +
-                  '</div>'
-                ).join('') +
-                ((s.options?.length || 0) < 25 ?
-                  '<button class="btn btn-ghost btn-sm _add-opt" style="width:100%;margin-top:6px;justify-content:center;">' +
-                    '<i data-lucide="plus" style="width:11px;height:11px;stroke:currentColor;"></i> ' + (isAR ? 'إضافة خيار' : 'Add Option') +
-                  '</button>' : '') +
+              '</div>' +
+              '<div class="bld-comp-row-aside">' +
+                '<button class="bld-comp-row-aside-btn red _del-row" title="' + (isAR ? 'حذف' : 'Delete') + '">' + TRASH_SVG + '</button>' +
               '</div>';
           }
 
-          container.appendChild(card);
+          compRowsEl.appendChild(wrap);
         });
 
         lucide.createIcons();
@@ -1005,123 +974,128 @@
 
       /* ═══ ROW EVENT BINDINGS ═══ */
       function bindRowEvents() {
-        compRowsEl.querySelectorAll('.comp-row-card').forEach(card => {
+        compRowsEl.querySelectorAll('.bld-comp-row[data-row-id]').forEach(card => {
           const rowId = card.dataset.rowId;
           const ri = compRows.findIndex(r => r.id === rowId);
           if (ri < 0) return;
 
-          // Move up/down
-          card.querySelector('._move-up')?.addEventListener('click', () => { if (ri > 0) { [compRows[ri - 1], compRows[ri]] = [compRows[ri], compRows[ri - 1]]; markDirty(); renderCompRows(); renderPreview(); } });
-          card.querySelector('._move-down')?.addEventListener('click', () => { if (ri < compRows.length - 1) { [compRows[ri], compRows[ri + 1]] = [compRows[ri + 1], compRows[ri]]; markDirty(); renderCompRows(); renderPreview(); } });
-
           // Delete row
           card.querySelector('._del-row')?.addEventListener('click', () => {
             compRows.splice(ri, 1);
-            markDirty();
-            renderCompRows();
-            renderActions();
-            renderPreview();
+            markDirty(); renderCompRows(); renderActions();
           });
 
-          // Buttons
           if (compRows[ri].type === 'buttons') {
-            card.querySelectorAll('._edit-btn').forEach(btn => {
-              btn.addEventListener('click', () => openBtnEdit(rowId, parseInt(btn.dataset.bi)));
-            });
-            card.querySelectorAll('._del-btn').forEach(btn => {
-              btn.addEventListener('click', () => {
-                const bi = parseInt(btn.dataset.bi);
-                const removed = compRows[ri].buttons.splice(bi, 1)[0];
-                if (removed?.customId) delete actionsMap[removed.customId];
-                markDirty(); renderCompRows(); renderActions(); renderPreview();
+            // Click pill to edit (not on × del)
+            card.querySelectorAll('.bld-btn-pill').forEach(pill => {
+              pill.addEventListener('click', e => {
+                if (e.target.classList.contains('bld-btn-pill-del')) return;
+                openBtnEdit(rowId, parseInt(pill.dataset.bi));
               });
             });
+            // Delete individual button
+            card.querySelectorAll('._del-btn').forEach(del => {
+              del.addEventListener('click', e => {
+                e.stopPropagation();
+                const bi = parseInt(del.dataset.bi);
+                const removed = compRows[ri].buttons.splice(bi, 1)[0];
+                if (removed?.customId) delete actionsMap[removed.customId];
+                markDirty(); renderCompRows(); renderActions();
+              });
+            });
+            // Add button
             card.querySelector('._add-btn')?.addEventListener('click', () => {
               if ((compRows[ri].buttons?.length || 0) >= 5) return;
               const cId = uid();
-              compRows[ri].buttons.push({ customId: cId, label: 'Button', style: 'Primary', emoji: '', url: '', disabled: false });
-              markDirty(); renderCompRows(); renderActions(); renderPreview();
-            });
-            card.querySelectorAll('._action-btn').forEach(btn => {
-              btn.addEventListener('click', () => openActionEditor(btn.dataset.cid));
+              compRows[ri].buttons.push({ customId: cId, label: isAR ? 'زر' : 'Button', style: 'Primary', emoji: '', url: '', disabled: false });
+              markDirty(); renderCompRows(); renderActions();
             });
           }
 
-          // Select
           if (compRows[ri].type === 'select') {
+            // Placeholder input
             const phInput = card.querySelector('._sel-ph');
-            if (phInput) {
-              phInput.addEventListener('input', () => {
-                compRows[ri].select.placeholder = phInput.value;
-                markDirty(); renderPreview();
-              });
-            }
-            card.querySelectorAll('._edit-opt').forEach(btn => {
-              btn.addEventListener('click', () => openOptEdit(rowId, parseInt(btn.dataset.oi)));
-            });
-            card.querySelectorAll('._del-opt').forEach(btn => {
-              btn.addEventListener('click', () => {
-                compRows[ri].select.options.splice(parseInt(btn.dataset.oi), 1);
-                markDirty(); renderCompRows(); renderPreview();
+            if (phInput) phInput.addEventListener('input', () => { compRows[ri].select.placeholder = phInput.value; markDirty(); });
+            // Actions shortcut
+            card.querySelector('._action-sel')?.addEventListener('click', () => openActionEditor(compRows[ri].select?.customId));
+            // Edit option chip
+            card.querySelectorAll('._edit-opt').forEach(chip => {
+              chip.addEventListener('click', e => {
+                if (e.target.classList.contains('bld-opt-chip-del')) return;
+                openOptEdit(rowId, parseInt(chip.dataset.oi));
               });
             });
+            // Delete option
+            card.querySelectorAll('._del-opt').forEach(del => {
+              del.addEventListener('click', e => {
+                e.stopPropagation();
+                compRows[ri].select.options.splice(parseInt(del.dataset.oi), 1);
+                markDirty(); renderCompRows();
+              });
+            });
+            // Add option
             card.querySelector('._add-opt')?.addEventListener('click', () => {
               if ((compRows[ri].select.options?.length || 0) >= 25) return;
-              compRows[ri].select.options.push({ label: 'Option', value: uid(), description: '', emoji: '', default: false });
-              markDirty(); renderCompRows(); renderPreview();
-            });
-            card.querySelector('._action-btn')?.addEventListener('click', () => {
-              openActionEditor(compRows[ri].select?.customId);
+              compRows[ri].select.options.push({ label: isAR ? 'خيار' : 'Option', value: uid(), description: '', emoji: '', default: false });
+              markDirty(); renderCompRows();
             });
           }
         });
       }
 
-      /* ═══ ADD ROWS ═══ */
-      document.getElementById('addBtnRow').addEventListener('click', () => {
-        if (compRows.length >= 5) { toast(isAR ? 'الحد الأقصى 5 صفوف' : 'Max 5 rows'); return; }
-        const id = 'row_' + (nextRowId++);
-        const cId = uid();
-        compRows.push({ id, type: 'buttons', buttons: [{ customId: cId, label: 'Button', style: 'Primary', emoji: '', url: '', disabled: false }], select: null });
-        markDirty(); renderCompRows(); renderActions(); renderPreview();
+      /* ═══ ADD COMPONENT MENU ═══ */
+      const addCompMenuEl = document.getElementById('addCompMenu');
+      document.getElementById('addCompBtn')?.addEventListener('click', e => {
+        e.stopPropagation();
+        addCompMenuEl && addCompMenuEl.classList.toggle('open');
       });
-      document.getElementById('addSelectRow').addEventListener('click', () => {
+      document.addEventListener('click', () => { addCompMenuEl && addCompMenuEl.classList.remove('open'); });
+
+      function addButtonRow() {
         if (compRows.length >= 5) { toast(isAR ? 'الحد الأقصى 5 صفوف' : 'Max 5 rows'); return; }
         const id = 'row_' + (nextRowId++);
-        const cId = uid();
-        compRows.push({ id, type: 'select', buttons: [], select: { customId: cId, placeholder: isAR ? 'اختر خياراً...' : 'Select an option…', minValues: 1, maxValues: 1, disabled: false, options: [{ label: 'Option 1', value: uid(), description: '', emoji: '', default: false }] } });
-        markDirty(); renderCompRows(); renderActions(); renderPreview();
+        compRows.push({ id, type: 'buttons', buttons: [{ customId: uid(), label: isAR ? 'زر' : 'Button', style: 'Primary', emoji: '', url: '', disabled: false }], select: null });
+        markDirty(); renderCompRows(); renderActions();
+      }
+      function addSelectRow() {
+        if (compRows.length >= 5) { toast(isAR ? 'الحد الأقصى 5 صفوف' : 'Max 5 rows'); return; }
+        const id = 'row_' + (nextRowId++);
+        compRows.push({ id, type: 'select', buttons: [], select: { customId: uid(), placeholder: isAR ? 'اختر خياراً...' : 'Select an option…', minValues: 1, maxValues: 1, disabled: false, options: [{ label: isAR ? 'خيار 1' : 'Option 1', value: uid(), description: '', emoji: '', default: false }] } });
+        markDirty(); renderCompRows(); renderActions();
+      }
+      document.getElementById('menuAddBtnRow')?.addEventListener('click', () => { addCompMenuEl.classList.remove('open'); addButtonRow(); });
+      document.getElementById('menuAddSelectRow')?.addEventListener('click', () => { addCompMenuEl.classList.remove('open'); addSelectRow(); });
+
+      /* ═══ ACTIONS SECTION TOGGLE ═══ */
+      document.getElementById('actionsToggle')?.addEventListener('click', () => {
+        const btn = document.getElementById('actionsToggle');
+        btn.classList.toggle('open');
+        actionsPanel.classList.toggle('open');
       });
 
       /* ═══ ACTIONS PANEL ═══ */
       function renderActions() {
-        actionsPanel.querySelectorAll('.action-list, ._act-item').forEach(el => el.remove());
         const allIds = getAllCustomIds();
-        if (!allIds.length) { noActionsMsg.style.display = ''; return; }
-        noActionsMsg.style.display = 'none';
-
-        const list = document.createElement('div');
-        list.className = 'action-list';
+        actionsSection.style.display = allIds.length ? '' : 'none';
+        actionsPanel.innerHTML = '';
+        if (!allIds.length) return;
 
         allIds.forEach(({ customId, label }) => {
           const pipeline = actionsMap[customId];
           const stepCount = pipeline?.steps?.length || 0;
           const item = document.createElement('div');
-          item.className = 'action-step _act-item';
-          item.style.cursor = 'pointer';
+          item.className = 'bld-action-item';
           item.innerHTML =
-            '<div class="action-step-number"><i data-lucide="zap" style="width:11px;height:11px;stroke:currentColor;"></i></div>' +
-            '<div class="action-step-body">' +
-              '<div style="font-size:.78rem;font-weight:600;color:var(--white);">' + esc(label) + '</div>' +
-              '<div style="font-size:.68rem;color:var(--muted);">' +
+            '<div class="bld-action-item-icon"><i data-lucide="zap" style="width:13px;height:13px;stroke:currentColor;"></i></div>' +
+            '<div class="bld-action-item-body">' +
+              '<div class="bld-action-item-label">' + esc(label) + '</div>' +
+              '<div class="bld-action-item-count">' +
                 (stepCount ? stepCount + ' ' + (isAR ? 'خطوات' : 'steps') : (isAR ? 'لا إجراءات — انقر للإعداد' : 'No actions — click to configure')) +
               '</div>' +
             '</div>';
           item.addEventListener('click', () => openActionEditor(customId));
-          list.appendChild(item);
+          actionsPanel.appendChild(item);
         });
-
-        actionsPanel.appendChild(list);
         lucide.createIcons();
       }
 
@@ -1139,34 +1113,8 @@
         return ids;
       }
 
-      /* ═══ PREVIEW RENDERING ═══ */
-      function renderPreview() {
-        const text = msgContent.value.trim();
-        prevContent.textContent = text || (isAR ? 'محتوى الرسالة يظهر هنا...' : 'Message content appears here...');
-        prevContent.style.color = text ? '#dbdee1' : '#72767d';
-        prevComponents.innerHTML = '';
-
-        compRows.forEach(row => {
-          if (row.type === 'buttons') {
-            const rowEl = document.createElement('div');
-            rowEl.className = 'preview-row';
-            (row.buttons || []).forEach(b => {
-              const btn = document.createElement('span');
-              btn.className = 'preview-btn ' + (b.style || 'Primary');
-              btn.innerHTML = (b.emoji ? esc(b.emoji) + ' ' : '') + esc(b.label || 'Button');
-              if (b.style === 'Link') btn.innerHTML += ' <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
-              if (b.disabled) btn.style.opacity = '0.5';
-              rowEl.appendChild(btn);
-            });
-            prevComponents.appendChild(rowEl);
-          } else if (row.type === 'select' && row.select) {
-            const sel = document.createElement('div');
-            sel.className = 'preview-select';
-            sel.textContent = row.select.placeholder || 'Select an option…';
-            prevComponents.appendChild(sel);
-          }
-        });
-      }
+      /* ═══ PREVIEW ═══ */
+      function renderPreview() { /* preview removed in this design */ }
 
       /* ═══ BUTTON EDIT MODAL ═══ */
       function openBtnEdit(rowId, bi) {
@@ -1426,7 +1374,7 @@
 
       /* ═══ EVENTS ═══ */
       function markDirty() { dirty = true; }
-      msgContent.addEventListener('input', () => { contentCount.textContent = msgContent.value.length; markDirty(); renderPreview(); });
+      msgContent.addEventListener('input', () => { contentCount.textContent = msgContent.value.length; markDirty(); });
       msgName.addEventListener('input', markDirty);
       msgChannel.addEventListener('change', markDirty);
 
