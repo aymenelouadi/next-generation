@@ -298,25 +298,38 @@
     if (bannerSolid && bannerSolid.dataset.bg) bannerSolid.style.background = bannerSolid.dataset.bg;
 
     /* ── Profile sidebar ── */
-    const openProf  = document.getElementById('open-profile');
-    const closeProf = document.getElementById('close-profile');
     const profSide  = document.getElementById('prof-sidebar');
     const profBack  = document.getElementById('prof-backdrop');
-    if (openProf && profSide) {
-      openProf.addEventListener('click', () => { profSide.classList.add('open'); profBack && profBack.classList.add('show'); profSide.removeAttribute('aria-hidden'); });
-      [closeProf, profBack].forEach(el => el && el.addEventListener('click', () => { profSide.classList.remove('open'); profBack && profBack.classList.remove('show'); profSide.setAttribute('aria-hidden','true'); }));
+    const openProf  = document.getElementById('open-profile');
+    const closeProf = document.getElementById('close-profile');
+    function openProfile()  {
+      if (!profSide) return;
+      profSide.classList.add('open');
+      if (profBack) profBack.classList.add('open');
+      profSide.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
     }
+    function closeProfile() {
+      if (!profSide) return;
+      profSide.classList.remove('open');
+      if (profBack) profBack.classList.remove('open');
+      profSide.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+    if (openProf)  openProf.addEventListener('click', openProfile);
+    if (closeProf) closeProf.addEventListener('click', closeProfile);
+    if (profBack)  profBack.addEventListener('click', closeProfile);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProfile(); });
 
     /* ── Nav overlay (mobile) ── */
-    const menuToggle = document.getElementById('menu-toggle');
-    const navOverlay = document.getElementById('nav-overlay');
-    const navSidebar = document.querySelector('.nav-sidebar');
+    const menuToggle  = document.getElementById('menu-toggle');
+    const navOverlay  = document.getElementById('nav-overlay');
+    const navSidebar  = document.querySelector('.nav-sidebar');
     const mgmtSidebar = document.getElementById('mgmt-sidebar');
-    if (menuToggle) menuToggle.addEventListener('click', () => {
-      if (mgmtSidebar && mgmtSidebar.classList.contains('open')) { mgmtSidebar.classList.remove('open'); navOverlay && navOverlay.classList.remove('open'); }
-      else if (mgmtSidebar) { mgmtSidebar.classList.add('open'); navOverlay && navOverlay.classList.add('open'); }
-    });
-    if (navOverlay) navOverlay.addEventListener('click', () => { mgmtSidebar && mgmtSidebar.classList.remove('open'); navSidebar && navSidebar.classList.remove('open'); navOverlay.classList.remove('open'); });
+    function openSidebar()  { if (!mgmtSidebar) return; mgmtSidebar.classList.add('open'); navOverlay && navOverlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeSidebar() { if (!mgmtSidebar) return; mgmtSidebar.classList.remove('open'); navSidebar && navSidebar.classList.remove('open'); navOverlay && navOverlay.classList.remove('open'); document.body.style.overflow = ''; }
+    if (menuToggle) menuToggle.addEventListener('click', () => mgmtSidebar.classList.contains('open') ? closeSidebar() : openSidebar());
+    if (navOverlay) navOverlay.addEventListener('click', () => closeSidebar());
 
     /* ── Copy user ID ── */
     const copyIdRow = document.getElementById('prof-copy-id');
@@ -354,14 +367,7 @@
     });
 
     /* ── Open profile via .open-profile-btn class (mgmt footer dots) ── */
-    document.querySelectorAll('.open-profile-btn').forEach(b => {
-      b.addEventListener('click', () => {
-        if (!profSide) return;
-        profSide.classList.add('open');
-        if (profBack) profBack.classList.add('show');
-        profSide.removeAttribute('aria-hidden');
-      });
-    });
+    document.querySelectorAll('.open-profile-btn').forEach(b => b.addEventListener('click', openProfile));
 
     /* ── Guild sort (nav-sidebar) ── */
     (function initGuildSort() {
