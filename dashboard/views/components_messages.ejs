@@ -352,6 +352,40 @@
         setTimeout(() => { window.location.href = href; }, 340);
       });
     });
+
+    /* ── Open profile via .open-profile-btn class (mgmt footer dots) ── */
+    document.querySelectorAll('.open-profile-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        if (!profSide) return;
+        profSide.classList.add('open');
+        if (profBack) profBack.classList.add('show');
+        profSide.removeAttribute('aria-hidden');
+      });
+    });
+
+    /* ── Guild sort (nav-sidebar) ── */
+    (function initGuildSort() {
+      const sortBtn = document.querySelector('.mgmt-sort-btn');
+      const nav     = document.querySelector('.nav-sidebar');
+      if (!sortBtn || !nav) return;
+      const items  = Array.from(nav.querySelectorAll('.nav-item'));
+      const orig   = items.slice();
+      let   sorted = false;
+      sortBtn.addEventListener('click', () => {
+        sorted = !sorted;
+        sortBtn.classList.toggle('sorted', sorted);
+        const ordered = sorted
+          ? items.slice().sort((a, b) => {
+              const na = (a.querySelector('.nav-item-name')?.textContent || '').trim().toLowerCase();
+              const nb = (b.querySelector('.nav-item-name')?.textContent || '').trim().toLowerCase();
+              return na.localeCompare(nb);
+            })
+          : orig;
+        const divider = nav.querySelector('.nav-divider');
+        const after   = divider ? divider.nextSibling : null;
+        ordered.forEach(el => nav.insertBefore(el, after));
+      });
+    })();
   </script>
 </body>
 </html>
