@@ -451,9 +451,24 @@
     @media (max-width: 1100px) { .builder.active { grid-template-columns: 1fr 300px; } }
     @media (max-width: 860px)  { .builder.active { grid-template-columns: 1fr; } .bld-preview-col { display: none; } }
     /* ── Collapse / Duplicate aside buttons ── */
+    .bld-comp-row-aside-btn.dup { color: var(--muted); }
     .bld-comp-row-aside-btn.dup:hover { background: rgba(124,58,237,.15); color: var(--purple-l); }
     .bld-comp-row-aside-btn.collapse-btn { color: var(--muted); }
     .bld-comp-row-aside-btn.collapse-btn:hover { background: rgba(255,255,255,.06); color: var(--white); }
+    /* ── Slash quick-add bar ── */
+    .bld-slash-bar { position: relative; margin-top: 2px; }
+    .bld-slash-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,.05); color: var(--muted); font-size: .78rem; font-family: inherit; padding: 9px 12px 9px 28px; outline: none; transition: border-color .2s, color .2s; }
+    .bld-slash-input:focus { border-bottom-color: var(--purple); color: var(--white); }
+    .bld-slash-input::placeholder { color: rgba(203,194,255,.28); }
+    .bld-slash-bar-icon { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: .84rem; color: rgba(124,58,237,.55); pointer-events: none; font-weight: 700; font-family: monospace; line-height: 1; }
+    .bld-slash-menu { position: absolute; left: 0; right: 0; bottom: calc(100% + 2px); background: rgba(10,3,30,.98); border: 1px solid var(--border); border-radius: 10px; padding: 6px; z-index: 250; display: none; box-shadow: 0 -8px 32px rgba(0,0,0,.6); }
+    .bld-slash-menu.open { display: block; }
+    .bld-slash-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 7px; cursor: pointer; transition: background .12s; }
+    .bld-slash-item:hover, .bld-slash-item.slash-active { background: rgba(124,58,237,.2); }
+    .bld-slash-item-key { font-size: .68rem; font-weight: 700; color: var(--purple-l); font-family: 'Orbitron',monospace; background: rgba(124,58,237,.15); border-radius: 4px; padding: 2px 7px; flex-shrink: 0; min-width: 40px; text-align: center; letter-spacing: .04em; }
+    .bld-slash-item-text { flex: 1; min-width: 0; }
+    .bld-slash-item-label { font-size: .8rem; font-weight: 600; color: var(--white); }
+    .bld-slash-item-desc { font-size: .65rem; color: var(--muted); }
     /* Collapsed cards — hide body, keep header */
     .bld-buttons-card.collapsed > *:not(.bld-row-header),
     .bld-select-card.collapsed > *:not(.bld-row-header),
@@ -586,6 +601,14 @@
           </div>
 
           <!-- Dynamic button / select rows rendered here by JS -->
+        </div>
+
+        <!-- Slash quick-add bar -->
+        <div class="bld-slash-bar" id="slashBar">
+          <span class="bld-slash-bar-icon">/</span>
+          <input class="bld-slash-input" id="slashInput" autocomplete="off" spellcheck="false"
+            placeholder="<%= lang === 'ar' ? 'اكتب /text أو /btn أو /sep أو /img أو /cnt أو /sel...' : 'Type /text, /btn, /sep, /img, /cnt or /sel to add fast...' %>">
+          <div class="bld-slash-menu" id="slashMenu"></div>
         </div>
 
         <!-- Add Component button -->
@@ -1079,6 +1102,9 @@
 
       /* ═══ CONTAINER CHILD ROW HELPER ═══ */
       const CHILD_GRIP_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 18 18"><circle cx="6.75" cy="4.5" r="1.1" fill="currentColor"/><circle cx="6.75" cy="9" r="1.1" fill="currentColor"/><circle cx="6.75" cy="13.5" r="1.1" fill="currentColor"/><circle cx="11.25" cy="4.5" r="1.1" fill="currentColor"/><circle cx="11.25" cy="9" r="1.1" fill="currentColor"/><circle cx="11.25" cy="13.5" r="1.1" fill="currentColor"/></svg>';
+      const COLLAPSE_SVG   = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>';
+      const EXPAND_SVG     = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>';
+      const DUP_SVG        = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
       function buildChildHTML(child, ci) {
         const delBtn = '<button class="bld-child-del _del-child" data-ci="' + ci + '" title="' + (isAR ? 'حذف' : 'Delete') + '">×</button>';
         let inner = '';
@@ -1268,6 +1294,25 @@
           }
 
           compRowsEl.appendChild(wrap);
+          // Inject Collapse + Duplicate buttons (always after fresh DOM creation)
+          const rowCol = collapsedRows.has(row.id);
+          const delBtnEl = wrap.querySelector('._del-row');
+          if (delBtnEl) {
+            const colEl = document.createElement('button');
+            colEl.className = 'bld-comp-row-aside-btn collapse-btn _col-row';
+            colEl.title = isAR ? (rowCol?'فتح':'طي') : (rowCol?'Expand':'Collapse');
+            colEl.innerHTML = rowCol ? EXPAND_SVG : COLLAPSE_SVG;
+            const dupEl = document.createElement('button');
+            dupEl.className = 'bld-comp-row-aside-btn dup _dup-row';
+            dupEl.title = isAR ? 'نسخ' : 'Duplicate';
+            dupEl.innerHTML = DUP_SVG;
+            delBtnEl.parentNode.insertBefore(colEl, delBtnEl);
+            delBtnEl.parentNode.insertBefore(dupEl, delBtnEl);
+          }
+          if (rowCol) {
+            const ic = wrap.querySelector('.bld-buttons-card,.bld-select-card,.bld-text-display-card,.bld-separator-card,.bld-container-card,.bld-image-card');
+            if (ic) ic.classList.add('collapsed');
+          }
         });
 
         lucide.createIcons();
@@ -1293,7 +1338,8 @@
               if (row) newOrder.push(row);
             });
             compRows = newOrder;
-            markDirty(); renderCompRows(); renderActions();
+            // Sortable already moved DOM; just update data + rebind events
+            markDirty(); renderPreview(); bindRowEvents();
           }
         });
         // Container children
@@ -1328,48 +1374,32 @@
           const ri = compRows.findIndex(r => r.id === rowId);
           if (ri < 0) return;
 
-          // Apply collapsed CSS class
-          const innerCard = card.querySelector('.bld-buttons-card,.bld-select-card,.bld-text-display-card,.bld-separator-card,.bld-container-card,.bld-image-card');
-          if (innerCard && collapsedRows.has(rowId)) innerCard.classList.add('collapsed');
+          // Collapse / Expand (button injected by renderCompRows, just bind)
+          card.querySelector('._col-row')?.addEventListener('click', () => {
+            if (collapsedRows.has(rowId)) collapsedRows.delete(rowId);
+            else collapsedRows.add(rowId);
+            renderCompRows();
+          });
 
-          // Inject Collapse + Duplicate buttons before the delete button
-          const aside = card.querySelector('.bld-comp-row-aside');
-          if (aside) {
-            const isCol = collapsedRows.has(rowId);
-            const colBtn = document.createElement('button');
-            colBtn.className = 'bld-comp-row-aside-btn collapse-btn';
-            colBtn.title = isCol ? (isAR ? 'فتح' : 'Expand') : (isAR ? 'طي' : 'Collapse');
-            colBtn.innerHTML = isCol
-              ? '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>'
-              : '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>';
-            const dupBtn = document.createElement('button');
-            dupBtn.className = 'bld-comp-row-aside-btn dup';
-            dupBtn.title = isAR ? 'نسخ' : 'Duplicate';
-            dupBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
-            aside.insertBefore(colBtn, aside.firstChild);
-            aside.insertBefore(dupBtn, colBtn.nextSibling);
-            colBtn.addEventListener('click', () => {
-              if (collapsedRows.has(rowId)) collapsedRows.delete(rowId);
-              else collapsedRows.add(rowId);
-              renderCompRows();
-            });
-            dupBtn.addEventListener('click', () => {
-              const clone = JSON.parse(JSON.stringify(compRows[ri]));
-              clone.id = 'row_' + (nextRowId++);
-              if (clone.type === 'buttons' && clone.buttons)
-                clone.buttons.forEach(b => { if (b.customId) b.customId = uid(); });
-              if (clone.type === 'select' && clone.select?.customId)
-                clone.select.customId = uid();
-              if (clone.type === 'container' && clone.children)
-                clone.children.forEach((ch, i) => {
-                  ch.id = 'child_' + clone.id + '_' + i;
-                  if (ch.buttons) ch.buttons.forEach(b => { if (b.customId) b.customId = uid(); });
-                  if (ch.select?.customId) ch.select.customId = uid();
-                });
-              compRows.splice(ri + 1, 0, clone);
-              markDirty(); renderCompRows(); renderActions();
-            });
-          }
+          // Duplicate row
+          card.querySelector('._dup-row')?.addEventListener('click', () => {
+            const ri2 = compRows.findIndex(r => r.id === rowId);
+            if (ri2 < 0) return;
+            const clone = JSON.parse(JSON.stringify(compRows[ri2]));
+            clone.id = 'row_' + (nextRowId++);
+            if (clone.type === 'buttons' && clone.buttons)
+              clone.buttons.forEach(b => { if (b.customId) b.customId = uid(); });
+            if (clone.type === 'select' && clone.select?.customId)
+              clone.select.customId = uid();
+            if (clone.type === 'container' && clone.children)
+              clone.children.forEach((ch, i) => {
+                ch.id = 'child_' + clone.id + '_' + i;
+                if (ch.buttons) ch.buttons.forEach(b => { if (b.customId) b.customId = uid(); });
+                if (ch.select?.customId) ch.select.customId = uid();
+              });
+            compRows.splice(ri2 + 1, 0, clone);
+            markDirty(); renderCompRows(); renderActions();
+          });
 
           // Delete row
           card.querySelector('._del-row')?.addEventListener('click', () => {
@@ -1542,6 +1572,64 @@
           }
         });
       }
+
+      /* ═══ SLASH QUICK-ADD ═══ */
+      (function initSlashCmd() {
+        const CMDS = [
+          { key: '/text', label: isAR ? 'نص'           : 'Text Display',  desc: isAR ? 'كتلة نص حر'       : 'Free-text markdown block',  fn: () => addTextDisplayRow() },
+          { key: '/btn',  label: isAR ? 'أزرار'         : 'Buttons',       desc: isAR ? 'صف أزرار تفاعلية' : 'Interactive button row',     fn: () => addButtonRow()      },
+          { key: '/sel',  label: isAR ? 'قائمة منسدلة' : 'Select Menu',   desc: isAR ? 'قائمة اختيار'     : 'Dropdown selection menu',   fn: () => addSelectRow()      },
+          { key: '/sep',  label: isAR ? 'فاصل'          : 'Separator',     desc: isAR ? 'خط أو مسافة فارغة': 'Divider line or spacing',    fn: () => addSeparatorRow()   },
+          { key: '/img',  label: isAR ? 'صورة'          : 'Image',         desc: isAR ? 'عرض صورة'         : 'Display an image',           fn: () => addImageRow()       },
+          { key: '/cnt',  label: isAR ? 'حاوية'         : 'Container',     desc: isAR ? 'حاوية بلون حد'    : 'Accent-border container',    fn: () => addContainerRow()   },
+        ];
+        const inp  = document.getElementById('slashInput');
+        const menu = document.getElementById('slashMenu');
+        if (!inp || !menu) return;
+        let activeIdx = 0;
+
+        function filtered() {
+          const q = inp.value.toLowerCase().replace(/^\//, '');
+          return q === '' ? CMDS : CMDS.filter(c => c.key.slice(1).startsWith(q) || c.label.toLowerCase().includes(q));
+        }
+        function renderMenu() {
+          if (!inp.value.startsWith('/')) { menu.classList.remove('open'); return; }
+          const items = filtered();
+          if (!items.length) { menu.classList.remove('open'); return; }
+          activeIdx = Math.min(activeIdx, items.length - 1);
+          menu.innerHTML = items.map((c, i) =>
+            '<div class="bld-slash-item' + (i === activeIdx ? ' slash-active' : '') + '" data-i="' + i + '">' +
+              '<span class="bld-slash-item-key">' + c.key + '</span>' +
+              '<div class="bld-slash-item-text">' +
+                '<div class="bld-slash-item-label">' + c.label + '</div>' +
+                '<div class="bld-slash-item-desc">'  + c.desc  + '</div>' +
+              '</div></div>'
+          ).join('');
+          menu.classList.add('open');
+          menu.querySelectorAll('.bld-slash-item').forEach(el => {
+            el.addEventListener('mousedown', e => {
+              e.preventDefault();
+              const cmd = filtered()[parseInt(el.dataset.i)];
+              if (cmd) { cmd.fn(); inp.value = ''; menu.classList.remove('open'); inp.blur(); }
+            });
+          });
+        }
+        function pick() {
+          const cmd = filtered()[activeIdx];
+          if (cmd) { cmd.fn(); inp.value = ''; menu.classList.remove('open'); inp.blur(); }
+        }
+        inp.addEventListener('input', () => { activeIdx = 0; renderMenu(); });
+        inp.addEventListener('keydown', e => {
+          const items = filtered();
+          if (!menu.classList.contains('open')) return;
+          if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = (activeIdx + 1) % items.length; renderMenu(); }
+          if (e.key === 'ArrowUp')   { e.preventDefault(); activeIdx = (activeIdx - 1 + items.length) % items.length; renderMenu(); }
+          if (e.key === 'Enter')     { e.preventDefault(); pick(); }
+          if (e.key === 'Escape')    { menu.classList.remove('open'); inp.value = ''; inp.blur(); }
+        });
+        inp.addEventListener('blur',  () => setTimeout(() => menu.classList.remove('open'), 160));
+        inp.addEventListener('focus', () => { if (inp.value.startsWith('/')) renderMenu(); });
+      })();
 
       /* ═══ ADD COMPONENT MENU ═══ */
       const addCompMenuEl = document.getElementById('addCompMenu');
