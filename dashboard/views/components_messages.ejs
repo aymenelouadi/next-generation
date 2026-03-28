@@ -388,6 +388,54 @@
     .action-step-number { width: 22px; height: 22px; border-radius: 50%; background: rgba(124,58,237,.2); display: flex; align-items: center; justify-content: center; font-size: .65rem; font-weight: 700; color: var(--purple-l); flex-shrink: 0; margin-top: 2px; }
     .action-step-body { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 
+    /* ── IF / THEN Logic Builder ── */
+    .if-modal { min-width: min(680px, 96vw) !important; padding: 0 !important; overflow: hidden !important; display: flex; flex-direction: column; max-height: 88vh !important; }
+    .if-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 14px; border-bottom: 1px solid rgba(255,255,255,.07); flex-shrink: 0; gap: 12px; }
+    .if-modal-head-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .if-modal-icon { font-size: 1.4rem; line-height: 1; flex-shrink: 0; }
+    .if-modal-title { font-size: .95rem; font-weight: 800; color: var(--white); font-family: 'Orbitron', monospace; letter-spacing: .04em; }
+    .if-modal-sub { font-size: .7rem; color: var(--muted); margin-top: 2px; font-family: monospace; letter-spacing: .03em; }
+    .if-rule-list { flex: 1; overflow-y: auto; padding: 14px 18px; display: flex; flex-direction: column; gap: 12px; }
+    .if-rule { background: rgba(255,255,255,.025); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; overflow: hidden; transition: border-color .2s; }
+    .if-rule:hover { border-color: rgba(124,58,237,.3); }
+    .if-rule-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,.06); background: rgba(255,255,255,.02); }
+    .if-badge { font-size: .62rem; font-weight: 800; letter-spacing: .06em; padding: 3px 10px; border-radius: 20px; font-family: 'Orbitron', monospace; flex-shrink: 0; }
+    .if-badge.if  { background: rgba(59,130,246,.2); color: #93c5fd; border: 1px solid rgba(59,130,246,.3); }
+    .if-badge.elif{ background: rgba(124,58,237,.2); color: #c4b5fd; border: 1px solid rgba(124,58,237,.35); }
+    .if-badge.else{ background: rgba(156,163,175,.12); color: #9ca3af; border: 1px solid rgba(156,163,175,.2); }
+    .if-rule-head-label { flex: 1; font-size: .72rem; color: var(--muted); font-style: italic; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .if-rule-head-btns { display: flex; gap: 4px; flex-shrink: 0; margin-left: auto; }
+    .if-rule-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+    /* Conditions area */
+    .if-cond-section { background: rgba(59,130,246,.04); border: 1px solid rgba(59,130,246,.12); border-radius: 8px; padding: 10px 12px; }
+    .if-cond-section-label { font-size: .63rem; font-weight: 700; color: #93c5fd; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 8px; }
+    .if-cond-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+    .if-cond-op-badge { font-size: .6rem; font-weight: 800; letter-spacing: .08em; color: #c4b5fd; background: rgba(124,58,237,.15); border-radius: 4px; padding: 2px 7px; align-self: center; flex-shrink: 0; cursor: pointer; border: 1px solid rgba(124,58,237,.2); transition: background .15s; }
+    .if-cond-op-badge:hover { background: rgba(124,58,237,.3); }
+    .if-cond-type { font-size: .72rem; flex: 1; min-width: 130px; }
+    .if-cond-val  { font-size: .72rem; flex: 1.4; min-width: 130px; }
+    .if-add-cond  { font-size: .68rem; color: #93c5fd; background: rgba(59,130,246,.1); border: 1px dashed rgba(59,130,246,.25); border-radius: 6px; padding: 4px 12px; cursor: pointer; width: 100%; text-align: center; transition: background .15s; margin-top: 2px; }
+    .if-add-cond:hover { background: rgba(59,130,246,.18); }
+    .if-else-label { font-size: .72rem; color: #9ca3af; font-style: italic; }
+    /* Steps area */
+    .if-steps-section { display: flex; flex-direction: column; gap: 4px; }
+    .if-steps-label { font-size: .63rem; font-weight: 700; color: var(--purple-l); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px; }
+    .if-step { display: flex; align-items: flex-start; gap: 8px; background: rgba(124,58,237,.05); border: 1px solid rgba(124,58,237,.1); border-radius: 8px; padding: 9px 11px; }
+    .if-step-num { width: 20px; height: 20px; border-radius: 50%; background: rgba(124,58,237,.25); display: flex; align-items: center; justify-content: center; font-size: .58rem; font-weight: 800; color: var(--purple-l); flex-shrink: 0; margin-top: 1px; }
+    .if-step-body { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+    .if-step-type { font-size: .72rem; }
+    .if-add-step { font-size: .68rem; color: var(--purple-l); background: rgba(124,58,237,.08); border: 1px dashed rgba(124,58,237,.2); border-radius: 6px; padding: 5px 12px; cursor: pointer; width: 100%; text-align: center; transition: background .15s; margin-top: 2px; }
+    .if-add-step:hover { background: rgba(124,58,237,.18); }
+    /* Add rule + footer */
+    .if-add-rule-btn { margin: 0 18px 14px; width: calc(100% - 36px); text-align: center; padding: 10px; font-size: .78rem; font-weight: 700; color: var(--muted); background: rgba(255,255,255,.03); border: 1px dashed rgba(255,255,255,.12); border-radius: 10px; cursor: pointer; transition: background .15s, color .15s, border-color .15s; display: flex; align-items: center; justify-content: center; gap: 6px; flex-shrink: 0; }
+    .if-add-rule-btn:hover { background: rgba(124,58,237,.1); color: var(--purple-l); border-color: rgba(124,58,237,.3); }
+    .if-add-rule-btn span { font-size: 1rem; font-weight: 700; line-height: 1; }
+    .if-modal-footer { padding: 12px 22px; border-top: 1px solid rgba(255,255,255,.07); margin-top: 0 !important; flex-shrink: 0; }
+    /* Trigger badge on panel */
+    .bld-action-item { position: relative; }
+    .bld-action-item-rules { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+    .bld-action-rule-chip { font-size: .6rem; padding: 1px 7px; border-radius: 10px; font-weight: 700; background: rgba(124,58,237,.15); color: var(--purple-l); border: 1px solid rgba(124,58,237,.2); }
+
     /* ── Modal overlay ── */
     .modal-overlay { position: fixed; inset: 0; z-index: 500; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.6); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity .2s; }
     .modal-overlay.open { opacity: 1; pointer-events: auto; }
@@ -785,18 +833,33 @@
     </div>
   </div>
 
-  <!-- ═══ ACTION CONFIG MODAL ═══ -->
+  <!-- ═══ IF / THEN LOGIC BUILDER MODAL ═══ -->
   <div class="modal-overlay" id="actionModal">
-    <div class="modal" style="min-width:440px;">
-      <h3 id="actionModalTitle"><%= lang === 'ar' ? 'إعداد الإجراء' : 'Configure Action' %></h3>
-      <div id="actionStepsList"></div>
-      <button class="btn btn-ghost btn-sm" id="addActionStep" style="margin-top:8px;">
-        <i data-lucide="plus" style="width:12px;height:12px;stroke:currentColor;"></i>
-        <%= lang === 'ar' ? 'إضافة خطوة' : 'Add Step' %>
+    <div class="modal if-modal">
+      <!-- Header -->
+      <div class="if-modal-head">
+        <div class="if-modal-head-left">
+          <span class="if-modal-icon">⚡</span>
+          <div>
+            <div class="if-modal-title" id="actionModalTitle"><%= lang === 'ar' ? 'منطق التفاعل' : 'Interaction Logic' %></div>
+            <div class="if-modal-sub" id="actionModalSub"></div>
+          </div>
+        </div>
+        <button class="icon-btn" id="actionCancel" title="Close" style="font-size:.9rem;">✕</button>
+      </div>
+      <!-- Rule list -->
+      <div class="if-rule-list" id="ifRuleList"></div>
+      <!-- Add Rule Block -->
+      <button class="if-add-rule-btn" id="addRuleBlock" type="button">
+        <span>+</span>
+        <%= lang === 'ar' ? 'إضافة كتلة شرطية جديدة' : 'Add Rule Block' %>
       </button>
-      <div class="modal-actions">
-        <button class="btn btn-ghost btn-sm" id="actionCancel"><%= lang === 'ar' ? 'إلغاء' : 'Cancel' %></button>
-        <button class="btn btn-primary btn-sm" id="actionSave"><%= lang === 'ar' ? 'حفظ' : 'Save' %></button>
+      <!-- Footer -->
+      <div class="modal-actions if-modal-footer">
+        <button class="btn btn-ghost btn-sm" id="actionCancel2"><%= lang === 'ar' ? 'إلغاء' : 'Cancel' %></button>
+        <button class="btn btn-primary btn-sm" id="actionSave">
+          <%= lang === 'ar' ? '💾 حفظ المنطق' : '💾 Save Logic' %>
+        </button>
       </div>
     </div>
   </div>
@@ -1071,7 +1134,16 @@
           msgContent.value = msg.content || '';
           compRows   = JSON.parse(JSON.stringify(msg.components || []));
           actionsMap = {};
-          (msg.actions || []).forEach(a => { actionsMap[a.customId] = JSON.parse(JSON.stringify(a)); });
+          (msg.actions || []).forEach(a => {
+            const entry = JSON.parse(JSON.stringify(a));
+            // Migrate old steps→rules on load
+            if (entry.steps && !entry.rules) {
+              entry.rules = entry.steps.length ? [{ id: 'r0', conditions: [], conditionOp: 'AND', steps: entry.steps }] : [];
+              delete entry.steps;
+            }
+            if (!entry.rules) entry.rules = [];
+            actionsMap[a.customId] = entry;
+          });
         } else {
           editingId = null;
           msgName.value = '';
@@ -1693,22 +1765,40 @@
         if (!allIds.length) return;
 
         allIds.forEach(({ customId, label }) => {
-          const pipeline = actionsMap[customId];
-          const stepCount = pipeline?.steps?.length || 0;
+          const entry   = actionsMap[customId];
+          // Support both old (steps[]) and new (rules[]) format
+          const rules   = entry?.rules || (entry?.steps?.length ? [{ conditions: [], steps: entry.steps }] : []);
+          const ruleCount = rules.length;
+          const totalSteps = rules.reduce((s, r) => s + (r.steps?.length || 0), 0);
+
           const item = document.createElement('div');
           item.className = 'bld-action-item';
+
+          // Build rule chips (show IF/ELSE IF/ELSE badges)
+          let chipsHtml = '';
+          if (ruleCount) {
+            chipsHtml = '<div class="bld-action-item-rules">';
+            rules.forEach((r, ri) => {
+              const bl = ri === 0 ? 'IF' : (ri === rules.length - 1 && !r.conditions?.length ? 'ELSE' : 'ELSE IF');
+              const stc = r.steps?.length || 0;
+              chipsHtml += '<span class="bld-action-rule-chip">' + bl + (stc ? ' \u2192 ' + stc + (isAR ? ' إجراء' : ' action' + (stc > 1 ? 's' : '')) : '') + '</span>';
+            });
+            chipsHtml += '</div>';
+          }
+
           item.innerHTML =
-            '<div class="bld-action-item-icon"><i data-lucide="zap" style="width:13px;height:13px;stroke:currentColor;"></i></div>' +
+            '<div class="bld-action-item-icon">⚡</div>' +
             '<div class="bld-action-item-body">' +
               '<div class="bld-action-item-label">' + esc(label) + '</div>' +
-              '<div class="bld-action-item-count">' +
-                (stepCount ? stepCount + ' ' + (isAR ? 'خطوات' : 'steps') : (isAR ? 'لا إجراءات — انقر للإعداد' : 'No actions — click to configure')) +
-              '</div>' +
-            '</div>';
+              (ruleCount
+                ? '<div class="bld-action-item-count">' + ruleCount + ' ' + (isAR ? 'كتلة' : 'block' + (ruleCount > 1 ? 's' : '')) + ' · ' + totalSteps + ' ' + (isAR ? 'إجراء' : 'action' + (totalSteps !== 1 ? 's' : '')) + '</div>' + chipsHtml
+                : '<div class="bld-action-item-count" style="color:rgba(255,200,100,.7);">' + (isAR ? '⚡ انقر لبناء المنطق' : '⚡ Click to build logic') + '</div>'
+              ) +
+            '</div>' +
+            '<div style="font-size:.7rem;color:var(--muted);margin-left:auto;flex-shrink:0;">' + (isAR ? 'تعديل &rsaquo;' : 'Edit &rsaquo;') + '</div>';
           item.addEventListener('click', () => openActionEditor(customId));
           actionsPanel.appendChild(item);
         });
-        lucide.createIcons();
       }
 
       function getAllCustomIds() {
@@ -1869,123 +1959,315 @@
         optEditModal.classList.remove('open'); _optEditCtx = null;
       });
 
-      /* ═══ ACTION EDITOR MODAL ═══ */
+      /* ═══ IF / THEN INTERACTION LOGIC BUILDER ═══ */
+
       const ACTION_TYPES = [
-        { value: 'reply',             label: isAR ? 'رد في القناة' : 'Reply in Channel' },
-        { value: 'send_dm',           label: isAR ? 'إرسال رسالة خاصة' : 'Send DM' },
-        { value: 'send_to_channel',   label: isAR ? 'إرسال إلى قناة' : 'Send to Channel' },
-        { value: 'add_role',          label: isAR ? 'إضافة رتبة' : 'Add Role' },
-        { value: 'remove_role',       label: isAR ? 'إزالة رتبة' : 'Remove Role' },
-        { value: 'toggle_role',       label: isAR ? 'تبديل رتبة' : 'Toggle Role' },
-        { value: 'edit_message',      label: isAR ? 'تعديل الرسالة' : 'Edit Message' },
-        { value: 'disable_component', label: isAR ? 'تعطيل المكون' : 'Disable Component' },
-        { value: 'enable_component',  label: isAR ? 'تفعيل المكون' : 'Enable Component' },
+        // Messaging
+        { value: 'reply',             label: isAR ? '💬 رد في القناة'       : '💬 Reply in Channel' },
+        { value: 'send_dm',           label: isAR ? '📨 رسالة خاصة'         : '📨 Send DM' },
+        { value: 'send_to_channel',   label: isAR ? '📢 إرسال إلى قناة'     : '📢 Send to Channel' },
+        { value: 'send_webhook',      label: isAR ? '🔗 إرسال Webhook'      : '🔗 Send Webhook' },
+        { value: 'edit_message',      label: isAR ? '✏️ تعديل الرسالة'      : '✏️ Edit Message' },
+        // Roles
+        { value: 'add_role',          label: isAR ? '🏷 إضافة رتبة'         : '🏷 Add Role' },
+        { value: 'remove_role',       label: isAR ? '🗑 إزالة رتبة'         : '🗑 Remove Role' },
+        { value: 'toggle_role',       label: isAR ? '🔄 تبديل رتبة'         : '🔄 Toggle Role' },
+        // Tickets
+        { value: 'open_ticket',       label: isAR ? '🎫 فتح تذكرة'          : '🎫 Open Ticket' },
+        { value: 'close_ticket',      label: isAR ? '🔒 إغلاق التذكرة'      : '🔒 Close Ticket' },
+        // Components
+        { value: 'disable_component', label: isAR ? '🚫 تعطيل مكوّن'        : '🚫 Disable Component' },
+        { value: 'enable_component',  label: isAR ? '✅ تفعيل مكوّن'        : '✅ Enable Component' },
+        // Other
+        { value: 'create_thread',     label: isAR ? '🧵 إنشاء ثريد'         : '🧵 Create Thread' },
+        { value: 'award_points',      label: isAR ? '⭐ منح نقاط'           : '⭐ Award Points' },
+        { value: 'kick_member',       label: isAR ? '👢 طرد العضو'          : '👢 Kick Member' },
+        { value: 'timeout_member',    label: isAR ? '⏱ إيقاف مؤقت (10 دق)' : '⏱ Timeout Member (10m)' },
       ];
+
+      const COND_TYPES = [
+        { value: 'user_has_role',     label: isAR ? 'العضو يملك رتبة'   : 'User has role',     needs: 'role' },
+        { value: 'user_missing_role', label: isAR ? 'العضو لا يملك رتبة': 'User missing role', needs: 'role' },
+        { value: 'channel_is',        label: isAR ? 'القناة هي'          : 'Channel is',        needs: 'channel' },
+        { value: 'channel_is_not',    label: isAR ? 'القناة ليست'        : 'Channel is not',    needs: 'channel' },
+        { value: 'selected_option',   label: isAR ? 'الخيار المختار يساوي': 'Selected option =', needs: 'text' },
+      ];
+
+      /* ── Migrate old steps→rules format ── */
+      function ensureRules(customId) {
+        if (!actionsMap[customId]) actionsMap[customId] = { customId, rules: [] };
+        const entry = actionsMap[customId];
+        // Old format had `steps` array instead of `rules`
+        if (entry.steps && !entry.rules) {
+          entry.rules = entry.steps.length
+            ? [{ id: uid(), conditions: [], conditionOp: 'AND', steps: entry.steps }]
+            : [];
+          delete entry.steps;
+        }
+        if (!entry.rules) entry.rules = [];
+        return entry;
+      }
 
       function openActionEditor(customId) {
         if (!customId) return;
         _actionCtx = { customId };
-        if (!actionsMap[customId]) actionsMap[customId] = { customId, steps: [] };
-        document.getElementById('actionModalTitle').textContent = (isAR ? 'إجراءات: ' : 'Actions: ') + customId.slice(0, 16);
-        renderActionSteps();
+        ensureRules(customId);
+        document.getElementById('actionModalTitle').textContent = isAR ? 'منطق التفاعل' : 'Interaction Logic';
+        document.getElementById('actionModalSub').textContent = customId;
+        renderRuleList();
         actionModal.classList.add('open');
       }
-      document.getElementById('actionCancel').addEventListener('click', () => { actionModal.classList.remove('open'); _actionCtx = null; });
+
+      function closeActionModal() { actionModal.classList.remove('open'); _actionCtx = null; }
+      document.getElementById('actionCancel').addEventListener('click', closeActionModal);
+      document.getElementById('actionCancel2').addEventListener('click', closeActionModal);
       document.getElementById('actionSave').addEventListener('click', () => {
         if (!_actionCtx) return;
-        // Steps are already in actionsMap, just re-render
         markDirty(); renderActions();
-        actionModal.classList.remove('open'); _actionCtx = null;
+        closeActionModal();
       });
-      document.getElementById('addActionStep').addEventListener('click', () => {
+      document.getElementById('addRuleBlock').addEventListener('click', () => {
         if (!_actionCtx) return;
-        actionsMap[_actionCtx.customId].steps.push({ type: 'reply', content: '', ephemeral: true, channelId: '', roleId: '', targetId: '' });
-        renderActionSteps();
+        const entry = actionsMap[_actionCtx.customId];
+        entry.rules.push({ id: uid(), conditions: [], conditionOp: 'AND', steps: [] });
+        renderRuleList();
       });
 
-      function renderActionSteps() {
-        const listEl = document.getElementById('actionStepsList');
+      /* ─── Render all rule blocks ─── */
+      function renderRuleList() {
+        const listEl = document.getElementById('ifRuleList');
         listEl.innerHTML = '';
         if (!_actionCtx) return;
-        const steps = actionsMap[_actionCtx.customId]?.steps || [];
+        const rules = actionsMap[_actionCtx.customId]?.rules || [];
+        rules.forEach((rule, ri) => renderRuleBlock(listEl, rule, ri, rules));
+      }
 
-        steps.forEach((step, si) => {
-          const div = document.createElement('div');
-          div.className = 'action-step';
-          div.innerHTML =
-            '<div class="action-step-number">' + (si + 1) + '</div>' +
-            '<div class="action-step-body">' +
-              '<div class="bld-field">' +
-                '<label class="bld-label">' + (isAR ? 'النوع' : 'Type') + '</label>' +
-                '<select class="bld-select _step-type" data-si="' + si + '">' +
-                  ACTION_TYPES.map(t => '<option value="' + t.value + '"' + (step.type === t.value ? ' selected' : '') + '>' + esc(t.label) + '</option>').join('') +
-                '</select>' +
-              '</div>' +
-              buildStepFields(step, si) +
-            '</div>' +
-            '<button class="icon-btn danger _del-step" data-si="' + si + '" title="Delete"><i data-lucide="x" style="width:12px;height:12px;stroke:currentColor;"></i></button>';
-          listEl.appendChild(div);
+      function ruleLabel(rule, ri, total) {
+        if (ri === 0) return 'IF';
+        if (ri === total - 1 && !rule.conditions.length) return 'ELSE';
+        return 'ELSE IF';
+      }
+      function ruleBadgeClass(rule, ri, total) {
+        if (ri === 0) return 'if';
+        if (ri === total - 1 && !rule.conditions.length) return 'else';
+        return 'elif';
+      }
+
+      function renderRuleBlock(listEl, rule, ri, allRules) {
+        const wrap = document.createElement('div');
+        wrap.className = 'if-rule';
+        wrap.dataset.ri = ri;
+
+        const rl   = ruleLabel(rule, ri, allRules.length);
+        const rbc  = ruleBadgeClass(rule, ri, allRules.length);
+        const isElse = rl === 'ELSE';
+        const condSummary = rule.conditions.length
+          ? rule.conditions.map(c => {
+              const ct = COND_TYPES.find(x => x.value === c.type);
+              return ct ? ct.label : c.type;
+            }).join(' ' + rule.conditionOp + ' ')
+          : (isElse ? (isAR ? 'تنفيذ دائمًا (افتراضي)' : 'Always executes (default)') : (isAR ? 'لا شروط' : 'No conditions'));
+
+        // ── Header ──
+        const head = document.createElement('div');
+        head.className = 'if-rule-head';
+        head.innerHTML =
+          '<span class="if-badge ' + rbc + '">' + rl + '</span>' +
+          '<span class="if-rule-head-label">' + esc(condSummary) + '</span>' +
+          '<div class="if-rule-head-btns">' +
+            (ri > 0 ? '<button class="icon-btn _mv-up" title="' + (isAR?'تحريك لأعلى':'Move up') + '" style="font-size:.7rem;">↑</button>' : '') +
+            (ri < allRules.length - 1 ? '<button class="icon-btn _mv-dn" title="' + (isAR?'تحريك لأسفل':'Move down') + '" style="font-size:.7rem;">↓</button>' : '') +
+            '<button class="icon-btn danger _del-rule" title="' + (isAR?'حذف الكتلة':'Delete block') + '" style="font-size:.7rem;">✕</button>' +
+          '</div>';
+        wrap.appendChild(head);
+
+        // ── Body ──
+        const body = document.createElement('div');
+        body.className = 'if-rule-body';
+
+        // Conditions section
+        const condSec = document.createElement('div');
+        condSec.className = 'if-cond-section';
+        condSec.innerHTML = '<div class="if-cond-section-label">' + (isAR ? 'الشروط' : 'CONDITIONS') + '</div>';
+
+        if (isElse && !rule.conditions.length) {
+          condSec.innerHTML += '<span class="if-else-label">' + (isAR ? '✓ يُنفَّذ إذا لم تتحقق أي كتلة سابقة' : '✓ Runs if no previous block matched') + '</span>';
+        } else {
+          rule.conditions.forEach((cond, ci) => {
+            const ct = COND_TYPES.find(x => x.value === cond.type);
+            const condRow = document.createElement('div');
+            condRow.className = 'if-cond-row';
+            if (ci > 0) {
+              condRow.innerHTML += '<button class="if-cond-op-badge _op-toggle" title="' + (isAR?'انقر للتبديل':'Click to toggle') + '">' + rule.conditionOp + '</button>';
+            }
+            condRow.innerHTML +=
+              '<select class="bld-select if-cond-type _cond-type" data-ci="' + ci + '">' +
+                COND_TYPES.map(x => '<option value="' + x.value + '"' + (cond.type === x.value ? ' selected' : '') + '>' + esc(x.label) + '</option>').join('') +
+              '</select>' +
+              buildCondValField(cond, ci) +
+              '<button class="icon-btn danger _del-cond" data-ci="' + ci + '" title="Remove" style="flex-shrink:0;">✕</button>';
+            condSec.appendChild(condRow);
+          });
+          const addCondBtn = document.createElement('button');
+          addCondBtn.className = 'if-add-cond _add-cond';
+          addCondBtn.textContent = (isAR ? '+ إضافة شرط' : '+ Add Condition');
+          condSec.appendChild(addCondBtn);
+        }
+        body.appendChild(condSec);
+
+        // Steps section
+        const stepSec = document.createElement('div');
+        stepSec.className = 'if-steps-section';
+        stepSec.innerHTML = '<div class="if-steps-label">' + (isAR ? '▶ الإجراءات' : '▶ THEN DO') + '</div>';
+        rule.steps.forEach((step, si) => buildStepEl(stepSec, step, si, rule.steps));
+        const addStepBtn = document.createElement('button');
+        addStepBtn.className = 'if-add-step _add-step';
+        addStepBtn.textContent = (isAR ? '+ إضافة إجراء' : '+ Add Action');
+        stepSec.appendChild(addStepBtn);
+        body.appendChild(stepSec);
+        wrap.appendChild(body);
+        listEl.appendChild(wrap);
+
+        // ── Bind rule-level events ──
+        head.querySelector('._del-rule')?.addEventListener('click', () => {
+          allRules.splice(ri, 1); renderRuleList();
+        });
+        head.querySelector('._mv-up')?.addEventListener('click', () => {
+          if (ri > 0) { [allRules[ri - 1], allRules[ri]] = [allRules[ri], allRules[ri - 1]]; renderRuleList(); }
+        });
+        head.querySelector('._mv-dn')?.addEventListener('click', () => {
+          if (ri < allRules.length - 1) { [allRules[ri], allRules[ri + 1]] = [allRules[ri + 1], allRules[ri]]; renderRuleList(); }
         });
 
-        lucide.createIcons();
-
-        // Bind events
-        listEl.querySelectorAll('._step-type').forEach(sel => {
+        // Condition events
+        condSec.querySelectorAll('._cond-type').forEach(sel => {
           sel.addEventListener('change', () => {
-            const si = parseInt(sel.dataset.si);
-            steps[si].type = sel.value;
-            renderActionSteps();
+            const ci = parseInt(sel.dataset.ci);
+            rule.conditions[ci].type = sel.value;
+            rule.conditions[ci].value = '';
+            renderRuleList();
           });
         });
-        listEl.querySelectorAll('._step-content').forEach(inp => {
-          inp.addEventListener('input', () => { steps[parseInt(inp.dataset.si)].content = inp.value; });
+        condSec.querySelectorAll('._cond-val-role').forEach(sel => {
+          sel.addEventListener('change', () => { rule.conditions[parseInt(sel.dataset.ci)].value = sel.value; });
         });
-        listEl.querySelectorAll('._step-ephemeral').forEach(cb => {
-          cb.addEventListener('change', () => { steps[parseInt(cb.dataset.si)].ephemeral = cb.checked; });
+        condSec.querySelectorAll('._cond-val-channel').forEach(sel => {
+          sel.addEventListener('change', () => { rule.conditions[parseInt(sel.dataset.ci)].value = sel.value; });
         });
-        listEl.querySelectorAll('._step-channel').forEach(sel => {
-          sel.addEventListener('change', () => { steps[parseInt(sel.dataset.si)].channelId = sel.value; });
+        condSec.querySelectorAll('._cond-val-text').forEach(inp => {
+          inp.addEventListener('input', () => { rule.conditions[parseInt(inp.dataset.ci)].value = inp.value; });
         });
-        listEl.querySelectorAll('._step-role').forEach(sel => {
-          sel.addEventListener('change', () => { steps[parseInt(sel.dataset.si)].roleId = sel.value; });
+        condSec.querySelectorAll('._del-cond').forEach(btn => {
+          btn.addEventListener('click', () => { rule.conditions.splice(parseInt(btn.dataset.ci), 1); renderRuleList(); });
         });
-        listEl.querySelectorAll('._step-target').forEach(inp => {
-          inp.addEventListener('input', () => { steps[parseInt(inp.dataset.si)].targetId = inp.value; });
+        condSec.querySelectorAll('._op-toggle').forEach(btn => {
+          btn.addEventListener('click', () => { rule.conditionOp = rule.conditionOp === 'AND' ? 'OR' : 'AND'; renderRuleList(); });
         });
-        listEl.querySelectorAll('._del-step').forEach(btn => {
-          btn.addEventListener('click', () => { steps.splice(parseInt(btn.dataset.si), 1); renderActionSteps(); });
+        condSec.querySelector('._add-cond')?.addEventListener('click', () => {
+          rule.conditions.push({ type: 'user_has_role', value: '' }); renderRuleList();
         });
+
+        // Step events
+        stepSec.querySelector('._add-step')?.addEventListener('click', () => {
+          rule.steps.push({ type: 'reply', content: '', ephemeral: true, channelId: '', roleId: '', targetId: '', webhookUrl: '' });
+          renderRuleList();
+        });
+      }
+
+      function buildCondValField(cond, ci) {
+        const ct = COND_TYPES.find(x => x.value === cond.type);
+        if (!ct) return '';
+        if (ct.needs === 'role') {
+          return '<select class="bld-select if-cond-val _cond-val-role" data-ci="' + ci + '">' +
+            '<option value="">' + (isAR ? 'اختر رتبة...' : 'Select role...') + '</option>' +
+            roles.map(r => '<option value="' + r.id + '"' + (cond.value === r.id ? ' selected' : '') + '>' + esc(r.name) + '</option>').join('') +
+            '</select>';
+        }
+        if (ct.needs === 'channel') {
+          return '<select class="bld-select if-cond-val _cond-val-channel" data-ci="' + ci + '">' +
+            '<option value="">' + (isAR ? 'اختر قناة...' : 'Select channel...') + '</option>' +
+            channels.map(c => '<option value="' + c.id + '"' + (cond.value === c.id ? ' selected' : '') + '>#' + esc(c.name) + '</option>').join('') +
+            '</select>';
+        }
+        return '<input class="bld-input if-cond-val _cond-val-text" data-ci="' + ci + '" value="' + esc(cond.value || '') + '" placeholder="value" style="font-size:.72rem;">';
+      }
+
+      function buildStepEl(parent, step, si, stepsArr) {
+        const div = document.createElement('div');
+        div.className = 'if-step';
+        div.innerHTML =
+          '<div class="if-step-num">' + (si + 1) + '</div>' +
+          '<div class="if-step-body">' +
+            '<select class="bld-select if-step-type _step-type" data-si="' + si + '">' +
+              ACTION_TYPES.map(t => '<option value="' + t.value + '"' + (step.type === t.value ? ' selected' : '') + '>' + esc(t.label) + '</option>').join('') +
+            '</select>' +
+            buildStepFields(step, si) +
+          '</div>' +
+          '<button class="icon-btn danger _del-step" data-si="' + si + '" title="Delete" style="flex-shrink:0;margin-top:1px;">✕</button>';
+        parent.insertBefore(div, parent.querySelector('._add-step'));
+
+        div.querySelector('._step-type').addEventListener('change', function() {
+          stepsArr[si].type = this.value;
+          renderRuleList();
+        });
+        const bindField = (sel, prop, evtType) => {
+          div.querySelectorAll(sel).forEach(el => {
+            el.addEventListener(evtType || 'input', () => { stepsArr[si][prop] = el.value; });
+          });
+        };
+        div.querySelectorAll('._step-content').forEach(el => el.addEventListener('input', () => { stepsArr[si].content = el.value; }));
+        div.querySelectorAll('._step-ephemeral').forEach(el => el.addEventListener('change', () => { stepsArr[si].ephemeral = el.checked; }));
+        div.querySelectorAll('._step-channel').forEach(el => el.addEventListener('change', () => { stepsArr[si].channelId = el.value; }));
+        div.querySelectorAll('._step-role').forEach(el => el.addEventListener('change', () => { stepsArr[si].roleId = el.value; }));
+        div.querySelectorAll('._step-target').forEach(el => el.addEventListener('input', () => { stepsArr[si].targetId = el.value; }));
+        div.querySelectorAll('._step-webhook').forEach(el => el.addEventListener('input', () => { stepsArr[si].webhookUrl = el.value; }));
+        div.querySelectorAll('._step-points').forEach(el => el.addEventListener('input', () => { stepsArr[si].points = parseInt(el.value) || 0; }));
+        div.querySelectorAll('._step-duration').forEach(el => el.addEventListener('input', () => { stepsArr[si].duration = parseInt(el.value) || 10; }));
+        div.querySelector('._del-step').addEventListener('click', () => { stepsArr.splice(si, 1); renderRuleList(); });
       }
 
       function buildStepFields(step, si) {
         let h = '';
         const t = step.type;
-        if (t === 'reply' || t === 'send_dm' || t === 'edit_message') {
-          h += '<div class="bld-field"><label class="bld-label">' + (isAR ? 'المحتوى' : 'Content') + '</label>' +
-               '<textarea class="bld-textarea _step-content" data-si="' + si + '" style="min-height:54px;" maxlength="2000">' + esc(step.content || '') + '</textarea></div>';
+        const content = '<div class="bld-field"><label class="bld-label">' + (isAR ? 'المحتوى' : 'Content') + '</label>' +
+          '<textarea class="bld-textarea _step-content" data-si="' + si + '" style="min-height:52px;" maxlength="2000">' + esc(step.content || '') + '</textarea></div>';
+        const ephem = '<div class="bld-field" style="display:flex;align-items:center;gap:8px;">' +
+          '<input type="checkbox" class="_step-ephemeral" data-si="' + si + '" style="accent-color:var(--purple);width:14px;height:14px;"' + (step.ephemeral !== false ? ' checked' : '') + '>' +
+          '<label style="font-size:.72rem;color:var(--muted);">' + (isAR ? 'مخفي (Ephemeral)' : 'Ephemeral — only visible to user') + '</label></div>';
+        const roleField = '<div class="bld-field"><label class="bld-label">' + (isAR ? 'الرتبة' : 'Role') + '</label>' +
+          '<select class="bld-select _step-role" data-si="' + si + '"><option value="">' + (isAR ? 'اختر...' : 'Select...') + '</option>' +
+          roles.map(r => '<option value="' + r.id + '"' + (step.roleId === r.id ? ' selected' : '') + '>' + esc(r.name) + '</option>').join('') +
+          '</select></div>';
+        const channelField = '<div class="bld-field"><label class="bld-label">' + (isAR ? 'القناة' : 'Channel') + '</label>' +
+          '<select class="bld-select _step-channel" data-si="' + si + '"><option value="">' + (isAR ? 'اختر...' : 'Select...') + '</option>' +
+          channels.map(c => '<option value="' + c.id + '"' + (step.channelId === c.id ? ' selected' : '') + '>#' + esc(c.name) + '</option>').join('') +
+          '</select></div>';
+
+        if (t === 'reply')           { h += content + ephem; }
+        if (t === 'send_dm')         { h += content; }
+        if (t === 'edit_message')    { h += content; }
+        if (t === 'send_to_channel') { h += content + channelField; }
+        if (t === 'send_webhook') {
+          h += '<div class="bld-field"><label class="bld-label">Webhook URL</label>' +
+            '<input type="url" class="bld-input _step-webhook" data-si="' + si + '" value="' + esc(step.webhookUrl || '') + '" placeholder="https://discord.com/api/webhooks/..."></div>';
+          h += content;
         }
-        if (t === 'reply') {
-          h += '<div class="bld-field" style="display:flex;align-items:center;gap:8px;">' +
-               '<input type="checkbox" class="_step-ephemeral" data-si="' + si + '" style="accent-color:var(--purple);width:15px;height:15px;"' + (step.ephemeral !== false ? ' checked' : '') + '>' +
-               '<label style="font-size:.75rem;color:var(--muted);">' + (isAR ? 'مخفي (Ephemeral)' : 'Ephemeral') + '</label></div>';
-        }
-        if (t === 'send_to_channel') {
-          h += '<div class="bld-field"><label class="bld-label">' + (isAR ? 'المحتوى' : 'Content') + '</label>' +
-               '<textarea class="bld-textarea _step-content" data-si="' + si + '" style="min-height:54px;" maxlength="2000">' + esc(step.content || '') + '</textarea></div>';
-          h += '<div class="bld-field"><label class="bld-label">' + (isAR ? 'القناة' : 'Channel') + '</label>' +
-               '<select class="bld-select _step-channel" data-si="' + si + '"><option value="">' + (isAR ? 'اختر...' : 'Select...') + '</option>' +
-               channels.map(c => '<option value="' + c.id + '"' + (step.channelId === c.id ? ' selected' : '') + '>#' + esc(c.name) + '</option>').join('') +
-               '</select></div>';
-        }
-        if (t === 'add_role' || t === 'remove_role' || t === 'toggle_role') {
-          h += '<div class="bld-field"><label class="bld-label">' + (isAR ? 'الرتبة' : 'Role') + '</label>' +
-               '<select class="bld-select _step-role" data-si="' + si + '"><option value="">' + (isAR ? 'اختر...' : 'Select...') + '</option>' +
-               roles.map(r => '<option value="' + r.id + '"' + (step.roleId === r.id ? ' selected' : '') + '>' + esc(r.name) + '</option>').join('') +
-               '</select></div>';
-        }
+        if (t === 'add_role' || t === 'remove_role' || t === 'toggle_role') { h += roleField; }
         if (t === 'disable_component' || t === 'enable_component') {
-          h += '<div class="bld-field"><label class="bld-label">' + (isAR ? 'معرف المكون' : 'Component ID') + '</label>' +
-               '<input type="text" class="bld-input _step-target" data-si="' + si + '" value="' + esc(step.targetId || '') + '" placeholder="customId"></div>';
+          h += '<div class="bld-field"><label class="bld-label">' + (isAR ? 'معرف المكوّن' : 'Component Custom ID') + '</label>' +
+            '<input type="text" class="bld-input _step-target" data-si="' + si + '" value="' + esc(step.targetId || '') + '" placeholder="customId" style="font-family:monospace;"></div>';
+        }
+        if (t === 'award_points') {
+          h += '<div class="bld-field"><label class="bld-label">' + (isAR ? 'عدد النقاط' : 'Points') + '</label>' +
+            '<input type="number" class="bld-input _step-points" data-si="' + si + '" value="' + (step.points || 10) + '" min="1" max="10000"></div>';
+        }
+        if (t === 'timeout_member') {
+          h += '<div class="bld-field"><label class="bld-label">' + (isAR ? 'المدة (دقائق)' : 'Duration (minutes)') + '</label>' +
+            '<input type="number" class="bld-input _step-duration" data-si="' + si + '" value="' + (step.duration || 10) + '" min="1" max="40320"></div>';
+        }
+        if (t === 'create_thread') {
+          h += '<div class="bld-field"><label class="bld-label">' + (isAR ? 'اسم الثريد' : 'Thread Name') + '</label>' +
+            '<input type="text" class="bld-input _step-target" data-si="' + si + '" value="' + esc(step.targetId || '') + '" placeholder="Support Thread" maxlength="100"></div>';
         }
         return h;
       }
@@ -2025,7 +2307,13 @@
         saveBtn.disabled = true;
         saveBtn.innerHTML = '<i data-lucide="loader" style="width:14px;height:14px;stroke:currentColor;animation:spin 1s linear infinite;"></i> ' + (isAR ? 'جاري الحفظ...' : 'Saving...');
 
-        const actions = Object.values(actionsMap).filter(a => a.steps?.length);
+        const actions = Object.values(actionsMap).filter(a => {
+          const rules = a.rules || (a.steps?.length ? [{ conditions: [], steps: a.steps }] : []);
+          return rules.some(r => r.steps?.length > 0);
+        }).map(a => {
+          const rules = a.rules || (a.steps?.length ? [{ conditions: [], steps: a.steps }] : []);
+          return { customId: a.customId, rules };
+        });
 
         try {
           const body = { name, channelId, content, components: compRows, actions };
