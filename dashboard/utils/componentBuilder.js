@@ -1,13 +1,37 @@
 /*
  * Next Generation — Component Builder Utility
- * Converts ComponentMessage data into a Discord.js-compatible message payload.
+ * Converts ComponentMessage data into a Discord.js Components V2 message payload.
+ *
+ * Discord Components V2 reference:
+ *   Type  1 = ActionRow   (buttons / select menus inside it)
+ *   Type  2 = Button
+ *   Type  3 = StringSelect
+ *   Type 10 = TextDisplay  – plain text block
+ *   Type 12 = MediaGallery – image(s)
+ *   Type 14 = Separator    – horizontal rule / spacing  (spacing: 1=Small, 2=Large)
+ *   Type 17 = Container    – visual group with optional accent_color
+ *
+ * REQUIRED: message must carry flags: MessageFlags.IsComponentsV2 (32768)
  */
 
 'use strict';
 
-const { ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, ButtonStyle, StringSelectMenuOptionBuilder } = require('discord.js');
+const {
+    ActionRowBuilder,
+    ButtonBuilder,
+    StringSelectMenuBuilder,
+    ButtonStyle,
+    StringSelectMenuOptionBuilder,
+    TextDisplayBuilder,
+    SeparatorBuilder,
+    SeparatorSpacingSize,
+    MediaGalleryBuilder,
+    MediaGalleryItemBuilder,
+    ContainerBuilder,
+    MessageFlags,
+} = require('discord.js');
 
-const STYLE_MAP = {
+const BUTTON_STYLE_MAP = {
     Primary:   ButtonStyle.Primary,
     Secondary: ButtonStyle.Secondary,
     Success:   ButtonStyle.Success,
@@ -15,58 +39,112 @@ const STYLE_MAP = {
     Link:      ButtonStyle.Link,
 };
 
+/** Convert a stored row into its discord.js builder, or null to skip. */
+function buildRow(row) {
+    // ── Action Row: Buttons ───────────────────────────────────────────────
+    if (row.type === 'buttons') {
+        const buttons = (row.buttons || []).slice(0, 5);
+        if (!buttons.length) return null;
+        const ar = new ActionRowBuilder();
+        ar.addComponents(buttons.map(b => {
+            const btn = new ButtonBuilder()
+                .setLabel((b.label || 'Button').slice(0, 80))
+                .setStyle(BUTTON_STYLE_MAP[b.style] || ButtonStyle.Primary);
+            if (b.style === 'Link') {
+                btn.setURL(b.url?.trim() || 'https://discord.com');
+            } else {
+                btn.setCustomId(b.customId);
+            }
+            if (b.emoji) { try { btn.setEmoji(b.emoji); } catch (_) {} }
+            if (b.disabled) btn.setDisabled(true);
+            return btn;
+        }));
+        return ar;
+    }
+
+    // ── Action Row: Select Menu ───────────────────────────────────────────
+    if (row.type === 'select' && row.select) {
+        const s = row.select;
+        const validOpts = (s.options || []).slice(0, 25).filter(o => o.value?.trim());
+        if (!validOpts.length) return null;
+        const menu = new StringSelectMenuBuilder()
+            .setCustomId(s.customId)
+            .setPlaceholder((s.placeholder || 'Select an option…').slice(0, 150))
+            .setMinValues(Math.min(s.minValues ?? 1, validOpts.length))
+            .setMaxValues(Math.min(s.maxValues ?? 1, validOpts.length));
+        if (s.disabled) menu.setDisabled(true);
+        menu.addOptions(validOpts.map(o => {
+            const opt = new StringSelectMenuOptionBuilder()
+                .setLabel((o.label || 'Option').slice(0, 100))
+                .setValue(o.value.slice(0, 100));
+            if (o.description) opt.setDescription(o.description.slice(0, 100));
+            if (o.emoji) { try { opt.setEmoji(o.emoji); } catch (_) {} }
+            if (o.default) opt.setDefault(true);
+            return opt;
+        }));
+        const ar = new ActionRowBuilder().addComponents(menu);
+        return ar;
+    }
+
+    // ── TextDisplay (type 10) ─────────────────────────────────────────────
+    if (row.type === 'text_display') {
+        const text = (row.text || '').trim();
+        if (!text) return null;
+        return new TextDisplayBuilder().setContent(text.slice(0, 4000));
+    }
+
+    // ── Separator (type 14) ───────────────────────────────────────────────
+    if (row.type === 'separator') {
+        const sep = new SeparatorBuilder().setDivider(row.divider !== false);
+        sep.setSpacing(row.spacing === 'Large' ? SeparatorSpacingSize.Large : SeparatorSpacingSize.Small);
+        return sep;
+    }
+
+    // ── Image → MediaGallery (type 12) ────────────────────────────────────
+    if (row.type === 'image') {
+        const url = (row.url || '').trim();
+        if (!url) return null;
+        const item = new MediaGalleryItemBuilder().setURL(url);
+        if (row.description) item.setDescription(row.description.slice(0, 512));
+        return new MediaGalleryBuilder().addItems(item);
+    }
+
+    // ── Container (type 17) ───────────────────────────────────────────────
+    if (row.type === 'container') {
+        const cnt = new ContainerBuilder();
+        if (row.accentColor) {
+            try {
+                const colorInt = parseInt(String(row.accentColor).replace(/^#/, ''), 16);
+                if (!isNaN(colorInt)) cnt.setAccentColor(colorInt);
+            } catch (_) {}
+        }
+        // Container requires at least one child component.
+        // A zero-width-space TextDisplay satisfies the requirement invisibly.
+        cnt.addTextDisplayComponents(new TextDisplayBuilder().setContent('\u200b'));
+        return cnt;
+    }
+
+    return null;
+}
+
 /**
- * Build a Discord.js message payload from a ComponentMessage document.
- * @param {object} doc  { content, components }
- * @returns {{ content: string, components: ActionRowBuilder[] }}
+ * Build a Discord.js Components V2 message payload.
+ * @param {object} doc  – { content: string, components: ComponentRow[] }
+ * @returns {{ content?: string, components: Builder[], flags: number }}
  */
 function buildComponentPayload(doc) {
-    const content = doc.content || '';
+    const components = [];
 
-    const components = (doc.components || []).slice(0, 5).map(row => {
-        const ar = new ActionRowBuilder();
+    for (const row of (doc.components || [])) {
+        const built = buildRow(row);
+        if (built) components.push(built);
+    }
 
-        if (row.type === 'buttons' && row.buttons?.length) {
-            ar.addComponents(row.buttons.slice(0, 5).map(b => {
-                const btn = new ButtonBuilder()
-                    .setLabel(b.label || 'Button')
-                    .setStyle(STYLE_MAP[b.style] || ButtonStyle.Primary);
-                if (b.style === 'Link') {
-                    btn.setURL(b.url || 'https://discord.com');
-                } else {
-                    btn.setCustomId(b.customId);
-                }
-                if (b.emoji) { try { btn.setEmoji(b.emoji); } catch (_) {} }
-                if (b.disabled) btn.setDisabled(true);
-                return btn;
-            }));
-        } else if (row.type === 'select' && row.select) {
-            const s = row.select;
-            const validOptions = (s.options || []).slice(0, 25).filter(o => o.value?.trim());
-            if (!validOptions.length) return null;
-            const menu = new StringSelectMenuBuilder()
-                .setCustomId(s.customId)
-                .setPlaceholder(s.placeholder || 'Select an option…')
-                .setMinValues(Math.min(s.minValues ?? 1, validOptions.length))
-                .setMaxValues(Math.min(s.maxValues ?? 1, validOptions.length));
-            if (s.disabled) menu.setDisabled(true);
-            menu.addOptions(validOptions.map(o => {
-                const opt = new StringSelectMenuOptionBuilder()
-                    .setLabel(o.label || 'Option')
-                    .setValue(o.value);
-                if (o.description) opt.setDescription(o.description.slice(0, 100));
-                if (o.emoji) { try { opt.setEmoji(o.emoji); } catch (_) {} }
-                if (o.default) opt.setDefault(true);
-                return opt;
-            }));
-            ar.addComponents(menu);
-        }
-
-        if (!ar.components.length) return null;
-        return ar;
-    }).filter(Boolean);
-
-    return { content: content || '\u200b', components };
+    return {
+        content:    doc.content?.trim() || undefined,
+        components,
+        flags: MessageFlags.IsComponentsV2,   // ← CRITICAL: enables V2 rendering
+    };
 }
 
 module.exports = { buildComponentPayload };

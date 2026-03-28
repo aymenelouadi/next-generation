@@ -1671,7 +1671,10 @@ app.post('/dashboard/:guildId/components/api/save', require('./middleware/auth')
                     const { buildComponentPayload } = require('./utils/componentBuilder');
                     const payload = buildComponentPayload({ content: doc.content, components: doc.components });
 
-                    if (doc.messageId) {
+                    // Require at least one component or content for a valid payload
+                    if (!payload.components.length && !payload.content) {
+                        logger.warn('components/save: payload is empty, skipping Discord send');
+                    } else if (doc.messageId) {
                         const msg = await channel.messages.fetch(doc.messageId).catch(() => null);
                         if (msg) {
                             await msg.edit(payload);
