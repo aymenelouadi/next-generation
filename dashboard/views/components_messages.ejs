@@ -213,8 +213,33 @@
     .page-header-left h2 { font-size: 1.45rem; font-weight: 800; color: var(--white); letter-spacing: -.02em; }
     .page-header-left p  { font-size: .83rem; color: var(--muted); max-width: 480px; line-height: 1.5; }
     .page-header-badge   { display: inline-flex; align-items: center; gap: 5px; font-size: .68rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--purple-l); background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.25); border-radius: 20px; padding: 3px 10px; width: fit-content; }
+    .page-header-right   { display: flex; gap: 8px; flex-shrink: 0; }
 
-    /* Empty state / Coming soon card */
+    /* ── Common Buttons ── */
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 10px; font-size: .82rem; font-weight: 600; cursor: pointer; border: 1px solid transparent; font-family: inherit; transition: all .18s; }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { background: var(--purple); color: var(--white); border-color: rgba(124,58,237,.5); }
+    .btn-primary:hover { background: #8b5cf6; box-shadow: 0 4px 20px rgba(124,58,237,.35); }
+    .btn-ghost { background: var(--surface); color: var(--muted); border-color: rgba(255,255,255,.08); }
+    .btn-ghost:hover { background: var(--surface-2); color: var(--white); }
+    .btn-danger { background: rgba(239,68,68,.12); color: #fca5a5; border-color: rgba(239,68,68,.25); }
+    .btn-danger:hover { background: rgba(239,68,68,.2); }
+    .btn-sm { padding: 6px 12px; font-size: .75rem; border-radius: 8px; }
+
+    /* ── Cards Grid (list view) ── */
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+    .msg-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px; transition: border-color .18s, box-shadow .18s; }
+    .msg-card:hover { border-color: var(--border-h); box-shadow: 0 4px 24px rgba(124,58,237,.12); }
+    .msg-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .msg-card-name { font-size: .92rem; font-weight: 700; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .msg-card-date { font-size: .65rem; color: var(--muted); white-space: nowrap; }
+    .msg-card-preview { font-size: .78rem; color: var(--muted); line-height: 1.45; max-height: 42px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .msg-card-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+    .msg-card-tag { display: inline-flex; align-items: center; gap: 4px; font-size: .65rem; font-weight: 600; color: var(--muted); background: var(--surface); border-radius: 6px; padding: 3px 8px; }
+    .msg-card-actions { display: flex; gap: 6px; margin-top: auto; }
+    .msg-card-actions .btn { flex: 1; justify-content: center; }
+
+    /* ── Empty state ── */
     .empty-state {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       gap: 16px; padding: 72px 24px; text-align: center;
@@ -229,16 +254,111 @@
     }
     .empty-state h3  { font-size: 1.1rem; font-weight: 700; color: var(--white); }
     .empty-state p   { font-size: .83rem; color: var(--muted); max-width: 360px; line-height: 1.55; }
-    .badge-soon {
-      display: inline-flex; align-items: center; gap: 5px;
-      font-size: .68rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
-      color: var(--gold-l); background: rgba(217,119,6,.12); border: 1px solid rgba(217,119,6,.25);
-      border-radius: 20px; padding: 4px 12px;
-    }
+
+    /* ── Builder (editor view) ── */
+    .builder { display: none; }
+    .builder.active { display: flex; gap: 20px; }
+    .builder-left { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+    .builder-right { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px; }
+    @media (max-width: 1100px) { .builder.active { flex-direction: column; } .builder-right { width: 100%; } }
+
+    .bld-section { background: var(--card); border: 1px solid var(--border); border-radius: 14px; }
+    .bld-section-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 0; }
+    .bld-section-title { font-size: .82rem; font-weight: 700; color: var(--white); display: flex; align-items: center; gap: 7px; }
+    .bld-section-body { padding: 12px 16px 16px; }
+
+    /* ── Message content editor ── */
+    .bld-textarea { width: 100%; min-height: 88px; background: var(--surface); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; padding: 10px 12px; color: var(--white); font-size: .82rem; font-family: inherit; resize: vertical; outline: none; transition: border-color .18s; }
+    .bld-textarea:focus { border-color: var(--purple); }
+    .bld-char-count { font-size: .65rem; color: var(--muted); text-align: right; margin-top: 4px; }
+
+    /* ── Input fields ── */
+    .bld-input { width: 100%; background: var(--surface); border: 1px solid rgba(255,255,255,.08); border-radius: 8px; padding: 8px 12px; color: var(--white); font-size: .8rem; font-family: inherit; outline: none; transition: border-color .18s; }
+    .bld-input:focus { border-color: var(--purple); }
+    .bld-select { width: 100%; background: var(--surface); border: 1px solid rgba(255,255,255,.08); border-radius: 8px; padding: 8px 12px; color: var(--white); font-size: .8rem; font-family: inherit; outline: none; -webkit-appearance: none; appearance: none; cursor: pointer; transition: border-color .18s; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a78bfa' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 12px; }
+    .bld-select:focus { border-color: var(--purple); }
+    .bld-select option { background: #0a0022; color: var(--white); }
+    .bld-label { display: block; font-size: .72rem; font-weight: 600; color: var(--muted); letter-spacing: .03em; margin-bottom: 6px; }
+    .bld-field { margin-bottom: 12px; }
+    .bld-field:last-child { margin-bottom: 0; }
+    .bld-row { display: flex; gap: 10px; }
+    .bld-row > * { flex: 1; }
+
+    /* ── Component Row Cards ── */
+    .comp-row-card { background: var(--surface); border: 1px solid rgba(255,255,255,.06); border-radius: 10px; margin-bottom: 10px; transition: border-color .15s; }
+    .comp-row-card:hover { border-color: rgba(255,255,255,.12); }
+    .comp-row-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; cursor: pointer; }
+    .comp-row-head-label { font-size: .78rem; font-weight: 600; color: var(--white); display: flex; align-items: center; gap: 6px; }
+    .comp-row-head-actions { display: flex; gap: 4px; }
+    .comp-row-body { padding: 0 12px 12px; }
+    .comp-row-icon { width: 20px; height: 20px; border-radius: 5px; display: flex; align-items: center; justify-content: center; background: rgba(124,58,237,.15); color: var(--purple-l); flex-shrink: 0; }
+    .comp-row-tag { font-size: .6rem; font-weight: 600; color: var(--muted); background: rgba(255,255,255,.06); border-radius: 4px; padding: 2px 6px; }
+
+    /* ── Button Items ── */
+    .btn-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 8px; margin-bottom: 6px; }
+    .btn-item:last-child { margin-bottom: 0; }
+    .btn-item-color { width: 8px; height: 20px; border-radius: 3px; flex-shrink: 0; }
+    .btn-item-color.Primary { background: #5865f2; }
+    .btn-item-color.Secondary { background: #4f545c; }
+    .btn-item-color.Success { background: #57f287; }
+    .btn-item-color.Danger { background: #ed4245; }
+    .btn-item-color.Link { background: #4f545c; }
+    .btn-item-label { flex: 1; font-size: .78rem; font-weight: 600; color: var(--white); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .btn-item-actions { display: flex; gap: 4px; }
+
+    /* ── Select option Items ── */
+    .opt-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: rgba(255,255,255,.02); border: 1px solid rgba(255,255,255,.04); border-radius: 6px; margin-bottom: 4px; font-size: .75rem; color: var(--muted); }
+    .opt-item:last-child { margin-bottom: 0; }
+    .opt-item-label { flex: 1; color: var(--white); font-weight: 600; }
+    .opt-item-desc  { flex: 1; font-size: .68rem; }
+
+    /* ── Icon buttons ── */
+    .icon-btn { display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 6px; border: none; background: none; color: var(--muted); cursor: pointer; transition: all .15s; flex-shrink: 0; }
+    .icon-btn:hover { background: rgba(255,255,255,.08); color: var(--white); }
+    .icon-btn.danger:hover { background: rgba(239,68,68,.15); color: #fca5a5; }
+
+    /* ── Action pipeline editor ── */
+    .action-list { display: flex; flex-direction: column; gap: 6px; }
+    .action-step { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; background: var(--surface); border: 1px solid rgba(255,255,255,.06); border-radius: 8px; }
+    .action-step-number { width: 22px; height: 22px; border-radius: 50%; background: rgba(124,58,237,.2); display: flex; align-items: center; justify-content: center; font-size: .65rem; font-weight: 700; color: var(--purple-l); flex-shrink: 0; margin-top: 2px; }
+    .action-step-body { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+
+    /* ── Preview panel ── */
+    .preview-panel { background: #2b2d31; border-radius: 8px; padding: 16px; }
+    .preview-msg { display: flex; gap: 14px; font-size: .88rem; line-height: 1.4; }
+    .preview-avatar { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; background: rgba(124,58,237,.3); display: flex; align-items: center; justify-content: center; }
+    .preview-avatar img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+    .preview-body { flex: 1; min-width: 0; }
+    .preview-author { display: flex; align-items: baseline; gap: 6px; margin-bottom: 2px; }
+    .preview-author-name { font-size: .88rem; font-weight: 600; color: #fff; }
+    .preview-author-badge { font-size: .55rem; font-weight: 700; background: #5865f2; color: #fff; padding: 1px 5px; border-radius: 3px; text-transform: uppercase; letter-spacing: .03em; }
+    .preview-content { color: #dbdee1; font-size: .88rem; white-space: pre-wrap; word-break: break-word; margin-bottom: 6px; }
+    .preview-components { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+    .preview-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .preview-btn { display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px; border-radius: 3px; font-size: .8rem; font-weight: 500; border: none; cursor: default; min-height: 32px; white-space: nowrap; transition: filter .15s; color: #fff; }
+    .preview-btn.Primary   { background: #5865f2; }
+    .preview-btn.Secondary { background: #4f545c; color: #fff; }
+    .preview-btn.Success   { background: #248046; }
+    .preview-btn.Danger    { background: #da373c; }
+    .preview-btn.Link      { background: #4f545c; color: #00a8fc; }
+    .preview-btn .link-icon { width: 12px; height: 12px; opacity: .6; }
+    .preview-select { width: 100%; max-width: 400px; background: #1e1f22; border: 1px solid #3f4147; border-radius: 4px; padding: 8px 32px 8px 12px; color: #949ba4; font-size: .8rem; font-family: inherit; -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23949ba4' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 12px; }
+
+    /* ── Modal overlay ── */
+    .modal-overlay { position: fixed; inset: 0; z-index: 500; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.6); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal { background: rgba(10,3,30,.97); border: 1px solid var(--border); border-radius: 16px; padding: 24px; min-width: 380px; max-width: 90vw; max-height: 85vh; overflow-y: auto; box-shadow: 0 12px 60px rgba(0,0,0,.7); }
+    .modal h3 { font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: 16px; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+
+    /* ── Toast ── */
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); z-index: 9000; padding: 10px 20px; border-radius: 10px; font-size: .82rem; font-weight: 600; background: var(--card); border: 1px solid var(--border); color: var(--white); pointer-events: none; opacity: 0; transition: all .3s; }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
     /* Page-in animation */
     @keyframes pIn  { from { opacity:1; } to { opacity: 0; pointer-events: none; } }
     @keyframes pOut { from { opacity:0; } to { opacity: 1; } }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     #ov { position:fixed;inset:0;z-index:9999;background:#040010;animation:pIn .45s cubic-bezier(.4,0,.2,1) forwards;pointer-events:none; }
   </style>
 </head>
@@ -250,39 +370,278 @@
 
   <%- include('partials/layout', { activePage: 'components' }) %>
 
+  <!-- Data injections -->
+  <script type="application/json" id="_data_channels"><%- JSON.stringify(guildChannels || []) %></script>
+  <script type="application/json" id="_data_roles"><%- JSON.stringify(guildRoles || []) %></script>
+  <script type="application/json" id="_data_emojis"><%- JSON.stringify(guildEmojis || []) %></script>
+  <script type="application/json" id="_data_botInfo"><%- JSON.stringify(botInfo || {}) %></script>
+  <script type="application/json" id="_data_saved"><%- JSON.stringify(savedMessages || []) %></script>
+
   <!-- Main content -->
   <main class="main">
 
-    <!-- Page header -->
-    <div class="page-header">
-      <div class="page-header-left">
-        <h2><%= lang === 'ar' ? 'رسائل المكونات' : 'Components Messages' %></h2>
-        <p><%= lang === 'ar' ? 'أنشئ رسائل تفاعلية تحتوي على أزرار وقوائم منسدلة باستخدام Discord Components V2' : 'Build interactive messages with buttons and select menus using Discord Components V2' %></p>
-        <div class="page-header-badge">
-          <i data-lucide="layout-panel-top" style="width:11px;height:11px;stroke:currentColor;"></i>
-          <%= lang === 'ar' ? 'الرسائل والـ Embeds' : 'Messaging & Embeds' %>
+    <!-- ═══ LIST VIEW ═══ -->
+    <div id="listView">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h2><%= lang === 'ar' ? 'رسائل المكونات' : 'Components Messages' %></h2>
+          <p><%= lang === 'ar' ? 'أنشئ رسائل تفاعلية تحتوي على أزرار وقوائم منسدلة باستخداⅯ Discord Components V2' : 'Build interactive messages with buttons and select menus using Discord Components V2' %></p>
+          <div class="page-header-badge">
+            <i data-lucide="layout-panel-top" style="width:11px;height:11px;stroke:currentColor;"></i>
+            Components V2
+          </div>
         </div>
+        <div class="page-header-right">
+          <button class="btn btn-primary" id="newMsgBtn">
+            <i data-lucide="plus" style="width:15px;height:15px;stroke:currentColor;"></i>
+            <%= lang === 'ar' ? 'رسالة جديدة' : 'New Message' %>
+          </button>
+        </div>
+      </div>
+
+      <!-- Cards grid -->
+      <div class="cards-grid" id="cardsGrid"></div>
+
+      <!-- Empty state -->
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <div class="empty-state-icon">
+          <i data-lucide="layout-panel-top" style="width:28px;height:28px;stroke:currentColor;fill:none;"></i>
+        </div>
+        <h3><%= lang === 'ar' ? 'لا توجد رسائل بعد' : 'No messages yet' %></h3>
+        <p><%= lang === 'ar' ? 'أنشئ أول رسالة تفاعلية باستخداⅯ الأزرار والقوائم.' : 'Create your first interactive message with buttons &amp; selects.' %></p>
+        <button class="btn btn-primary" id="emptyNewBtn">
+          <i data-lucide="plus" style="width:15px;height:15px;stroke:currentColor;"></i>
+          <%= lang === 'ar' ? 'إنشاء رسالة' : 'Create Message' %>
+        </button>
       </div>
     </div>
 
-    <!-- Empty / Coming soon state -->
-    <div class="empty-state">
-      <div class="empty-state-icon">
-        <i data-lucide="layout-panel-top" style="width:28px;height:28px;stroke:currentColor;fill:none;"></i>
+    <!-- ═══ BUILDER VIEW ═══ -->
+    <div class="builder" id="builderView">
+
+      <!-- Toolbar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;flex-wrap:wrap;width:100%;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button class="btn btn-ghost btn-sm" id="backToList">
+            <i data-lucide="arrow-left" style="width:14px;height:14px;stroke:currentColor;"></i>
+            <%= lang === 'ar' ? 'رجوع' : 'Back' %>
+          </button>
+          <span id="editorTitle" style="font-size:.92rem;font-weight:700;color:var(--white);"></span>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary" id="saveBtn">
+            <i data-lucide="save" style="width:14px;height:14px;stroke:currentColor;"></i>
+            <%= lang === 'ar' ? 'حفظ وإرسال' : 'Save & Send' %>
+          </button>
+        </div>
       </div>
-      <h3><%= lang === 'ar' ? 'رسائل المكونات' : 'Components Messages' %></h3>
-      <p>
-        <%= lang === 'ar'
-          ? 'قم بإنشاء رسائل تفاعلية باستخدام Discord Components V2 من أزرار وقوائم وإرسالها بسهولة.'
-          : 'Create interactive messages using Discord Components V2 with buttons, selects, and send them with ease.' %>
-      </p>
-      <span class="badge-soon">
-        <i data-lucide="clock" style="width:10px;height:10px;stroke:currentColor;"></i>
-        <%= lang === 'ar' ? 'قريباً' : 'Coming Soon' %>
-      </span>
+
+      <!-- Builder body -->
+      <div class="builder-left">
+
+        <!-- Message settings -->
+        <div class="bld-section">
+          <div class="bld-section-head">
+            <div class="bld-section-title">
+              <i data-lucide="settings-2" style="width:15px;height:15px;stroke:currentColor;"></i>
+              <%= lang === 'ar' ? 'إعدادات الرسالة' : 'Message Settings' %>
+            </div>
+          </div>
+          <div class="bld-section-body">
+            <div class="bld-row">
+              <div class="bld-field">
+                <label class="bld-label"><%= lang === 'ar' ? 'اسم الرسالة' : 'Message Name' %></label>
+                <input type="text" class="bld-input" id="msgName" maxlength="100" placeholder="<%= lang === 'ar' ? 'مثال: قائمة الأدوار' : 'e.g. Role Menu' %>">
+              </div>
+              <div class="bld-field">
+                <label class="bld-label"><%= lang === 'ar' ? 'القناة' : 'Channel' %></label>
+                <select class="bld-select" id="msgChannel">
+                  <option value=""><%= lang === 'ar' ? 'اختر قناة...' : 'Select channel...' %></option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message content -->
+        <div class="bld-section">
+          <div class="bld-section-head">
+            <div class="bld-section-title">
+              <i data-lucide="text" style="width:15px;height:15px;stroke:currentColor;"></i>
+              <%= lang === 'ar' ? 'محتوى الرسالة' : 'Message Content' %>
+            </div>
+          </div>
+          <div class="bld-section-body">
+            <textarea class="bld-textarea" id="msgContent" maxlength="2000" placeholder="<%= lang === 'ar' ? 'اكتب محتوى الرسالة هنا...' : 'Type your message content here...' %>"></textarea>
+            <div class="bld-char-count"><span id="contentCount">0</span> / 2000</div>
+          </div>
+        </div>
+
+        <!-- Components -->
+        <div class="bld-section">
+          <div class="bld-section-head">
+            <div class="bld-section-title">
+              <i data-lucide="layout-grid" style="width:15px;height:15px;stroke:currentColor;"></i>
+              <%= lang === 'ar' ? 'المكونات' : 'Components' %>
+              <span style="font-size:.65rem;color:var(--muted);font-weight:400;">(max 5 rows)</span>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-ghost btn-sm" id="addBtnRow">
+                <i data-lucide="square" style="width:12px;height:12px;stroke:currentColor;"></i>
+                <%= lang === 'ar' ? 'صف أزرار' : 'Button Row' %>
+              </button>
+              <button class="btn btn-ghost btn-sm" id="addSelectRow">
+                <i data-lucide="list" style="width:12px;height:12px;stroke:currentColor;"></i>
+                <%= lang === 'ar' ? 'قائمة' : 'Select Menu' %>
+              </button>
+            </div>
+          </div>
+          <div class="bld-section-body" id="compRows">
+            <div id="noCompMsg" style="text-align:center;padding:20px;color:var(--muted);font-size:.8rem;">
+              <%= lang === 'ar' ? 'لم تُضف أي مكونات بعد. أضف صف أزرار أو قائمة للبدء.' : 'No components added yet. Add a button row or select menu to get started.' %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="bld-section">
+          <div class="bld-section-head">
+            <div class="bld-section-title">
+              <i data-lucide="zap" style="width:15px;height:15px;stroke:currentColor;"></i>
+              <%= lang === 'ar' ? 'إجراءات التفاعل' : 'Interaction Actions' %>
+            </div>
+          </div>
+          <div class="bld-section-body" id="actionsPanel">
+            <div id="noActionsMsg" style="text-align:center;padding:20px;color:var(--muted);font-size:.8rem;">
+              <%= lang === 'ar' ? 'أضف مكونات أولاً ثم حدد الإجراءات لكل زر أو خيار.' : 'Add components first, then configure actions for each button or option.' %>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Preview -->
+      <div class="builder-right">
+        <div class="bld-section">
+          <div class="bld-section-head">
+            <div class="bld-section-title">
+              <i data-lucide="eye" style="width:15px;height:15px;stroke:currentColor;"></i>
+              <%= lang === 'ar' ? 'معاينة' : 'Preview' %>
+            </div>
+          </div>
+          <div class="bld-section-body">
+            <div class="preview-panel" id="previewPanel">
+              <div class="preview-msg">
+                <div class="preview-avatar" id="prevAvatar"></div>
+                <div class="preview-body">
+                  <div class="preview-author">
+                    <span class="preview-author-name" id="prevBotName">Bot</span>
+                    <span class="preview-author-badge">BOT</span>
+                  </div>
+                  <div class="preview-content" id="prevContent"><%= lang === 'ar' ? 'محتوى الرسالة يظهر هنا...' : 'Message content appears here...' %></div>
+                  <div class="preview-components" id="prevComponents"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
   </main>
+
+  <!-- ═══ BUTTON EDIT MODAL ═══ -->
+  <div class="modal-overlay" id="btnEditModal">
+    <div class="modal">
+      <h3 id="btnEditTitle"><%= lang === 'ar' ? 'تعديل زر' : 'Edit Button' %></h3>
+      <div class="bld-field">
+        <label class="bld-label"><%= lang === 'ar' ? 'النص' : 'Label' %></label>
+        <input type="text" class="bld-input" id="btnEditLabel" maxlength="80">
+      </div>
+      <div class="bld-field">
+        <label class="bld-label"><%= lang === 'ar' ? 'النمط' : 'Style' %></label>
+        <select class="bld-select" id="btnEditStyle">
+          <option value="Primary">Primary</option>
+          <option value="Secondary">Secondary</option>
+          <option value="Success">Success</option>
+          <option value="Danger">Danger</option>
+          <option value="Link">Link</option>
+        </select>
+      </div>
+      <div class="bld-field" id="btnEditUrlWrap" style="display:none;">
+        <label class="bld-label">URL</label>
+        <input type="url" class="bld-input" id="btnEditUrl" placeholder="https://...">
+      </div>
+      <div class="bld-field">
+        <label class="bld-label"><%= lang === 'ar' ? 'إيموجي' : 'Emoji' %></label>
+        <input type="text" class="bld-input" id="btnEditEmoji" placeholder="😀 or <:name:id>">
+      </div>
+      <div class="bld-field" style="display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="btnEditDisabled" style="accent-color:var(--purple);width:16px;height:16px;">
+        <label for="btnEditDisabled" style="font-size:.78rem;color:var(--muted);cursor:pointer;"><%= lang === 'ar' ? 'معطل' : 'Disabled' %></label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-sm" id="btnEditCancel"><%= lang === 'ar' ? 'إلغاء' : 'Cancel' %></button>
+        <button class="btn btn-primary btn-sm" id="btnEditSave"><%= lang === 'ar' ? 'حفظ' : 'Save' %></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SELECT OPTION EDIT MODAL ═══ -->
+  <div class="modal-overlay" id="optEditModal">
+    <div class="modal">
+      <h3><%= lang === 'ar' ? 'تعديل خيار' : 'Edit Option' %></h3>
+      <div class="bld-field">
+        <label class="bld-label"><%= lang === 'ar' ? 'النص' : 'Label' %></label>
+        <input type="text" class="bld-input" id="optEditLabel" maxlength="100">
+      </div>
+      <div class="bld-field">
+        <label class="bld-label"><%= lang === 'ar' ? 'القيمة' : 'Value' %></label>
+        <input type="text" class="bld-input" id="optEditValue" maxlength="100">
+      </div>
+      <div class="bld-field">
+        <label class="bld-label"><%= lang === 'ar' ? 'الوصف' : 'Description' %></label>
+        <input type="text" class="bld-input" id="optEditDesc" maxlength="100">
+      </div>
+      <div class="bld-field">
+        <label class="bld-label"><%= lang === 'ar' ? 'إيموجي' : 'Emoji' %></label>
+        <input type="text" class="bld-input" id="optEditEmoji" placeholder="😀">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-sm" id="optEditCancel"><%= lang === 'ar' ? 'إلغاء' : 'Cancel' %></button>
+        <button class="btn btn-primary btn-sm" id="optEditSave"><%= lang === 'ar' ? 'حفظ' : 'Save' %></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ACTION CONFIG MODAL ═══ -->
+  <div class="modal-overlay" id="actionModal">
+    <div class="modal" style="min-width:440px;">
+      <h3 id="actionModalTitle"><%= lang === 'ar' ? 'إعداد الإجراء' : 'Configure Action' %></h3>
+      <div id="actionStepsList"></div>
+      <button class="btn btn-ghost btn-sm" id="addActionStep" style="margin-top:8px;">
+        <i data-lucide="plus" style="width:12px;height:12px;stroke:currentColor;"></i>
+        <%= lang === 'ar' ? 'إضافة خطوة' : 'Add Step' %>
+      </button>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-sm" id="actionCancel"><%= lang === 'ar' ? 'إلغاء' : 'Cancel' %></button>
+        <button class="btn btn-primary btn-sm" id="actionSave"><%= lang === 'ar' ? 'حفظ' : 'Save' %></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DELETE CONFIRM MODAL ═══ -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal" style="min-width:340px;text-align:center;">
+      <h3><%= lang === 'ar' ? 'تأكيد الحذف' : 'Confirm Delete' %></h3>
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px;" id="deleteText"></p>
+      <div class="modal-actions" style="justify-content:center;">
+        <button class="btn btn-ghost btn-sm" id="deleteCancelBtn"><%= lang === 'ar' ? 'إلغاء' : 'Cancel' %></button>
+        <button class="btn btn-danger btn-sm" id="deleteConfirmBtn"><%= lang === 'ar' ? 'حذف' : 'Delete' %></button>
+      </div>
+    </div>
+  </div>
 
   <%- include('partials/promo_card') %>
   <%- include('partials/footer') %>
@@ -391,6 +750,711 @@
         const after   = divider ? divider.nextSibling : null;
         ordered.forEach(el => nav.insertBefore(el, after));
       });
+    })();
+
+    /* ═══════════════════════════════════════════════════════════════════════
+     *  COMPONENTS V2 BUILDER ENGINE
+     * ═══════════════════════════════════════════════════════════════════════ */
+    (function ComponentsBuilder() {
+      'use strict';
+
+      const LANG     = document.documentElement.lang || 'en';
+      const isAR     = LANG === 'ar';
+      const GUILD_ID = window.location.pathname.split('/')[2];
+      const API      = `/dashboard/${GUILD_ID}/components/api`;
+
+      /* ── Parse injected JSON ── */
+      function parseJSON(id) { try { return JSON.parse(document.getElementById(id)?.textContent || '[]'); } catch { return []; } }
+      const channels = parseJSON('_data_channels');
+      const roles    = parseJSON('_data_roles');
+      const emojis   = parseJSON('_data_emojis');
+      const botInfo  = (() => { try { return JSON.parse(document.getElementById('_data_botInfo')?.textContent || '{}'); } catch { return {}; } })();
+      let   saved    = parseJSON('_data_saved');
+
+      /* ── DOM refs ── */
+      const listView      = document.getElementById('listView');
+      const builderView   = document.getElementById('builderView');
+      const cardsGrid     = document.getElementById('cardsGrid');
+      const emptyState    = document.getElementById('emptyState');
+      const newMsgBtn     = document.getElementById('newMsgBtn');
+      const emptyNewBtn   = document.getElementById('emptyNewBtn');
+      const backToList    = document.getElementById('backToList');
+      const saveBtn       = document.getElementById('saveBtn');
+      const editorTitle   = document.getElementById('editorTitle');
+      const msgName       = document.getElementById('msgName');
+      const msgChannel    = document.getElementById('msgChannel');
+      const msgContent    = document.getElementById('msgContent');
+      const contentCount  = document.getElementById('contentCount');
+      const compRowsEl    = document.getElementById('compRows');
+      const noCompMsg     = document.getElementById('noCompMsg');
+      const actionsPanel  = document.getElementById('actionsPanel');
+      const noActionsMsg  = document.getElementById('noActionsMsg');
+      const prevAvatar    = document.getElementById('prevAvatar');
+      const prevBotName   = document.getElementById('prevBotName');
+      const prevContent   = document.getElementById('prevContent');
+      const prevComponents = document.getElementById('prevComponents');
+      const toastEl       = document.getElementById('toast');
+
+      /* ── Modal refs ── */
+      const btnEditModal   = document.getElementById('btnEditModal');
+      const optEditModal   = document.getElementById('optEditModal');
+      const actionModal    = document.getElementById('actionModal');
+      const deleteModal    = document.getElementById('deleteModal');
+
+      /* ── State ── */
+      let editingId    = null;   // null = new, string = editing existing
+      let compRows     = [];     // array of { id, type, buttons[], select }
+      let actionsMap   = {};     // customId → { customId, steps[] }
+      let dirty        = false;
+      let _btnEditCtx  = null;   // { rowId, btnIndex }
+      let _optEditCtx  = null;   // { rowId, optIndex }
+      let _actionCtx   = null;   // { customId }
+      let _deleteCtx   = null;   // { id, name }
+      let nextRowId    = 1;
+
+      /* ── Utility ── */
+      function uid() { return 'c_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7); }
+      function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+      function toast(msg, dur) {
+        toastEl.textContent = msg;
+        toastEl.classList.add('show');
+        clearTimeout(toastEl._t);
+        toastEl._t = setTimeout(() => toastEl.classList.remove('show'), dur || 3000);
+      }
+
+      /* ── Populate channel dropdown ── */
+      channels.forEach(ch => {
+        const o = document.createElement('option');
+        o.value = ch.id;
+        o.textContent = '#' + ch.name;
+        msgChannel.appendChild(o);
+      });
+
+      /* ── Bot info in preview ── */
+      if (botInfo.avatar) prevAvatar.innerHTML = '<img src="' + esc(botInfo.avatar) + '" alt="" />';
+      else prevAvatar.textContent = 'B';
+      if (botInfo.username) prevBotName.textContent = botInfo.username;
+
+      /* ═══ LIST VIEW RENDERING ═══ */
+      function renderList() {
+        cardsGrid.innerHTML = '';
+        if (!saved.length) { emptyState.style.display = ''; cardsGrid.style.display = 'none'; return; }
+        emptyState.style.display = 'none';
+        cardsGrid.style.display = '';
+
+        saved.forEach(msg => {
+          const card = document.createElement('div');
+          card.className = 'msg-card';
+          const btnCount = (msg.components || []).reduce((n, r) => n + (r.type === 'buttons' ? (r.buttons?.length || 0) : 0), 0);
+          const selCount = (msg.components || []).filter(r => r.type === 'select').length;
+          const actCount = (msg.actions || []).length;
+          const chName   = channels.find(c => c.id === msg.channelId)?.name || '—';
+          const date     = msg.updatedAt ? new Date(msg.updatedAt).toLocaleDateString(isAR ? 'ar' : 'en', { month: 'short', day: 'numeric' }) : '';
+
+          card.innerHTML =
+            '<div class="msg-card-head">' +
+              '<span class="msg-card-name">' + esc(msg.name) + '</span>' +
+              '<span class="msg-card-date">' + esc(date) + '</span>' +
+            '</div>' +
+            '<div class="msg-card-preview">' + esc(msg.content || (isAR ? '(بدون محتوى)' : '(no content)')) + '</div>' +
+            '<div class="msg-card-meta">' +
+              '<span class="msg-card-tag"><i data-lucide="hash" style="width:10px;height:10px;stroke:currentColor;"></i> ' + esc(chName) + '</span>' +
+              (btnCount ? '<span class="msg-card-tag"><i data-lucide="square" style="width:10px;height:10px;stroke:currentColor;"></i> ' + btnCount + ' ' + (isAR ? 'أزرار' : 'btns') + '</span>' : '') +
+              (selCount ? '<span class="msg-card-tag"><i data-lucide="list" style="width:10px;height:10px;stroke:currentColor;"></i> ' + selCount + ' ' + (isAR ? 'قوائم' : 'selects') + '</span>' : '') +
+              (actCount ? '<span class="msg-card-tag"><i data-lucide="zap" style="width:10px;height:10px;stroke:currentColor;"></i> ' + actCount + ' ' + (isAR ? 'إجراءات' : 'actions') + '</span>' : '') +
+            '</div>' +
+            '<div class="msg-card-actions">' +
+              '<button class="btn btn-ghost btn-sm _edit" data-id="' + msg._id + '">' +
+                '<i data-lucide="pencil" style="width:12px;height:12px;stroke:currentColor;"></i> ' + (isAR ? 'تعديل' : 'Edit') +
+              '</button>' +
+              '<button class="btn btn-danger btn-sm _del" data-id="' + msg._id + '" data-name="' + esc(msg.name) + '">' +
+                '<i data-lucide="trash-2" style="width:12px;height:12px;stroke:currentColor;"></i> ' + (isAR ? 'حذف' : 'Delete') +
+              '</button>' +
+            '</div>';
+          cardsGrid.appendChild(card);
+        });
+        lucide.createIcons();
+
+        cardsGrid.querySelectorAll('._edit').forEach(btn => btn.addEventListener('click', () => openEditor(btn.dataset.id)));
+        cardsGrid.querySelectorAll('._del').forEach(btn => btn.addEventListener('click', () => confirmDelete(btn.dataset.id, btn.dataset.name)));
+      }
+
+      /* ═══ OPEN / CLOSE EDITOR ═══ */
+      function openEditor(id) {
+        if (id) {
+          const msg = saved.find(m => m._id === id);
+          if (!msg) return;
+          editingId = id;
+          msgName.value    = msg.name || '';
+          msgChannel.value = msg.channelId || '';
+          msgContent.value = msg.content || '';
+          compRows   = JSON.parse(JSON.stringify(msg.components || []));
+          actionsMap = {};
+          (msg.actions || []).forEach(a => { actionsMap[a.customId] = JSON.parse(JSON.stringify(a)); });
+          editorTitle.textContent = isAR ? 'تعديل الرسالة' : 'Edit Message';
+        } else {
+          editingId = null;
+          msgName.value = '';
+          msgChannel.value = '';
+          msgContent.value = '';
+          compRows   = [];
+          actionsMap = {};
+          editorTitle.textContent = isAR ? 'رسالة جديدة' : 'New Message';
+        }
+        nextRowId = compRows.length ? Math.max(...compRows.map(r => parseInt(r.id?.split('_')[1]) || 0)) + 1 : 1;
+        contentCount.textContent = msgContent.value.length;
+        dirty = false;
+        listView.style.display    = 'none';
+        builderView.classList.add('active');
+        renderCompRows();
+        renderActions();
+        renderPreview();
+      }
+
+      function closeEditor() {
+        builderView.classList.remove('active');
+        listView.style.display = '';
+        renderList();
+      }
+
+      /* ═══ COMPONENT ROWS RENDERING ═══ */
+      function renderCompRows() {
+        const container = compRowsEl;
+        // Remove old row cards but keep noCompMsg
+        container.querySelectorAll('.comp-row-card').forEach(el => el.remove());
+
+        if (!compRows.length) { noCompMsg.style.display = ''; return; }
+        noCompMsg.style.display = 'none';
+
+        compRows.forEach((row, ri) => {
+          const card = document.createElement('div');
+          card.className = 'comp-row-card';
+          card.dataset.rowId = row.id;
+
+          if (row.type === 'buttons') {
+            card.innerHTML =
+              '<div class="comp-row-head">' +
+                '<span class="comp-row-head-label">' +
+                  '<span class="comp-row-icon"><i data-lucide="square" style="width:11px;height:11px;stroke:currentColor;"></i></span>' +
+                  (isAR ? 'صف أزرار' : 'Button Row') + ' <span class="comp-row-tag">' + (row.buttons?.length || 0) + '/5</span>' +
+                '</span>' +
+                '<span class="comp-row-head-actions">' +
+                  (ri > 0 ? '<button class="icon-btn _move-up" title="Move up"><i data-lucide="chevron-up" style="width:13px;height:13px;stroke:currentColor;"></i></button>' : '') +
+                  (ri < compRows.length - 1 ? '<button class="icon-btn _move-down" title="Move down"><i data-lucide="chevron-down" style="width:13px;height:13px;stroke:currentColor;"></i></button>' : '') +
+                  '<button class="icon-btn danger _del-row" title="Delete row"><i data-lucide="x" style="width:13px;height:13px;stroke:currentColor;"></i></button>' +
+                '</span>' +
+              '</div>' +
+              '<div class="comp-row-body">' +
+                (row.buttons || []).map((b, bi) =>
+                  '<div class="btn-item" data-bi="' + bi + '">' +
+                    '<div class="btn-item-color ' + b.style + '"></div>' +
+                    '<span class="btn-item-label">' + esc(b.emoji ? b.emoji + ' ' : '') + esc(b.label || 'Button') + '</span>' +
+                    '<span class="btn-item-actions">' +
+                      '<button class="icon-btn _edit-btn" data-bi="' + bi + '" title="Edit"><i data-lucide="pencil" style="width:11px;height:11px;stroke:currentColor;"></i></button>' +
+                      '<button class="icon-btn _action-btn" data-cid="' + esc(b.customId) + '" title="Actions"><i data-lucide="zap" style="width:11px;height:11px;stroke:currentColor;"></i></button>' +
+                      '<button class="icon-btn danger _del-btn" data-bi="' + bi + '" title="Delete"><i data-lucide="x" style="width:11px;height:11px;stroke:currentColor;"></i></button>' +
+                    '</span>' +
+                  '</div>'
+                ).join('') +
+                ((row.buttons?.length || 0) < 5 ?
+                  '<button class="btn btn-ghost btn-sm _add-btn" style="width:100%;margin-top:6px;justify-content:center;">' +
+                    '<i data-lucide="plus" style="width:11px;height:11px;stroke:currentColor;"></i> ' + (isAR ? 'إضافة زر' : 'Add Button') +
+                  '</button>' : '') +
+              '</div>';
+          } else if (row.type === 'select') {
+            const s = row.select || {};
+            card.innerHTML =
+              '<div class="comp-row-head">' +
+                '<span class="comp-row-head-label">' +
+                  '<span class="comp-row-icon"><i data-lucide="list" style="width:11px;height:11px;stroke:currentColor;"></i></span>' +
+                  (isAR ? 'قائمة منسدلة' : 'Select Menu') + ' <span class="comp-row-tag">' + (s.options?.length || 0) + ' ' + (isAR ? 'خيارات' : 'opts') + '</span>' +
+                '</span>' +
+                '<span class="comp-row-head-actions">' +
+                  (ri > 0 ? '<button class="icon-btn _move-up" title="Move up"><i data-lucide="chevron-up" style="width:13px;height:13px;stroke:currentColor;"></i></button>' : '') +
+                  (ri < compRows.length - 1 ? '<button class="icon-btn _move-down" title="Move down"><i data-lucide="chevron-down" style="width:13px;height:13px;stroke:currentColor;"></i></button>' : '') +
+                  '<button class="icon-btn _action-btn" data-cid="' + esc(s.customId || '') + '" title="Actions"><i data-lucide="zap" style="width:11px;height:11px;stroke:currentColor;"></i></button>' +
+                  '<button class="icon-btn danger _del-row" title="Delete row"><i data-lucide="x" style="width:13px;height:13px;stroke:currentColor;"></i></button>' +
+                '</span>' +
+              '</div>' +
+              '<div class="comp-row-body">' +
+                '<div class="bld-field" style="margin-bottom:8px;">' +
+                  '<label class="bld-label">' + (isAR ? 'النص التوضيحي' : 'Placeholder') + '</label>' +
+                  '<input type="text" class="bld-input _sel-ph" value="' + esc(s.placeholder || '') + '" maxlength="150" style="font-size:.75rem;">' +
+                '</div>' +
+                (s.options || []).map((o, oi) =>
+                  '<div class="opt-item" data-oi="' + oi + '">' +
+                    '<span class="opt-item-label">' + esc(o.emoji ? o.emoji + ' ' : '') + esc(o.label || 'Option') + '</span>' +
+                    '<span class="opt-item-desc">' + esc(o.description || '') + '</span>' +
+                    '<button class="icon-btn _edit-opt" data-oi="' + oi + '" title="Edit"><i data-lucide="pencil" style="width:10px;height:10px;stroke:currentColor;"></i></button>' +
+                    '<button class="icon-btn danger _del-opt" data-oi="' + oi + '" title="Delete"><i data-lucide="x" style="width:10px;height:10px;stroke:currentColor;"></i></button>' +
+                  '</div>'
+                ).join('') +
+                ((s.options?.length || 0) < 25 ?
+                  '<button class="btn btn-ghost btn-sm _add-opt" style="width:100%;margin-top:6px;justify-content:center;">' +
+                    '<i data-lucide="plus" style="width:11px;height:11px;stroke:currentColor;"></i> ' + (isAR ? 'إضافة خيار' : 'Add Option') +
+                  '</button>' : '') +
+              '</div>';
+          }
+
+          container.appendChild(card);
+        });
+
+        lucide.createIcons();
+        bindRowEvents();
+      }
+
+      /* ═══ ROW EVENT BINDINGS ═══ */
+      function bindRowEvents() {
+        compRowsEl.querySelectorAll('.comp-row-card').forEach(card => {
+          const rowId = card.dataset.rowId;
+          const ri = compRows.findIndex(r => r.id === rowId);
+          if (ri < 0) return;
+
+          // Move up/down
+          card.querySelector('._move-up')?.addEventListener('click', () => { if (ri > 0) { [compRows[ri - 1], compRows[ri]] = [compRows[ri], compRows[ri - 1]]; markDirty(); renderCompRows(); renderPreview(); } });
+          card.querySelector('._move-down')?.addEventListener('click', () => { if (ri < compRows.length - 1) { [compRows[ri], compRows[ri + 1]] = [compRows[ri + 1], compRows[ri]]; markDirty(); renderCompRows(); renderPreview(); } });
+
+          // Delete row
+          card.querySelector('._del-row')?.addEventListener('click', () => {
+            compRows.splice(ri, 1);
+            markDirty();
+            renderCompRows();
+            renderActions();
+            renderPreview();
+          });
+
+          // Buttons
+          if (compRows[ri].type === 'buttons') {
+            card.querySelectorAll('._edit-btn').forEach(btn => {
+              btn.addEventListener('click', () => openBtnEdit(rowId, parseInt(btn.dataset.bi)));
+            });
+            card.querySelectorAll('._del-btn').forEach(btn => {
+              btn.addEventListener('click', () => {
+                const bi = parseInt(btn.dataset.bi);
+                const removed = compRows[ri].buttons.splice(bi, 1)[0];
+                if (removed?.customId) delete actionsMap[removed.customId];
+                markDirty(); renderCompRows(); renderActions(); renderPreview();
+              });
+            });
+            card.querySelector('._add-btn')?.addEventListener('click', () => {
+              if ((compRows[ri].buttons?.length || 0) >= 5) return;
+              const cId = uid();
+              compRows[ri].buttons.push({ customId: cId, label: 'Button', style: 'Primary', emoji: '', url: '', disabled: false });
+              markDirty(); renderCompRows(); renderActions(); renderPreview();
+            });
+            card.querySelectorAll('._action-btn').forEach(btn => {
+              btn.addEventListener('click', () => openActionEditor(btn.dataset.cid));
+            });
+          }
+
+          // Select
+          if (compRows[ri].type === 'select') {
+            const phInput = card.querySelector('._sel-ph');
+            if (phInput) {
+              phInput.addEventListener('input', () => {
+                compRows[ri].select.placeholder = phInput.value;
+                markDirty(); renderPreview();
+              });
+            }
+            card.querySelectorAll('._edit-opt').forEach(btn => {
+              btn.addEventListener('click', () => openOptEdit(rowId, parseInt(btn.dataset.oi)));
+            });
+            card.querySelectorAll('._del-opt').forEach(btn => {
+              btn.addEventListener('click', () => {
+                compRows[ri].select.options.splice(parseInt(btn.dataset.oi), 1);
+                markDirty(); renderCompRows(); renderPreview();
+              });
+            });
+            card.querySelector('._add-opt')?.addEventListener('click', () => {
+              if ((compRows[ri].select.options?.length || 0) >= 25) return;
+              compRows[ri].select.options.push({ label: 'Option', value: uid(), description: '', emoji: '', default: false });
+              markDirty(); renderCompRows(); renderPreview();
+            });
+            card.querySelector('._action-btn')?.addEventListener('click', () => {
+              openActionEditor(compRows[ri].select?.customId);
+            });
+          }
+        });
+      }
+
+      /* ═══ ADD ROWS ═══ */
+      document.getElementById('addBtnRow').addEventListener('click', () => {
+        if (compRows.length >= 5) { toast(isAR ? 'الحد الأقصى 5 صفوف' : 'Max 5 rows'); return; }
+        const id = 'row_' + (nextRowId++);
+        const cId = uid();
+        compRows.push({ id, type: 'buttons', buttons: [{ customId: cId, label: 'Button', style: 'Primary', emoji: '', url: '', disabled: false }], select: null });
+        markDirty(); renderCompRows(); renderActions(); renderPreview();
+      });
+      document.getElementById('addSelectRow').addEventListener('click', () => {
+        if (compRows.length >= 5) { toast(isAR ? 'الحد الأقصى 5 صفوف' : 'Max 5 rows'); return; }
+        const id = 'row_' + (nextRowId++);
+        const cId = uid();
+        compRows.push({ id, type: 'select', buttons: [], select: { customId: cId, placeholder: isAR ? 'اختر خياراً...' : 'Select an option…', minValues: 1, maxValues: 1, disabled: false, options: [{ label: 'Option 1', value: uid(), description: '', emoji: '', default: false }] } });
+        markDirty(); renderCompRows(); renderActions(); renderPreview();
+      });
+
+      /* ═══ ACTIONS PANEL ═══ */
+      function renderActions() {
+        actionsPanel.querySelectorAll('.action-list, ._act-item').forEach(el => el.remove());
+        const allIds = getAllCustomIds();
+        if (!allIds.length) { noActionsMsg.style.display = ''; return; }
+        noActionsMsg.style.display = 'none';
+
+        const list = document.createElement('div');
+        list.className = 'action-list';
+
+        allIds.forEach(({ customId, label }) => {
+          const pipeline = actionsMap[customId];
+          const stepCount = pipeline?.steps?.length || 0;
+          const item = document.createElement('div');
+          item.className = 'action-step _act-item';
+          item.style.cursor = 'pointer';
+          item.innerHTML =
+            '<div class="action-step-number"><i data-lucide="zap" style="width:11px;height:11px;stroke:currentColor;"></i></div>' +
+            '<div class="action-step-body">' +
+              '<div style="font-size:.78rem;font-weight:600;color:var(--white);">' + esc(label) + '</div>' +
+              '<div style="font-size:.68rem;color:var(--muted);">' +
+                (stepCount ? stepCount + ' ' + (isAR ? 'خطوات' : 'steps') : (isAR ? 'لا إجراءات — انقر للإعداد' : 'No actions — click to configure')) +
+              '</div>' +
+            '</div>';
+          item.addEventListener('click', () => openActionEditor(customId));
+          list.appendChild(item);
+        });
+
+        actionsPanel.appendChild(list);
+        lucide.createIcons();
+      }
+
+      function getAllCustomIds() {
+        const ids = [];
+        compRows.forEach(row => {
+          if (row.type === 'buttons') {
+            (row.buttons || []).forEach(b => {
+              if (b.style !== 'Link' && b.customId) ids.push({ customId: b.customId, label: b.emoji ? b.emoji + ' ' + b.label : b.label || 'Button' });
+            });
+          } else if (row.type === 'select' && row.select?.customId) {
+            ids.push({ customId: row.select.customId, label: row.select.placeholder || 'Select Menu' });
+          }
+        });
+        return ids;
+      }
+
+      /* ═══ PREVIEW RENDERING ═══ */
+      function renderPreview() {
+        const text = msgContent.value.trim();
+        prevContent.textContent = text || (isAR ? 'محتوى الرسالة يظهر هنا...' : 'Message content appears here...');
+        prevContent.style.color = text ? '#dbdee1' : '#72767d';
+        prevComponents.innerHTML = '';
+
+        compRows.forEach(row => {
+          if (row.type === 'buttons') {
+            const rowEl = document.createElement('div');
+            rowEl.className = 'preview-row';
+            (row.buttons || []).forEach(b => {
+              const btn = document.createElement('span');
+              btn.className = 'preview-btn ' + (b.style || 'Primary');
+              btn.innerHTML = (b.emoji ? esc(b.emoji) + ' ' : '') + esc(b.label || 'Button');
+              if (b.style === 'Link') btn.innerHTML += ' <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+              if (b.disabled) btn.style.opacity = '0.5';
+              rowEl.appendChild(btn);
+            });
+            prevComponents.appendChild(rowEl);
+          } else if (row.type === 'select' && row.select) {
+            const sel = document.createElement('div');
+            sel.className = 'preview-select';
+            sel.textContent = row.select.placeholder || 'Select an option…';
+            prevComponents.appendChild(sel);
+          }
+        });
+      }
+
+      /* ═══ BUTTON EDIT MODAL ═══ */
+      function openBtnEdit(rowId, bi) {
+        const ri = compRows.findIndex(r => r.id === rowId);
+        if (ri < 0) return;
+        const btn = compRows[ri].buttons[bi];
+        if (!btn) return;
+        _btnEditCtx = { rowId, bi };
+        document.getElementById('btnEditLabel').value    = btn.label || '';
+        document.getElementById('btnEditStyle').value    = btn.style || 'Primary';
+        document.getElementById('btnEditUrl').value      = btn.url || '';
+        document.getElementById('btnEditEmoji').value    = btn.emoji || '';
+        document.getElementById('btnEditDisabled').checked = !!btn.disabled;
+        toggleUrlField();
+        btnEditModal.classList.add('open');
+      }
+      function toggleUrlField() {
+        document.getElementById('btnEditUrlWrap').style.display =
+          document.getElementById('btnEditStyle').value === 'Link' ? '' : 'none';
+      }
+      document.getElementById('btnEditStyle').addEventListener('change', toggleUrlField);
+      document.getElementById('btnEditCancel').addEventListener('click', () => { btnEditModal.classList.remove('open'); _btnEditCtx = null; });
+      document.getElementById('btnEditSave').addEventListener('click', () => {
+        if (!_btnEditCtx) return;
+        const ri = compRows.findIndex(r => r.id === _btnEditCtx.rowId);
+        if (ri < 0) return;
+        const btn = compRows[ri].buttons[_btnEditCtx.bi];
+        if (!btn) return;
+        btn.label    = document.getElementById('btnEditLabel').value.trim() || 'Button';
+        btn.style    = document.getElementById('btnEditStyle').value;
+        btn.url      = document.getElementById('btnEditUrl').value.trim();
+        btn.emoji    = document.getElementById('btnEditEmoji').value.trim();
+        btn.disabled = document.getElementById('btnEditDisabled').checked;
+        if (btn.style === 'Link') { btn.customId = ''; delete actionsMap[btn.customId]; }
+        else if (!btn.customId) { btn.customId = uid(); }
+        markDirty(); renderCompRows(); renderActions(); renderPreview();
+        btnEditModal.classList.remove('open'); _btnEditCtx = null;
+      });
+
+      /* ═══ OPTION EDIT MODAL ═══ */
+      function openOptEdit(rowId, oi) {
+        const ri = compRows.findIndex(r => r.id === rowId);
+        if (ri < 0) return;
+        const opt = compRows[ri].select?.options?.[oi];
+        if (!opt) return;
+        _optEditCtx = { rowId, oi };
+        document.getElementById('optEditLabel').value = opt.label || '';
+        document.getElementById('optEditValue').value = opt.value || '';
+        document.getElementById('optEditDesc').value  = opt.description || '';
+        document.getElementById('optEditEmoji').value = opt.emoji || '';
+        optEditModal.classList.add('open');
+      }
+      document.getElementById('optEditCancel').addEventListener('click', () => { optEditModal.classList.remove('open'); _optEditCtx = null; });
+      document.getElementById('optEditSave').addEventListener('click', () => {
+        if (!_optEditCtx) return;
+        const ri = compRows.findIndex(r => r.id === _optEditCtx.rowId);
+        if (ri < 0) return;
+        const opt = compRows[ri].select?.options?.[_optEditCtx.oi];
+        if (!opt) return;
+        opt.label       = document.getElementById('optEditLabel').value.trim() || 'Option';
+        opt.value       = document.getElementById('optEditValue').value.trim() || uid();
+        opt.description = document.getElementById('optEditDesc').value.trim();
+        opt.emoji       = document.getElementById('optEditEmoji').value.trim();
+        markDirty(); renderCompRows(); renderPreview();
+        optEditModal.classList.remove('open'); _optEditCtx = null;
+      });
+
+      /* ═══ ACTION EDITOR MODAL ═══ */
+      const ACTION_TYPES = [
+        { value: 'reply',             label: isAR ? 'رد في القناة' : 'Reply in Channel' },
+        { value: 'send_dm',           label: isAR ? 'إرسال رسالة خاصة' : 'Send DM' },
+        { value: 'send_to_channel',   label: isAR ? 'إرسال إلى قناة' : 'Send to Channel' },
+        { value: 'add_role',          label: isAR ? 'إضافة رتبة' : 'Add Role' },
+        { value: 'remove_role',       label: isAR ? 'إزالة رتبة' : 'Remove Role' },
+        { value: 'toggle_role',       label: isAR ? 'تبديل رتبة' : 'Toggle Role' },
+        { value: 'edit_message',      label: isAR ? 'تعديل الرسالة' : 'Edit Message' },
+        { value: 'disable_component', label: isAR ? 'تعطيل المكون' : 'Disable Component' },
+        { value: 'enable_component',  label: isAR ? 'تفعيل المكون' : 'Enable Component' },
+      ];
+
+      function openActionEditor(customId) {
+        if (!customId) return;
+        _actionCtx = { customId };
+        if (!actionsMap[customId]) actionsMap[customId] = { customId, steps: [] };
+        document.getElementById('actionModalTitle').textContent = (isAR ? 'إجراءات: ' : 'Actions: ') + customId.slice(0, 16);
+        renderActionSteps();
+        actionModal.classList.add('open');
+      }
+      document.getElementById('actionCancel').addEventListener('click', () => { actionModal.classList.remove('open'); _actionCtx = null; });
+      document.getElementById('actionSave').addEventListener('click', () => {
+        if (!_actionCtx) return;
+        // Steps are already in actionsMap, just re-render
+        markDirty(); renderActions();
+        actionModal.classList.remove('open'); _actionCtx = null;
+      });
+      document.getElementById('addActionStep').addEventListener('click', () => {
+        if (!_actionCtx) return;
+        actionsMap[_actionCtx.customId].steps.push({ type: 'reply', content: '', ephemeral: true, channelId: '', roleId: '', targetId: '' });
+        renderActionSteps();
+      });
+
+      function renderActionSteps() {
+        const listEl = document.getElementById('actionStepsList');
+        listEl.innerHTML = '';
+        if (!_actionCtx) return;
+        const steps = actionsMap[_actionCtx.customId]?.steps || [];
+
+        steps.forEach((step, si) => {
+          const div = document.createElement('div');
+          div.className = 'action-step';
+          div.innerHTML =
+            '<div class="action-step-number">' + (si + 1) + '</div>' +
+            '<div class="action-step-body">' +
+              '<div class="bld-field">' +
+                '<label class="bld-label">' + (isAR ? 'النوع' : 'Type') + '</label>' +
+                '<select class="bld-select _step-type" data-si="' + si + '">' +
+                  ACTION_TYPES.map(t => '<option value="' + t.value + '"' + (step.type === t.value ? ' selected' : '') + '>' + esc(t.label) + '</option>').join('') +
+                '</select>' +
+              '</div>' +
+              buildStepFields(step, si) +
+            '</div>' +
+            '<button class="icon-btn danger _del-step" data-si="' + si + '" title="Delete"><i data-lucide="x" style="width:12px;height:12px;stroke:currentColor;"></i></button>';
+          listEl.appendChild(div);
+        });
+
+        lucide.createIcons();
+
+        // Bind events
+        listEl.querySelectorAll('._step-type').forEach(sel => {
+          sel.addEventListener('change', () => {
+            const si = parseInt(sel.dataset.si);
+            steps[si].type = sel.value;
+            renderActionSteps();
+          });
+        });
+        listEl.querySelectorAll('._step-content').forEach(inp => {
+          inp.addEventListener('input', () => { steps[parseInt(inp.dataset.si)].content = inp.value; });
+        });
+        listEl.querySelectorAll('._step-ephemeral').forEach(cb => {
+          cb.addEventListener('change', () => { steps[parseInt(cb.dataset.si)].ephemeral = cb.checked; });
+        });
+        listEl.querySelectorAll('._step-channel').forEach(sel => {
+          sel.addEventListener('change', () => { steps[parseInt(sel.dataset.si)].channelId = sel.value; });
+        });
+        listEl.querySelectorAll('._step-role').forEach(sel => {
+          sel.addEventListener('change', () => { steps[parseInt(sel.dataset.si)].roleId = sel.value; });
+        });
+        listEl.querySelectorAll('._step-target').forEach(inp => {
+          inp.addEventListener('input', () => { steps[parseInt(inp.dataset.si)].targetId = inp.value; });
+        });
+        listEl.querySelectorAll('._del-step').forEach(btn => {
+          btn.addEventListener('click', () => { steps.splice(parseInt(btn.dataset.si), 1); renderActionSteps(); });
+        });
+      }
+
+      function buildStepFields(step, si) {
+        let h = '';
+        const t = step.type;
+        if (t === 'reply' || t === 'send_dm' || t === 'edit_message') {
+          h += '<div class="bld-field"><label class="bld-label">' + (isAR ? 'المحتوى' : 'Content') + '</label>' +
+               '<textarea class="bld-textarea _step-content" data-si="' + si + '" style="min-height:54px;" maxlength="2000">' + esc(step.content || '') + '</textarea></div>';
+        }
+        if (t === 'reply') {
+          h += '<div class="bld-field" style="display:flex;align-items:center;gap:8px;">' +
+               '<input type="checkbox" class="_step-ephemeral" data-si="' + si + '" style="accent-color:var(--purple);width:15px;height:15px;"' + (step.ephemeral !== false ? ' checked' : '') + '>' +
+               '<label style="font-size:.75rem;color:var(--muted);">' + (isAR ? 'مخفي (Ephemeral)' : 'Ephemeral') + '</label></div>';
+        }
+        if (t === 'send_to_channel') {
+          h += '<div class="bld-field"><label class="bld-label">' + (isAR ? 'المحتوى' : 'Content') + '</label>' +
+               '<textarea class="bld-textarea _step-content" data-si="' + si + '" style="min-height:54px;" maxlength="2000">' + esc(step.content || '') + '</textarea></div>';
+          h += '<div class="bld-field"><label class="bld-label">' + (isAR ? 'القناة' : 'Channel') + '</label>' +
+               '<select class="bld-select _step-channel" data-si="' + si + '"><option value="">' + (isAR ? 'اختر...' : 'Select...') + '</option>' +
+               channels.map(c => '<option value="' + c.id + '"' + (step.channelId === c.id ? ' selected' : '') + '>#' + esc(c.name) + '</option>').join('') +
+               '</select></div>';
+        }
+        if (t === 'add_role' || t === 'remove_role' || t === 'toggle_role') {
+          h += '<div class="bld-field"><label class="bld-label">' + (isAR ? 'الرتبة' : 'Role') + '</label>' +
+               '<select class="bld-select _step-role" data-si="' + si + '"><option value="">' + (isAR ? 'اختر...' : 'Select...') + '</option>' +
+               roles.map(r => '<option value="' + r.id + '"' + (step.roleId === r.id ? ' selected' : '') + '>' + esc(r.name) + '</option>').join('') +
+               '</select></div>';
+        }
+        if (t === 'disable_component' || t === 'enable_component') {
+          h += '<div class="bld-field"><label class="bld-label">' + (isAR ? 'معرف المكون' : 'Component ID') + '</label>' +
+               '<input type="text" class="bld-input _step-target" data-si="' + si + '" value="' + esc(step.targetId || '') + '" placeholder="customId"></div>';
+        }
+        return h;
+      }
+
+      /* ═══ DELETE MODAL ═══ */
+      function confirmDelete(id, name) {
+        _deleteCtx = { id, name };
+        document.getElementById('deleteText').textContent = (isAR ? 'هل تريد حذف "' + name + '"؟ لا يمكن التراجع.' : 'Delete "' + name + '"? This cannot be undone.');
+        deleteModal.classList.add('open');
+      }
+      document.getElementById('deleteCancelBtn').addEventListener('click', () => { deleteModal.classList.remove('open'); _deleteCtx = null; });
+      document.getElementById('deleteConfirmBtn').addEventListener('click', async () => {
+        if (!_deleteCtx) return;
+        deleteModal.classList.remove('open');
+        try {
+          const res = await fetch(API + '/' + _deleteCtx.id, { method: 'DELETE' });
+          const data = await res.json();
+          if (data.success) {
+            saved = saved.filter(m => m._id !== _deleteCtx.id);
+            toast(isAR ? 'تم الحذف' : 'Deleted');
+            renderList();
+          } else { toast(data.error || 'Error', 4000); }
+        } catch (e) { toast('Network error', 4000); }
+        _deleteCtx = null;
+      });
+
+      /* ═══ SAVE ═══ */
+      saveBtn.addEventListener('click', async () => {
+        const name      = msgName.value.trim();
+        const channelId = msgChannel.value;
+        const content   = msgContent.value;
+        if (!name) { toast(isAR ? 'أدخل اسم الرسالة' : 'Enter a message name'); msgName.focus(); return; }
+        if (!channelId) { toast(isAR ? 'اختر قناة' : 'Select a channel'); msgChannel.focus(); return; }
+        // Validate: at least 1 component or content
+        if (!content.trim() && !compRows.length) { toast(isAR ? 'أضف محتوى أو مكونات' : 'Add content or components'); return; }
+
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i data-lucide="loader" style="width:14px;height:14px;stroke:currentColor;animation:spin 1s linear infinite;"></i> ' + (isAR ? 'جاري الحفظ...' : 'Saving...');
+
+        const actions = Object.values(actionsMap).filter(a => a.steps?.length);
+
+        try {
+          const body = { name, channelId, content, components: compRows, actions };
+          if (editingId) body._id = editingId;
+
+          const res = await fetch(API + '/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+          const data = await res.json();
+          if (data.success) {
+            if (editingId) {
+              const idx = saved.findIndex(m => m._id === editingId);
+              if (idx >= 0) saved[idx] = data.data; else saved.unshift(data.data);
+            } else {
+              saved.unshift(data.data);
+              editingId = data.data._id;
+            }
+            dirty = false;
+            toast(isAR ? 'تم الحفظ والإرسال بنجاح!' : 'Saved & sent successfully!');
+          } else {
+            toast(data.error || 'Error', 4000);
+          }
+        } catch (e) {
+          toast('Network error', 4000);
+        }
+
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i data-lucide="save" style="width:14px;height:14px;stroke:currentColor;"></i> ' + (isAR ? 'حفظ وإرسال' : 'Save & Send');
+        lucide.createIcons();
+      });
+
+      /* ═══ EVENTS ═══ */
+      function markDirty() { dirty = true; }
+      msgContent.addEventListener('input', () => { contentCount.textContent = msgContent.value.length; markDirty(); renderPreview(); });
+      msgName.addEventListener('input', markDirty);
+      msgChannel.addEventListener('change', markDirty);
+
+      newMsgBtn.addEventListener('click', () => openEditor(null));
+      emptyNewBtn.addEventListener('click', () => openEditor(null));
+      backToList.addEventListener('click', () => {
+        if (dirty && !confirm(isAR ? 'لديك تغييرات غير محفوظة، هل تريد الخروج؟' : 'You have unsaved changes. Leave anyway?')) return;
+        closeEditor();
+      });
+
+      // Close modals on escape
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          if (btnEditModal.classList.contains('open')) { btnEditModal.classList.remove('open'); _btnEditCtx = null; }
+          if (optEditModal.classList.contains('open')) { optEditModal.classList.remove('open'); _optEditCtx = null; }
+          if (actionModal.classList.contains('open')) { actionModal.classList.remove('open'); _actionCtx = null; }
+          if (deleteModal.classList.contains('open')) { deleteModal.classList.remove('open'); _deleteCtx = null; }
+        }
+      });
+
+      // Close modals on backdrop click
+      [btnEditModal, optEditModal, actionModal, deleteModal].forEach(modal => {
+        modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+      });
+
+      /* ═══ INIT ═══ */
+      renderList();
+
     })();
   </script>
 </body>

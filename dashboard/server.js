@@ -1524,9 +1524,10 @@ app.delete('/dashboard/:guildId/embeds/api/:id', require('./middleware/auth'), a
 });
 
 /* ── Messaging: Components Messages ─────────────────── */
-app.get('/dashboard/:guildId/components', require('./middleware/auth'), (req, res) => {
+app.get('/dashboard/:guildId/components', require('./middleware/auth'), async (req, res) => {
     const guildDb   = require('./utils/guildDb');
     const { getClient } = require('./utils/botClient');
+    const ComponentMessage = require('../systems/schemas/ComponentMessage');
     const botClient = getClient();
     const { guildId } = req.params;
 
@@ -1538,11 +1539,178 @@ app.get('/dashboard/:guildId/components', require('./middleware/auth'), (req, re
     const guildInfo = raw.find(g => g.id === guildId);
     const guilds    = raw.map(g => ({ ...g, inBot: botClient ? botClient.guilds.cache.has(g.id) : guildDb.exists(g.id) }));
 
+    let guildChannels = [];
+    if (botClient) {
+        const guild = botClient.guilds.cache.get(guildId);
+        if (guild) {
+            guildChannels = guild.channels.cache
+                .filter(c => c.type === 0)
+                .map(c => ({ id: c.id, name: c.name }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+        }
+    }
+
+    let guildRoles = [];
+    if (botClient) {
+        const guild = botClient.guilds.cache.get(guildId);
+        if (guild) {
+            guildRoles = guild.roles.cache
+                .filter(r => !r.managed && r.name !== '@everyone')
+                .map(r => ({ id: r.id, name: r.name, color: r.hexColor || '#99aab5', position: r.rawPosition }))
+                .sort((a, b) => b.position - a.position);
+        }
+    }
+
+    let guildEmojis = [];
+    if (botClient) {
+        const guild = botClient.guilds.cache.get(guildId);
+        if (guild) {
+            guildEmojis = guild.emojis.cache
+                .map(e => ({ id: e.id, name: e.name, animated: e.animated, url: `https://cdn.discordapp.com/emojis/${e.id}.${e.animated ? 'gif' : 'png'}?size=32` }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+        }
+    }
+
+    const botInfo = botClient?.user
+        ? { username: botClient.user.username, avatar: botClient.user.displayAvatarURL({ size: 64 }) }
+        : { username: 'Bot', avatar: null };
+
+    let savedMessages = [];
+    try { savedMessages = await ComponentMessage.find({ guildId }).sort({ updatedAt: -1 }).lean(); } catch (_) {}
+
     res.render('components_messages', {
         user: req.session.user, guildInfo, guilds,
+        guildChannels, guildRoles, guildEmojis, botInfo,
+        savedMessages,
         t: req.t, lang: req.lang, guildId,
         isShip: getIsShip(req.session.user?.id)
     });
+});
+
+/* ── Components API: list ────────────────────────────── */
+app.get('/dashboard/:guildId/components/api/list', require('./middleware/auth'), async (req, res) => {
+    const ComponentMessage = require('../systems/schemas/ComponentMessage');
+    const { guildId } = req.params;
+    const raw = req.session.guilds || [];
+    if (!raw.find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const list = await ComponentMessage.find({ guildId }).sort({ updatedAt: -1 }).lean();
+        res.json({ success: true, data: list });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* ── Components API: get single ──────────────────────── */
+app.get('/dashboard/:guildId/components/api/:id', require('./middleware/auth'), async (req, res) => {
+    const ComponentMessage = require('../systems/schemas/ComponentMessage');
+    const { guildId, id } = req.params;
+    const raw = req.session.guilds || [];
+    if (!raw.find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const doc = await ComponentMessage.findOne({ _id: id, guildId }).lean();
+        if (!doc) return res.status(404).json({ error: 'Not found' });
+        res.json({ success: true, data: doc });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* ── Components API: save (create / update) ──────────── */
+app.post('/dashboard/:guildId/components/api/save', require('./middleware/auth'), express.json(), async (req, res) => {
+    const ComponentMessage = require('../systems/schemas/ComponentMessage');
+    const { getClient } = require('./utils/botClient');
+    const { guildId } = req.params;
+    const raw = req.session.guilds || [];
+    if (!raw.find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
+
+    const { _id, name, content, channelId, components, actions } = req.body;
+    if (!name || !name.trim()) return res.status(400).json({ error: 'Name is required' });
+    if (!channelId)            return res.status(400).json({ error: 'Channel is required' });
+
+    const componentIds = [];
+    for (const row of (components || [])) {
+        if (row.type === 'buttons') {
+            for (const btn of (row.buttons || [])) {
+                if (btn.customId && btn.style !== 'Link') componentIds.push(btn.customId);
+            }
+        } else if (row.type === 'select' && row.select?.customId) {
+            componentIds.push(row.select.customId);
+        }
+    }
+
+    try {
+        let doc;
+        const updateData = {
+            name: name.trim(),
+            content: (content || '').slice(0, 2000),
+            channelId,
+            components: components || [],
+            actions: actions || [],
+            componentIds,
+            updatedBy: req.session.user?.id || '',
+        };
+
+        if (_id) {
+            doc = await ComponentMessage.findOneAndUpdate(
+                { _id, guildId },
+                { $set: updateData },
+                { new: true }
+            );
+            if (!doc) return res.status(404).json({ error: 'Message not found' });
+        } else {
+            doc = await ComponentMessage.create({
+                guildId,
+                ...updateData,
+                createdBy: req.session.user?.id || '',
+            });
+        }
+
+        // Send or edit the live Discord message
+        const botClient = getClient();
+        if (botClient && channelId) {
+            try {
+                const channel = await botClient.channels.fetch(channelId).catch(() => null);
+                if (channel) {
+                    const { buildComponentPayload } = require('./utils/componentBuilder');
+                    const payload = buildComponentPayload({ content: doc.content, components: doc.components });
+
+                    if (doc.messageId) {
+                        const msg = await channel.messages.fetch(doc.messageId).catch(() => null);
+                        if (msg) {
+                            await msg.edit(payload);
+                        } else {
+                            const sent = await channel.send(payload);
+                            await ComponentMessage.findByIdAndUpdate(doc._id, { $set: { messageId: sent.id } });
+                            doc = doc.toObject ? doc.toObject() : { ...doc };
+                            doc.messageId = sent.id;
+                        }
+                    } else {
+                        const sent = await channel.send(payload);
+                        await ComponentMessage.findByIdAndUpdate(doc._id, { $set: { messageId: sent.id } });
+                        doc = doc.toObject ? doc.toObject() : { ...doc };
+                        doc.messageId = sent.id;
+                    }
+                }
+            } catch (botErr) {
+                logger.warn('components/save bot send failed', { error: botErr.message });
+            }
+        }
+
+        res.json({ success: true, data: doc });
+    } catch (e) {
+        if (e.code === 11000) return res.status(409).json({ error: 'A message with this name already exists' });
+        res.status(500).json({ error: e.message });
+    }
+});
+
+/* ── Components API: delete ──────────────────────────── */
+app.delete('/dashboard/:guildId/components/api/:id', require('./middleware/auth'), async (req, res) => {
+    const ComponentMessage = require('../systems/schemas/ComponentMessage');
+    const { guildId, id } = req.params;
+    const raw = req.session.guilds || [];
+    if (!raw.find(g => g.id === guildId)) return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const doc = await ComponentMessage.findOneAndDelete({ _id: id, guildId });
+        if (!doc) return res.status(404).json({ error: 'Not found' });
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.get('/dashboard/:guildId/levels', require('./middleware/auth'), (req, res) => {
