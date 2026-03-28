@@ -318,6 +318,22 @@
 
     /* ── Container row card ── */
     .bld-container-card { background: var(--surface); border: 1px solid rgba(255,255,255,.09); border-left: 3px solid rgba(124,58,237,.5); border-radius: 10px; padding: 10px 12px; transition: border-left-color .2s; }
+    .bld-container-children { margin: 8px 0 4px; display: flex; flex-direction: column; gap: 5px; }
+    .bld-child-row { display: flex; gap: 5px; align-items: flex-start; background: rgba(255,255,255,.025); border: 1px solid rgba(255,255,255,.06); border-radius: 8px; padding: 8px 10px; }
+    .bld-child-grip { color: var(--muted); opacity: .25; flex-shrink: 0; padding-top: 3px; }
+    .bld-child-main { flex: 1; min-width: 0; }
+    .bld-child-del { display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 5px; border: none; background: none; color: #f44336; cursor: pointer; flex-shrink: 0; opacity: .55; padding: 0; font-size: 14px; line-height: 1; transition: background .15s, opacity .15s; }
+    .bld-child-del:hover { background: rgba(244,67,54,.15); opacity: 1; }
+    .bld-child-title { font-size: .58rem; font-weight: 700; color: var(--muted); letter-spacing: .07em; text-transform: uppercase; margin-bottom: 5px; }
+    .bld-child-textarea { width: 100%; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); border-radius: 6px; padding: 6px 8px; color: var(--white); font-size: .78rem; font-family: inherit; resize: vertical; outline: none; line-height: 1.5; min-height: 52px; }
+    .bld-child-textarea:focus { border-color: var(--purple); }
+    .bld-add-child-wrap { position: relative; margin-top: 6px; }
+    .bld-add-child-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px; background: rgba(255,255,255,.02); border: 1px dashed rgba(255,255,255,.1); border-radius: 7px; color: var(--muted); font-size: .74rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all .15s; }
+    .bld-add-child-btn:hover { background: rgba(124,58,237,.1); border-color: rgba(124,58,237,.4); color: var(--purple-l); }
+    .bld-add-child-menu { position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); background: rgba(10,3,30,.97); border: 1px solid var(--border); border-radius: 10px; padding: 6px; min-width: 180px; z-index: 300; display: none; box-shadow: 0 8px 32px rgba(0,0,0,.55); }
+    .bld-add-child-menu.open { display: block; }
+    .bld-add-child-menu-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 7px; font-size: .78rem; font-weight: 600; color: var(--muted); cursor: pointer; transition: background .15s, color .15s; border: none; background: none; width: 100%; font-family: inherit; text-align: start; }
+    .bld-add-child-menu-item:hover { background: rgba(255,255,255,.07); color: var(--white); }
 
     /* ── Image row card ── */
     .bld-image-card { background: var(--surface); border: 1px solid rgba(255,255,255,.09); border-radius: 10px; padding: 10px 12px; }
@@ -951,6 +967,38 @@
       const GRIP_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><circle cx="6.75" cy="9" r="1.25" fill="currentColor"></circle><circle cx="6.75" cy="3.75" r="1.25" fill="currentColor"></circle><circle cx="6.75" cy="14.25" r="1.25" fill="currentColor"></circle><circle cx="11.25" cy="9" r="1.25" fill="currentColor"></circle><circle cx="11.25" cy="3.75" r="1.25" fill="currentColor"></circle><circle cx="11.25" cy="14.25" r="1.25" fill="currentColor"></circle></svg>';
       const TRASH_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18"><path opacity="0.4" d="M3.408 5L3.903 14.389C3.979 15.853 5.185 17 6.649 17H11.353C12.817 17 14.023 15.853 14.099 14.39L14.594 5H3.408Z" fill="currentColor"></path><path d="M7.374 14C6.98 14 6.649 13.69 6.626 13.29L6.376 8.79C6.354 8.38 6.67 8.02 7.083 8C7.489 7.98 7.851 8.29 7.874 8.71L8.124 13.21C8.147 13.62 7.83 13.98 7.417 14H7.374Z" fill="currentColor"></path><path d="M10.626 14H10.583C10.17 13.98 9.854 13.62 9.876 13.21L10.126 8.71C10.149 8.29 10.498 7.98 10.917 8C11.33 8.02 11.647 8.38 11.624 8.79L11.374 13.29C11.352 13.69 11.021 14 10.626 14Z" fill="currentColor"></path><path d="M15.25 4H12V2.75C12 1.785 11.215 1 10.25 1H7.75C6.785 1 6 1.785 6 2.75V4H2.75C2.336 4 2 4.336 2 4.75C2 5.164 2.336 5.5 2.75 5.5H15.25C15.664 5.5 16 5.164 16 4.75C16 4.336 15.664 4 15.25 4ZM7.5 2.75C7.5 2.614 7.614 2.5 7.75 2.5H10.25C10.386 2.5 10.5 2.614 10.5 2.75V4H7.5V2.75Z" fill="currentColor"></path></svg>';
 
+      /* ═══ CONTAINER CHILD ROW HELPER ═══ */
+      const CHILD_GRIP_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 18 18"><circle cx="6.75" cy="4.5" r="1.1" fill="currentColor"/><circle cx="6.75" cy="9" r="1.1" fill="currentColor"/><circle cx="6.75" cy="13.5" r="1.1" fill="currentColor"/><circle cx="11.25" cy="4.5" r="1.1" fill="currentColor"/><circle cx="11.25" cy="9" r="1.1" fill="currentColor"/><circle cx="11.25" cy="13.5" r="1.1" fill="currentColor"/></svg>';
+      function buildChildHTML(child, ci) {
+        const delBtn = '<button class="bld-child-del _del-child" data-ci="' + ci + '" title="' + (isAR ? 'حذف' : 'Delete') + '">×</button>';
+        let inner = '';
+        if (child.type === 'text_display') {
+          inner = '<div class="bld-child-title">' + (isAR ? 'نص' : 'TEXT') + '</div>' +
+            '<textarea class="bld-child-textarea _child-td-text" data-ci="' + ci + '" rows="2" maxlength="4000" placeholder="' + (isAR ? 'أدخل نصاً...' : 'Enter text...') + '">' + esc(child.text || '') + '</textarea>';
+        } else if (child.type === 'separator') {
+          inner = '<div class="bld-child-title">' + (isAR ? 'فاصل' : 'SEPARATOR') + '</div>' +
+            '<div style="display:flex;align-items:center;gap:8px;">' +
+              '<label style="display:flex;align-items:center;gap:4px;font-size:.72rem;color:var(--muted);cursor:pointer;"><input type="checkbox" class="_child-sep-divider" data-ci="' + ci + '"' + (child.divider !== false ? ' checked' : '') + '> ' + (isAR ? 'خط' : 'Line') + '</label>' +
+              '<select class="bld-select _child-sep-spacing" data-ci="' + ci + '" style="font-size:.7rem;padding:3px 22px 3px 7px;width:auto;">' +
+                '<option value="Small"' + (child.spacing !== 'Large' ? ' selected' : '') + '>' + (isAR ? 'صغير' : 'Small') + '</option>' +
+                '<option value="Large"' + (child.spacing === 'Large' ? ' selected' : '') + '>' + (isAR ? 'كبير' : 'Large') + '</option>' +
+              '</select>' +
+            '</div>';
+        } else if (child.type === 'image') {
+          inner = '<div class="bld-child-title">' + (isAR ? 'صورة' : 'IMAGE') + '</div>' +
+            '<input type="url" class="bld-input _child-img-url" data-ci="' + ci + '" value="' + esc(child.url || '') + '" placeholder="https://..." style="font-size:.74rem;margin-bottom:4px;">' +
+            '<input type="text" class="bld-input _child-img-desc" data-ci="' + ci + '" value="' + esc(child.description || '') + '" placeholder="' + (isAR ? 'نص بديل' : 'Alt text') + '" style="font-size:.74rem;">';
+        } else if (child.type === 'buttons') {
+          const btns = (child.buttons || []).map(b => '<span class="bld-btn-pill ' + b.style + '" style="font-size:.7rem;padding:3px 8px;">' + esc(b.label || 'Btn') + '</span>').join('');
+          inner = '<div class="bld-child-title">' + (isAR ? 'أزرار' : 'BUTTONS') + '</div>' +
+            '<div style="display:flex;flex-wrap:wrap;gap:4px;">' + (btns || '<span style="font-size:.72rem;color:var(--muted);">' + (isAR ? 'لا أزرار' : 'No buttons') + '</span>') + '</div>';
+        } else if (child.type === 'select') {
+          inner = '<div class="bld-child-title">' + (isAR ? 'قائمة' : 'SELECT') + '</div>' +
+            '<input type="text" class="bld-input _child-sel-ph" data-ci="' + ci + '" value="' + esc(child.select?.placeholder || '') + '" placeholder="Placeholder..." style="font-size:.74rem;">';
+        }
+        return '<div class="bld-child-row"><div class="bld-child-grip">' + CHILD_GRIP_SVG + '</div><div class="bld-child-main">' + inner + '</div>' + delBtn + '</div>';
+      }
+
       /* ═══ COMPONENT ROWS RENDERING ═══ */
       function renderCompRows() {
         // Remove only dynamic rows (those with data-row-id), keep #contentRow
@@ -1059,6 +1107,7 @@
               '</div>';
 
           } else if (row.type === 'container') {
+            const childrenHtml = (row.children || []).map((ch, ci) => buildChildHTML(ch, ci)).join('');
             wrap.innerHTML =
               '<div class="bld-comp-row-grip">' + GRIP_SVG + '</div>' +
               '<div class="bld-comp-row-main">' +
@@ -1071,7 +1120,17 @@
                       '<button class="btn btn-ghost btn-sm _cont-clear" style="font-size:.65rem;padding:2px 6px;">' + (isAR ? 'إزالة' : 'Clear') + '</button>' +
                     '</div>' +
                   '</div>' +
-                  '<div style="font-size:.72rem;color:var(--muted);padding:4px 0 2px;">' + (isAR ? 'تضم مكونات مضافة لاحقاً' : 'Groups nested components (nesting coming soon)') + '</div>' +
+                  '<div class="bld-container-children">' + childrenHtml + '</div>' +
+                  '<div class="bld-add-child-wrap">' +
+                    '<button class="bld-add-child-btn _add-child-btn" type="button">＋ ' + (isAR ? 'أضف داخل الحاوية' : 'Add inside container') + '</button>' +
+                    '<div class="bld-add-child-menu _add-child-menu">' +
+                      '<button class="bld-add-child-menu-item _child-menu-text" type="button">' + (isAR ? 'نص' : 'Text Display') + '</button>' +
+                      '<button class="bld-add-child-menu-item _child-menu-sep"  type="button">' + (isAR ? 'فاصل' : 'Separator') + '</button>' +
+                      '<button class="bld-add-child-menu-item _child-menu-img"  type="button">' + (isAR ? 'صورة' : 'Image') + '</button>' +
+                      '<button class="bld-add-child-menu-item _child-menu-btn"  type="button">' + (isAR ? 'أزرار' : 'Buttons') + '</button>' +
+                      '<button class="bld-add-child-menu-item _child-menu-sel"  type="button">' + (isAR ? 'قائمة منسدلة' : 'Select Menu') + '</button>' +
+                    '</div>' +
+                  '</div>' +
                 '</div>' +
               '</div>' +
               '<div class="bld-comp-row-aside">' +
@@ -1187,9 +1246,92 @@
           }
 
           if (compRows[ri].type === 'container') {
+            if (!compRows[ri].children) compRows[ri].children = [];
             const contColor = card.querySelector('._cont-color');
             if (contColor) contColor.addEventListener('input', () => { compRows[ri].accentColor = contColor.value; markDirty(); renderCompRows(); });
             card.querySelector('._cont-clear')?.addEventListener('click', () => { compRows[ri].accentColor = ''; markDirty(); renderCompRows(); });
+
+            // Delete child
+            card.querySelectorAll('._del-child').forEach(btn => {
+              btn.addEventListener('click', e => {
+                e.stopPropagation();
+                const ci = parseInt(btn.dataset.ci);
+                compRows[ri].children.splice(ci, 1);
+                markDirty(); renderCompRows();
+              });
+            });
+
+            // text_display child
+            card.querySelectorAll('._child-td-text').forEach(ta => {
+              ta.addEventListener('input', () => {
+                const ci = parseInt(ta.dataset.ci);
+                if (compRows[ri].children[ci]) { compRows[ri].children[ci].text = ta.value; markDirty(); }
+              });
+            });
+
+            // separator child
+            card.querySelectorAll('._child-sep-divider').forEach(chk => {
+              chk.addEventListener('change', () => {
+                const ci = parseInt(chk.dataset.ci);
+                if (compRows[ri].children[ci]) { compRows[ri].children[ci].divider = chk.checked; markDirty(); renderCompRows(); }
+              });
+            });
+            card.querySelectorAll('._child-sep-spacing').forEach(sel => {
+              sel.addEventListener('change', () => {
+                const ci = parseInt(sel.dataset.ci);
+                if (compRows[ri].children[ci]) { compRows[ri].children[ci].spacing = sel.value; markDirty(); renderCompRows(); }
+              });
+            });
+
+            // image child
+            card.querySelectorAll('._child-img-url').forEach(inp => {
+              inp.addEventListener('change', () => {
+                const ci = parseInt(inp.dataset.ci);
+                if (compRows[ri].children[ci]) { compRows[ri].children[ci].url = inp.value; markDirty(); renderCompRows(); }
+              });
+            });
+            card.querySelectorAll('._child-img-desc').forEach(inp => {
+              inp.addEventListener('input', () => {
+                const ci = parseInt(inp.dataset.ci);
+                if (compRows[ri].children[ci]) { compRows[ri].children[ci].description = inp.value; markDirty(); }
+              });
+            });
+
+            // select placeholder child
+            card.querySelectorAll('._child-sel-ph').forEach(inp => {
+              inp.addEventListener('input', () => {
+                const ci = parseInt(inp.dataset.ci);
+                if (compRows[ri].children[ci]?.select) { compRows[ri].children[ci].select.placeholder = inp.value; markDirty(); }
+              });
+            });
+
+            // Add child popup menu
+            const addChildBtn  = card.querySelector('._add-child-btn');
+            const addChildMenu = card.querySelector('._add-child-menu');
+            if (addChildBtn && addChildMenu) {
+              addChildBtn.addEventListener('click', e => {
+                e.stopPropagation();
+                addChildMenu.classList.toggle('open');
+              });
+              document.addEventListener('click', () => addChildMenu.classList.remove('open'));
+              function addChild(type) {
+                addChildMenu.classList.remove('open');
+                const childId = 'child_' + rowId + '_' + Date.now();
+                let child = { id: childId, type };
+                if (type === 'text_display') child.text = '';
+                else if (type === 'separator') { child.divider = true; child.spacing = 'Small'; }
+                else if (type === 'image')     { child.url = ''; child.description = ''; }
+                else if (type === 'buttons')   { child.buttons = [{ customId: uid(), label: isAR ? 'زر' : 'Button', style: 'Primary', emoji: '', url: '', disabled: false }]; child.select = null; }
+                else if (type === 'select')    { child.buttons = []; child.select = { customId: uid(), placeholder: isAR ? 'اختر...' : 'Select…', minValues: 1, maxValues: 1, disabled: false, options: [{ label: isAR ? 'خيار 1' : 'Option 1', value: uid(), description: '', emoji: '', default: false }] }; }
+                compRows[ri].children.push(child);
+                markDirty(); renderCompRows();
+              }
+              card.querySelector('._child-menu-text')?.addEventListener('click', () => addChild('text_display'));
+              card.querySelector('._child-menu-sep')?.addEventListener('click',  () => addChild('separator'));
+              card.querySelector('._child-menu-img')?.addEventListener('click',  () => addChild('image'));
+              card.querySelector('._child-menu-btn')?.addEventListener('click',  () => addChild('buttons'));
+              card.querySelector('._child-menu-sel')?.addEventListener('click',  () => addChild('select'));
+            }
           }
 
           if (compRows[ri].type === 'image') {
@@ -1233,7 +1375,7 @@
       }
       function addContainerRow() {
         const id = 'row_' + (nextRowId++);
-        compRows.push({ id, type: 'container', accentColor: '' });
+        compRows.push({ id, type: 'container', accentColor: '', children: [] });
         markDirty(); renderCompRows();
       }
       function addImageRow() {

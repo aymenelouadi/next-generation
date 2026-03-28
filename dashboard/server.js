@@ -1625,15 +1625,20 @@ app.post('/dashboard/:guildId/components/api/save', require('./middleware/auth')
     if (!channelId)            return res.status(400).json({ error: 'Channel is required' });
 
     const componentIds = [];
-    for (const row of (components || [])) {
-        if (row.type === 'buttons') {
-            for (const btn of (row.buttons || [])) {
-                if (btn.customId && btn.style !== 'Link') componentIds.push(btn.customId);
+    function extractIds(rows) {
+        for (const row of (rows || [])) {
+            if (row.type === 'buttons') {
+                for (const btn of (row.buttons || [])) {
+                    if (btn.customId && btn.style !== 'Link') componentIds.push(btn.customId);
+                }
+            } else if (row.type === 'select' && row.select?.customId) {
+                componentIds.push(row.select.customId);
+            } else if (row.type === 'container') {
+                extractIds(row.children || []);
             }
-        } else if (row.type === 'select' && row.select?.customId) {
-            componentIds.push(row.select.customId);
         }
     }
+    extractIds(components || []);
 
     try {
         let doc;

@@ -118,9 +118,22 @@ function buildRow(row) {
                 if (!isNaN(colorInt)) cnt.setAccentColor(colorInt);
             } catch (_) {}
         }
-        // Container requires at least one child component.
-        // A zero-width-space TextDisplay satisfies the requirement invisibly.
-        cnt.addTextDisplayComponents(new TextDisplayBuilder().setContent('\u200b'));
+        let childCount = 0;
+        for (const child of (row.children || [])) {
+            if (child.type === 'container') continue; // no nesting
+            const built = buildRow(child);
+            if (!built) continue;
+            const json = built.toJSON();
+            switch (json.type) {
+                case 1:  cnt.addActionRowComponents(built);    break; // buttons / select
+                case 10: cnt.addTextDisplayComponents(built);  break; // text_display
+                case 12: cnt.addMediaGalleryComponents(built); break; // image
+                case 14: cnt.addSeparatorComponents(built);    break; // separator
+            }
+            childCount++;
+        }
+        // Container requires at least one child to be valid
+        if (childCount === 0) cnt.addTextDisplayComponents(new TextDisplayBuilder().setContent('\u200b'));
         return cnt;
     }
 
@@ -130,10 +143,16 @@ function buildRow(row) {
 /**
  * Build a Discord.js Components V2 message payload.
  * @param {object} doc  – { content: string, components: ComponentRow[] }
- * @returns {{ content?: string, components: Builder[], flags: number }}
+ * @returns {{ components: Builder[], flags: number }}
  */
 function buildComponentPayload(doc) {
     const components = [];
+
+    // IS_COMPONENTS_V2 forbids the top-level `content` field.
+    // Prepend it as a TextDisplay instead so it still appears in the message.
+    if (doc.content?.trim()) {
+        components.push(new TextDisplayBuilder().setContent(doc.content.trim().slice(0, 4000)));
+    }
 
     for (const row of (doc.components || [])) {
         const built = buildRow(row);
@@ -141,9 +160,9 @@ function buildComponentPayload(doc) {
     }
 
     return {
-        content:    doc.content?.trim() || undefined,
+        // No 'content' field — forbidden with IS_COMPONENTS_V2
         components,
-        flags: MessageFlags.IsComponentsV2,   // ← CRITICAL: enables V2 rendering
+        flags: MessageFlags.IsComponentsV2,
     };
 }
 

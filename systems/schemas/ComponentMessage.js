@@ -45,6 +45,19 @@ const SelectMenuSchema = new Schema({
     options:     { type: [SelectOptionSchema], default: [] },
 }, { _id: false });
 
+// ── Container child sub-schema (no nesting — same fields minus 'container') ──
+const ContainerChildSchema = new Schema({
+    id:          { type: String, required: true },
+    type:        { type: String, enum: ['buttons', 'select', 'text_display', 'separator', 'image'], required: true },
+    buttons:     { type: [ButtonSchema], default: [] },
+    select:      { type: SelectMenuSchema, default: null },
+    text:        { type: String, default: '' },
+    divider:     { type: Boolean, default: true },
+    spacing:     { type: String, enum: ['Small', 'Large'], default: 'Small' },
+    url:         { type: String, default: '' },
+    description: { type: String, default: '' },
+}, { _id: false });
+
 // ── Component row sub-schema ────────────────────────────────────────────────
 const ComponentRowSchema = new Schema({
     id:          { type: String, required: true },
@@ -58,6 +71,7 @@ const ComponentRowSchema = new Schema({
     spacing:     { type: String, enum: ['Small', 'Large'], default: 'Small' },
     // container
     accentColor: { type: String, default: '' },
+    children:    { type: [ContainerChildSchema], default: [] },
     // image
     url:         { type: String, default: '' },
     description: { type: String, default: '' },
