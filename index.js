@@ -34,6 +34,11 @@ const client = new Client({
     ]
 });
 
+// Each system registers its own event listeners (plugin-style architecture),
+// so the default EventEmitter limit of 10 is too low (e.g. 11+ interactionCreate
+// handlers). Raise it to avoid false-positive "memory leak" warnings.
+client.setMaxListeners(25);
+
 client.commands = new Collection();
 client.systems = new Collection();
 client.textCommands = new Collection();
