@@ -1,0 +1,280 @@
+/**
+ * Next Generation - Global Dashboard Styles
+ * Redesigned with a focus on modern Glassmorphism, smooth animations, and enhanced UX.
+ * @author Senior Developer Team
+ */
+
+/* ── Custom Properties (Design Tokens) ──────────────────────────────── */
+:root {
+  /* Color Palette */
+  --bg-primary: #060613;
+  --bg-secondary: #0b0b1e;
+  --accent-primary: #7c3aed;   /* Indigo/Violet */
+  --accent-secondary: #06b6d4; /* Cyan */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  /* Glassmorphism Surface Tokens */
+  --glass-surface: rgba(255, 255, 255, 0.03);
+  --glass-surface-hover: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-focus: rgba(124, 58, 237, 0.4);
+  
+  /* Shadows */
+  --shadow-sm: 0 4px 10px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.5);
+  --shadow-accent: 0 0 40px -10px rgba(124, 58, 237, 0.3);
+
+  /* Layout */
+  --nav-w: 72px;
+  --mgmt-w: 240px;
+  --header-h: 64px;
+  
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Light Theme Overrides */
+html[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --glass-surface: rgba(255, 255, 255, 0.7);
+  --glass-surface-hover: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-border-focus: rgba(124, 58, 237, 0.3);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Resets & Base Styles ─────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+/* Re-apply font fallback for specific regions */
+body[dir="rtl"] {
+  font-family: 'Tajawal', 'Inter', sans-serif;
+}
+
+/* ── Layout Components ─────────────────────────────────────────────── */
+
+/* Modernized Glass Topbar */
+.topbar {
+  background: var(--glass-surface) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-bottom: 1px solid var(--glass-border) !important;
+  box-shadow: var(--shadow-sm);
+  height: var(--header-h) !important;
+}
+
+/* Sidebar Redesign */
+.nav-sidebar, .mgmt-sidebar {
+  background: var(--bg-secondary) !important;
+  border-right: 1px solid var(--glass-border) !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: var(--shadow-md);
+}
+
+.mgmt-sidebar {
+  width: var(--mgmt-w) !important;
+}
+
+.nav-sidebar:hover {
+  width: var(--mgmt-w) !important;
+}
+
+/* Improved Mgmt Items */
+.mgmt-item {
+  border-radius: 12px !important;
+  margin: 2px 8px !important;
+  padding: 8px 12px !important;
+  transition: var(--transition-normal) !important;
+}
+
+.mgmt-item:hover:not(.disabled) {
+  background: var(--glass-surface-hover) !important;
+  transform: translateX(4px);
+}
+
+.mgmt-item.active {
+  background: var(--accent-primary) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px -5px var(--accent-primary) !important;
+}
+
+.mgmt-item.active .mgmt-item-indicator {
+  display: none; /* Removed the old indicator in favor of full background */
+}
+
+/* ── Dashboard Content ────────────────────────────────────────────── */
+
+/* Refined Stat Cards */
+.stat-card {
+  background: var(--glass-surface) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 20px !important;
+  padding: 24px !important;
+  transition: var(--transition-normal) !important;
+  overflow: visible !important;
+}
+
+.stat-card:hover {
+  background: var(--glass-surface-hover) !important;
+  border-color: var(--accent-primary) !important;
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: var(--shadow-accent) !important;
+}
+
+.stat-value {
+  font-family: 'Orbitron', sans-serif !important;
+  font-size: 2.5rem !important;
+  letter-spacing: -0.05em !important;
+}
+
+/* Modernized Section Headings */
+.section-heading h2 {
+  font-family: 'Orbitron', sans-serif !important;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.9rem !important;
+  color: var(--text-secondary);
+}
+
+.section-heading-icon {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)) !important;
+  border: none !important;
+  box-shadow: 0 0 15px rgba(124, 58, 237, 0.4);
+}
+
+.section-heading-icon i, .section-heading-icon svg {
+  color: white !important;
+}
+
+/* ── UI Elements ─────────────────────────────────────────────────── */
+
+/* Modern Buttons */
+.btn-primary, .manage-btn, .add-bot-btn {
+  border-radius: 14px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em;
+  transition: var(--transition-normal) !important;
+  border: none !important;
+}
+
+.manage-btn {
+  background: linear-gradient(135deg, var(--accent-primary), #6d28d9) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.manage-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.45);
+}
+
+.add-bot-btn {
+  background: linear-gradient(135deg, var(--accent-secondary), #0891b2) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+}
+
+.add-bot-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(6, 182, 212, 0.45);
+}
+
+/* Better Profile Sidebar */
+.profile-sidebar {
+  background: var(--bg-secondary) !important;
+  border-left: 1px solid var(--glass-border) !important;
+  width: 320px !important;
+}
+
+.prof-banner {
+  height: 120px !important;
+}
+
+.prof-avatar {
+  border: 6px solid var(--bg-secondary) !important;
+  box-shadow: 0 0 0 2px var(--accent-primary) !important;
+}
+
+/* ── Animations ──────────────────────────────────────────────────── */
+
+@keyframes slide-in-right {
+  from { transform: translateX(30px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.guild-card {
+  animation: fade-in-up 0.6s var(--transition-normal) both;
+}
+
+/* Staggered load effect */
+.guild-grid > div:nth-child(1) { animation-delay: 0.05s; }
+.guild-grid > div:nth-child(2) { animation-delay: 0.10s; }
+.guild-grid > div:nth-child(3) { animation-delay: 0.15s; }
+.guild-grid > div:nth-child(4) { animation-delay: 0.20s; }
+.guild-grid > div:nth-child(5) { animation-delay: 0.25s; }
+.guild-grid > div:nth-child(6) { animation-delay: 0.30s; }
+
+/* ── Scrollbars ──────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}
+
+/* ── Modern Utils ─────────────────────────────────────────────────── */
+.glass {
+  background: var(--glass-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--white), var(--accent-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
