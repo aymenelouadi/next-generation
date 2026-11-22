@@ -64,6 +64,9 @@ loadFiles('commands', (file, command) => {
         client.commands.set(command.data.name, command);
             logger.discord(`Command loaded: ${command.data.name}`, { category: 'loader' });
     }
+    if (file === 'games.js' || file === 'music.js') {
+        logger.discord(`Bonus game/music command loaded: ${command.data.name}`, { category: 'loader' });
+    }
     if (command.textCommand) {
         client.textCommands.set(command.textCommand.name, command);
         const actionCfg     = settingsUtil.get().actions?.[actionKey] || {};
