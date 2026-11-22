@@ -34,6 +34,11 @@ const client = new Client({
     ]
 });
 
+// Each system registers its own event listeners (plugin-style architecture),
+// so the default EventEmitter limit of 10 is too low (e.g. 11+ interactionCreate
+// handlers). Raise it to avoid false-positive "memory leak" warnings.
+client.setMaxListeners(25);
+
 client.commands = new Collection();
 client.systems = new Collection();
 client.textCommands = new Collection();
@@ -58,6 +63,9 @@ loadFiles('commands', (file, command) => {
     if (command.data && typeof command.execute === 'function') {
         client.commands.set(command.data.name, command);
             logger.discord(`Command loaded: ${command.data.name}`, { category: 'loader' });
+    }
+    if (file === 'games.js' || file === 'music.js') {
+        logger.discord(`Bonus game/music command loaded: ${command.data.name}`, { category: 'loader' });
     }
     if (command.textCommand) {
         client.textCommands.set(command.textCommand.name, command);
